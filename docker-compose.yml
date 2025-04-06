@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_PASSWORD: akalanka28
+      POSTGRES_MULTIPLE_DATABASES: driver_db,order_assignment_db  # Removed order_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh  # Initialize only needed DBs
+
+  driver-service:
+    build: ./driver-service
+    ports:
+    - "8082:8082"  # Changed from 8082:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_db
+    depends_on:
+      - postgres
+
+  order-assignment-service:
+    build: ./order-assignment-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_assignment_db
+      DRIVER_SERVICE_URL: http://driver-service:8082
+    depends_on:
+      - postgres
+      - driver-service
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
