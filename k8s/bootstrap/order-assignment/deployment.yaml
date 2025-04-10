@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-assignment-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-assignment-service
+  template:
+    metadata:
+      labels:
+        app: order-assignment-service
+    spec:
+      containers:
+        - name: order-assignment
+          image: akalankadias/order-assignment-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/order_assignment_db"
+            # - name: SPRING_PROFILES_ACTIVE
+            #   value: "k8s"
+      restartPolicy: Always
