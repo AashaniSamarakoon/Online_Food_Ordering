@@ -16,4 +16,5 @@ public interface DriverService {
 
     Boolean isDriverAvailable(Long driverId);
 
+    List<OrderAssignmentDTO> getDriverActiveOrders(Long driverId);
 }

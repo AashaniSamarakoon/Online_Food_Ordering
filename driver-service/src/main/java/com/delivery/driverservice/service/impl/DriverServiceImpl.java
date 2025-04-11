@@ -1,6 +1,7 @@
 package com.delivery.driverservice.service.impl;
 
 
+import com.delivery.driverservice.client.OrderAssignmentClient;
 import com.delivery.driverservice.dto.*;
 import com.delivery.driverservice.exception.DriverNotFoundException;
 import com.delivery.driverservice.model.Driver;
@@ -20,6 +21,7 @@ public class DriverServiceImpl implements DriverService {
 
     private final DriverRepository driverRepository;
     private final ModelMapper modelMapper;
+    private final OrderAssignmentClient orderAssignmentClient;
 
     @Override
     @Transactional
@@ -79,5 +81,10 @@ public class DriverServiceImpl implements DriverService {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new DriverNotFoundException("Driver not found"));
         return "AVAILABLE".equals(driver.getStatus());
+    }
+
+    @Override
+    public List<OrderAssignmentDTO> getDriverActiveOrders(Long driverId) {
+        return orderAssignmentClient.getActiveDriverAssignments(driverId);
     }
 }

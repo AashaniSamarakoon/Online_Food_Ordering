@@ -1,4 +1,4 @@
-package com.delivery.driverservice.dto;
+package com.delivery.driverservice.dto.tracking;
 
 import lombok.Data;
 

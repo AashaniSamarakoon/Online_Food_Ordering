@@ -1,6 +1,9 @@
-package com.delivery.orderassignmentservice.dto;
+package com.delivery.driverservice.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -11,16 +14,8 @@ import java.time.LocalDateTime;
 public class OrderAssignmentDTO {
     private Long id;
     private Long orderId;
-    private AssignDriverDTO driver;  // Changed from driverId to full driver object
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @Data
-    public static class AssignDriverDTO {
-        private Long id;
-        private String name;
-        private String vehicleType;
-        private Double rating;
-    }
 }
