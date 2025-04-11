@@ -1,12 +1,17 @@
 FROM node:18-alpine
 
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install
+
 COPY . .
 
-# Install MongoDB tools (optional)
-RUN apk add --no-cache mongodb-tools
+ENV NODE_ENV=production
+ENV PORT=8084
+ENV MONGO_URI=mongodb://mongodb:27017/tracking_db
+ENV REDIS_URL=redis://redis:6379
 
 EXPOSE 8084
-CMD ["npm", "start"]
+
+CMD ["node", "src/server.js"]

@@ -1,6 +1,9 @@
 package com.delivery.driverservice.controller;
 
+import com.delivery.driverservice.client.TrackingServiceClient;
 import com.delivery.driverservice.dto.*;
+import com.delivery.driverservice.dto.tracking.LocationUpdateDTO;
+import com.delivery.driverservice.dto.tracking.TrackingDTO;
 import com.delivery.driverservice.service.DriverService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import java.util.List;
 public class DriverController {
 
     private final DriverService driverService;
+    private final TrackingServiceClient trackingServiceClient;
 
     @PostMapping
     public ResponseEntity<DriverDTO> registerDriver(@Valid @RequestBody DriverRequest request) {
@@ -57,4 +61,30 @@ public class DriverController {
         boolean isAvailable = driverService.isDriverAvailable(driverId);
         return ResponseEntity.ok(isAvailable);
     }
+
+    @GetMapping("/{driverId}/active-orders")
+    public ResponseEntity<List<OrderAssignmentDTO>> getDriverActiveOrders(
+            @PathVariable Long driverId) {
+        List<OrderAssignmentDTO> activeOrders = driverService.getDriverActiveOrders(driverId);
+        return ResponseEntity.ok(activeOrders);
+    }
+
+    @PostMapping("/{driverId}/location")
+    public ResponseEntity<TrackingDTO> updateDriverLocation(
+            @PathVariable String driverId,
+            @Valid @RequestBody LocationUpdateDTO update) {
+
+        // First get active tracking
+        TrackingDTO tracking = trackingServiceClient.getActiveTrackingByDriver(driverId);
+
+        // Then update location
+        TrackingDTO updatedTracking = trackingServiceClient.updateLocation(
+                tracking.getId(),
+                update
+        );
+
+        return ResponseEntity.ok(updatedTracking);
+    }
+
+
 }

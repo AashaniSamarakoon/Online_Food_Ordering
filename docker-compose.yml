@@ -5,12 +5,18 @@ services:
     image: postgres:13
     environment:
       POSTGRES_PASSWORD: akalanka28
-      POSTGRES_MULTIPLE_DATABASES: driver_db,order_assignment_db
+      POSTGRES_USER: postgres
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -22,23 +28,27 @@ services:
       - postgres
 
   mongodb:
-    image: mongo:6.0
-    container_name: mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: akalanka28
+    image: mongo:latest
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   driver-service:
     build: ./driver-service
     ports:
-    - "8082:8082" 
+      - "8082:8082" 
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: akalanka28
     depends_on:
       - postgres
 
@@ -48,6 +58,8 @@ services:
       - "8083:8083"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_assignment_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: akalanka28
       DRIVER_SERVICE_URL: http://driver-service:8082
     depends_on:
       - postgres
@@ -55,19 +67,24 @@ services:
 
   tracking-service:
     build: ./tracking-service
-    container_name: tracking-service
     ports:
       - "8084:8084"
     environment:
-      MONGO_URI: "mongodb://root:akalanka28@mongodb:27017/tracking_db?authSource=admin"
-      DRIVER_SERVICE_URL: "http://driver-service:8082"
-      ORDER_SERVICE_URL: "http://order-assignment-service:8083"  
+      - NODE_ENV=development
+      - PORT=8084
+      - MONGO_URI=mongodb://mongodb:27017/tracking_db
+      - REDIS_URL=redis://redis:6379
+      - DRIVER_SERVICE_URL=http://driver-service:8082
+      - ORDER_ASSIGNMENT_SERVICE_URL=http://order-assignment-service:8083
+    volumes:
+      - ./logs:/app/logs
     depends_on:
       - mongodb
-
+      - redis
+      - driver-service
+      - order-assignment-service
 
 volumes:
   pgdata:
   mongodb_data:
-
-  
+  redis_data:
