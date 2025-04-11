@@ -8,15 +8,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
 
-@FeignClient(name = "order-service", url = "${order.service.url}")
+@FeignClient(name = "order-assignment-service", url = "${order.service.url}")
 public interface OrderServiceClient {
 
     @GetMapping("/api/orders/driver/{driverId}")
     List<OrderDTO> getDriverOrders(@PathVariable Long driverId);
 
 
-    @PutMapping("/api/orders/{orderId}/assign/{driverId}")
-    void assignDriverToOrder(@PathVariable Long orderId, @PathVariable Long driverId);
 }
 
 //
