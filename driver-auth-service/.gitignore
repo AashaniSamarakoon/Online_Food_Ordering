@@ -31,5 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
-driver-auth-service/.env
-
+.env
