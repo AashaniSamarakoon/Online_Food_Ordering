@@ -9,26 +9,26 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "driver-service", url = "${driver.service.url}")
 public interface DriverServiceClient {
 
-    @CircuitBreaker(name = "driverServiceCircuitBreaker", fallbackMethod = "getDriverDetailsFallback")
-    @GetMapping("/api/drivers/{driverId}")
-    DriverDetailsDTO getDriverDetails(@PathVariable Long driverId);
+//    @CircuitBreaker(name = "driverServiceCircuitBreaker", fallbackMethod = "getDriverDetailsFallback")
+//    @GetMapping("/api/drivers/{driverId}")
+//    DriverDetailsDTO getDriverDetails(@PathVariable Long driverId);
 
     @CircuitBreaker(name = "driverServiceCircuitBreaker", fallbackMethod = "registerDriverFallback")
     @PostMapping("/api/drivers")
     DriverDetailsDTO registerDriver(@RequestBody DriverRegistrationDTO registrationDTO);
+//
+//    @CircuitBreaker(name = "driverServiceCircuitBreaker", fallbackMethod = "updateDriverStatusFallback")
+//    @PatchMapping("/api/drivers/{driverId}/status")
+//    DriverDetailsDTO updateDriverStatus(@PathVariable Long driverId, @RequestParam String status);
 
-    @CircuitBreaker(name = "driverServiceCircuitBreaker", fallbackMethod = "updateDriverStatusFallback")
-    @PatchMapping("/api/drivers/{driverId}/status")
-    DriverDetailsDTO updateDriverStatus(@PathVariable Long driverId, @RequestParam String status);
-
-    // Fallback methods
-    default DriverDetailsDTO getDriverDetailsFallback(Long driverId, Throwable t) {
-        // Log error and return a minimal driver details object
-        return DriverDetailsDTO.builder()
-                .id(driverId)
-                .isActive(false)
-                .build();
-    }
+//    // Fallback methods
+//    default DriverDetailsDTO getDriverDetailsFallback(Long driverId, Throwable t) {
+//        // Log error and return a minimal driver details object
+//        return DriverDetailsDTO.builder()
+//                .id(driverId)
+//                .isActive(false)
+//                .build();
+//    }
 
     default DriverDetailsDTO registerDriverFallback(DriverRegistrationDTO registrationDTO, Throwable t) {
         // Instead of throwing an exception, return a dummy object
@@ -42,11 +42,11 @@ public interface DriverServiceClient {
                 .build();
     }
 
-    default DriverDetailsDTO updateDriverStatusFallback(Long driverId, String status, Throwable t) {
-        // Log error and return a minimal driver details object
-        return DriverDetailsDTO.builder()
-                .id(driverId)
-                .status("UNKNOWN")
-                .build();
-    }
+//    default DriverDetailsDTO updateDriverStatusFallback(Long driverId, String status, Throwable t) {
+//        // Log error and return a minimal driver details object
+//        return DriverDetailsDTO.builder()
+//                .id(driverId)
+//                .status("UNKNOWN")
+//                .build();
+//    }
 }

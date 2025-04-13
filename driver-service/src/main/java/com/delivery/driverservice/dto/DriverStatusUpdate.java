@@ -1,6 +1,7 @@
 package com.delivery.driverservice.dto;
 
 import lombok.Data;
+import java.time.LocalDateTime;
 
 @Data
 public class DriverStatusUpdate {
@@ -8,4 +9,5 @@ public class DriverStatusUpdate {
     private String status;
     private Double latitude;
     private Double longitude;
+    private LocalDateTime lastActiveAt;
 }
