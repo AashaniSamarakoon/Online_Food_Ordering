@@ -22,6 +22,7 @@ public class AuthResponse {
     private Set<String> roles;
     private String tokenType;
     private boolean phoneVerified;
+    private String registrationStatus;
     private DriverDetailsDTO driverDetails;
     private VehicleDTO vehicleDetails;
     private List<DocumentDTO> documents;

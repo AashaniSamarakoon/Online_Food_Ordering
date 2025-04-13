@@ -6,7 +6,9 @@ import lombok.Data;
 @Data
 @Builder
 public class DriverRegistrationDTO {
-    private String name;
+    private String firstName;
+    private String lastName;
+    private String email;
     private String licenseNumber;
     private String vehicleType;
     private String phoneNumber;

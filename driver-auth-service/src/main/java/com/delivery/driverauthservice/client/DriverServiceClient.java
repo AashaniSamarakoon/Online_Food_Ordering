@@ -31,8 +31,15 @@ public interface DriverServiceClient {
     }
 
     default DriverDetailsDTO registerDriverFallback(DriverRegistrationDTO registrationDTO, Throwable t) {
-        // Log error and throw an exception or return a minimal object
-        throw new RuntimeException("Driver service is currently unavailable. Please try again later.");
+        // Instead of throwing an exception, return a dummy object
+        // This lets the background service process continue
+        return DriverDetailsDTO.builder()
+                .id(-1L) // Use a placeholder ID to indicate it's not a real driver service ID
+                .firstName(registrationDTO.getFirstName())
+                .lastName(registrationDTO.getLastName())
+                .isActive(false)
+                .status("PENDING_SYNC")
+                .build();
     }
 
     default DriverDetailsDTO updateDriverStatusFallback(Long driverId, String status, Throwable t) {

@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 public class DriverDetailsDTO {
 
     private Long id;
-    private String name;
+    private String firstName;
+    private String lastName;
     private String licenseNumber;
     private String vehicleType;
     private String status;

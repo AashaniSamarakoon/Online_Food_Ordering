@@ -7,10 +7,9 @@ import com.delivery.driverauthservice.exception.InvalidCredentialsException;
 import com.delivery.driverauthservice.exception.ResourceAlreadyExistsException;
 import com.delivery.driverauthservice.exception.TokenRefreshException;
 import com.delivery.driverauthservice.exception.VerificationException;
-import com.delivery.driverauthservice.model.DriverCredential;
-import com.delivery.driverauthservice.model.RefreshToken;
-import com.delivery.driverauthservice.model.Vehicle;
-import com.delivery.driverauthservice.model.VerificationCode;
+import com.delivery.driverauthservice.messaging.DriverEventPublisher;
+import com.delivery.driverauthservice.messaging.DriverRegistrationEvent;
+import com.delivery.driverauthservice.model.*;
 import com.delivery.driverauthservice.repository.DriverCredentialRepository;
 import com.delivery.driverauthservice.repository.RefreshTokenRepository;
 import com.delivery.driverauthservice.repository.VehicleRepository;
@@ -18,9 +17,7 @@ import com.delivery.driverauthservice.repository.VerificationCodeRepository;
 import com.delivery.driverauthservice.security.CustomUserDetails;
 import com.delivery.driverauthservice.security.JwtTokenProvider;
 import com.delivery.driverauthservice.security.TokenBlacklistService;
-import com.delivery.driverauthservice.service.AuthService;
-import com.delivery.driverauthservice.service.SmsService;
-import com.delivery.driverauthservice.service.VehicleService;
+import com.delivery.driverauthservice.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -32,10 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -53,13 +48,16 @@ public class AuthServiceImpl implements AuthService {
     private final SmsService smsService;
     private final DriverServiceClient driverServiceClient;
     private final VehicleService vehicleService;
+    private final DocumentService documentService;
+    private final SequenceGenerator sequenceGenerator;
+    private final DriverEventPublisher driverEventPublisher;
 
     @Override
     @Transactional
     public AuthResponse login(LoginRequest loginRequest) {
-        // Authenticate with Spring Security
+        // Authenticate with Spring Security - will work with username, email or phone
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(loginRequest.getLoginIdentifier(), loginRequest.getPassword())
         );
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -99,6 +97,9 @@ public class AuthServiceImpl implements AuthService {
         // Get vehicle details
         VehicleDTO vehicleDetails = vehicleService.getVehicleByDriverId(driver.getDriverId());
 
+        // Get driver documents
+        List<DocumentDTO> documents = documentService.getDriverDocuments(driver.getDriverId());
+
         // Create and return the authentication response
         return AuthResponse.builder()
                 .driverId(driver.getDriverId())
@@ -109,10 +110,14 @@ public class AuthServiceImpl implements AuthService {
                 .roles(driver.getRoles())
                 .tokenType("Bearer")
                 .phoneVerified(driver.isPhoneVerified())
+                .registrationStatus(driver.getRegistrationStatus().name())
                 .driverDetails(driverDetails)
                 .vehicleDetails(vehicleDetails)
+                .documents(documents)
                 .build();
     }
+
+    // Update the register method within your existing AuthServiceImpl class
 
     @Override
     @Transactional
@@ -127,36 +132,34 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceAlreadyExistsException("Phone number already registered");
         }
 
-        // First register driver in driver service
-        DriverRegistrationDTO driverRegistrationDTO = DriverRegistrationDTO.builder()
-                .name(registrationRequest.getFullName())
-                .licenseNumber(registrationRequest.getLicenseNumber())
-                .vehicleType(registrationRequest.getVehicleType())
-                .phoneNumber(registrationRequest.getPhoneNumber())
-                .latitude(0.0)  // Default values until driver provides location
-                .longitude(0.0)
-                .vehicleBrand(registrationRequest.getVehicleBrand())
-                .vehicleModel(registrationRequest.getVehicleModel())
-                .vehicleYear(registrationRequest.getVehicleYear())
-                .licensePlate(registrationRequest.getLicensePlate())
-                .vehicleColor(registrationRequest.getVehicleColor())
-                .build();
+        // Check if email already exists (if provided)
+        if (registrationRequest.getEmail() != null && !registrationRequest.getEmail().isEmpty() &&
+                driverCredentialRepository.existsByEmail(registrationRequest.getEmail())) {
+            throw new ResourceAlreadyExistsException("Email already registered");
+        }
 
-        DriverDetailsDTO driverDetails = driverServiceClient.registerDriver(driverRegistrationDTO);
+        // Validate required documents
+        validateRequiredDocuments(registrationRequest.getDocuments());
 
-        // Create driver credentials
+        // Generate a temporary ID for the driver
+        Long tempDriverId = sequenceGenerator.nextId();
+
+        // Create driver credentials first
         Set<String> roles = new HashSet<>();
         roles.add("ROLE_DRIVER");
 
         DriverCredential driverCredential = DriverCredential.builder()
-                .driverId(driverDetails.getId())
+                .driverId(tempDriverId)
                 .username(registrationRequest.getUsername())
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .phoneNumber(registrationRequest.getPhoneNumber())
                 .email(registrationRequest.getEmail())
+                .firstName(registrationRequest.getFirstName())
+                .lastName(registrationRequest.getLastName())
                 .roles(roles)
-                .phoneVerified(false)  // Requires verification
+                .phoneVerified(false)
                 .accountLocked(false)
+                .registrationStatus(RegistrationStatus.PENDING)
                 .failedLoginAttempts(0)
                 .build();
 
@@ -176,10 +179,60 @@ public class AuthServiceImpl implements AuthService {
 
         vehicleRepository.save(vehicle);
 
-        // Send verification code
+        // Process document uploads and store them locally
+        Map<DocumentType, Long> documentIds = new HashMap<>();
+        List<DocumentDTO> uploadedDocuments = new ArrayList<>();
+
+        if (registrationRequest.getDocuments() != null && !registrationRequest.getDocuments().isEmpty()) {
+            for (Map.Entry<DocumentType, DocumentUploadMetadata> entry : registrationRequest.getDocuments().entrySet()) {
+                DocumentType documentType = entry.getKey();
+                DocumentUploadMetadata metadata = entry.getValue();
+
+                DocumentUploadRequest docRequest = new DocumentUploadRequest();
+                docRequest.setDriverId(driverCredential.getDriverId());
+                docRequest.setDocumentType(documentType);
+                docRequest.setBase64Image(metadata.getBase64Image());
+                docRequest.setFileName(metadata.getFileName() != null ?
+                        metadata.getFileName() : generateDefaultFileName(documentType));
+                docRequest.setContentType(metadata.getContentType() != null ?
+                        metadata.getContentType() : "image/jpeg");
+                docRequest.setExpiryDate(metadata.getExpiryDate());
+
+                try {
+                    DocumentDTO document = documentService.uploadDocumentBase64(docRequest);
+                    uploadedDocuments.add(document);
+                    documentIds.put(documentType, document.getId());
+                } catch (Exception e) {
+                    log.error("Error uploading document of type {}: {}", documentType, e.getMessage());
+                    // Continue with other documents even if one fails
+                }
+            }
+        }
+
+        // Send verification code for phone verification
         sendVerificationCode(new SendVerificationRequest(registrationRequest.getPhoneNumber()));
 
-        // Return response without tokens (user needs to verify phone first)
+        // Queue registration with driver service asynchronously via RabbitMQ
+        DriverRegistrationEvent event = DriverRegistrationEvent.builder()
+                .tempDriverId(tempDriverId)
+                .username(registrationRequest.getUsername())
+                .email(registrationRequest.getEmail())
+                .phoneNumber(registrationRequest.getPhoneNumber())
+                .firstName(registrationRequest.getFirstName())
+                .lastName(registrationRequest.getLastName())
+                .licenseNumber(registrationRequest.getLicenseNumber())
+                .vehicleType(registrationRequest.getVehicleType())
+                .vehicleBrand(registrationRequest.getVehicleBrand())
+                .vehicleModel(registrationRequest.getVehicleModel())
+                .vehicleYear(registrationRequest.getVehicleYear())
+                .licensePlate(registrationRequest.getLicensePlate())
+                .vehicleColor(registrationRequest.getVehicleColor())
+                .documentIds(documentIds)
+                .build();
+
+        driverEventPublisher.publishDriverRegistration(event);
+
+        // Create vehicle DTO for response
         VehicleDTO vehicleDTO = VehicleDTO.builder()
                 .id(vehicle.getId())
                 .driverId(driverCredential.getDriverId())
@@ -192,14 +245,44 @@ public class AuthServiceImpl implements AuthService {
                 .verified(vehicle.getVerified())
                 .build();
 
+        // Return response without tokens (user needs to verify phone first)
         return AuthResponse.builder()
                 .driverId(driverCredential.getDriverId())
                 .username(driverCredential.getUsername())
                 .phoneVerified(false)
+                .registrationStatus(RegistrationStatus.PENDING.name())
                 .roles(roles)
-                .driverDetails(driverDetails)
                 .vehicleDetails(vehicleDTO)
+                .documents(uploadedDocuments)
                 .build();
+    }
+
+    private void validateRequiredDocuments(Map<DocumentType, DocumentUploadMetadata> documents) {
+        // Define the required document types
+        Set<DocumentType> requiredDocTypes = Set.of(
+                DocumentType.DRIVING_LICENSE,
+                DocumentType.VEHICLE_INSURANCE,
+                DocumentType.VEHICLE_REGISTRATION
+        );
+
+        if (documents == null || documents.isEmpty()) {
+            throw new IllegalArgumentException("Required documents are missing");
+        }
+
+        // Check if all required document types are present
+        for (DocumentType requiredType : requiredDocTypes) {
+            if (!documents.containsKey(requiredType) ||
+                    documents.get(requiredType) == null ||
+                    documents.get(requiredType).getBase64Image() == null ||
+                    documents.get(requiredType).getBase64Image().isEmpty()) {
+                throw new IllegalArgumentException("Required document missing: " + requiredType);
+            }
+        }
+    }
+
+    private String generateDefaultFileName(DocumentType documentType) {
+        return documentType.name().toLowerCase().replace('_', '-') + "-" +
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + ".jpg";
     }
 
     @Override
@@ -304,6 +387,12 @@ public class AuthServiceImpl implements AuthService {
         // Get driver details
         DriverDetailsDTO driverDetails = driverServiceClient.getDriverDetails(driver.getDriverId());
 
+        // Get vehicle details
+        VehicleDTO vehicleDetails = vehicleService.getVehicleByDriverId(driver.getDriverId());
+
+        // Get driver documents
+        List<DocumentDTO> documents = documentService.getDriverDocuments(driver.getDriverId());
+
         // Create and return the authentication response
         return AuthResponse.builder()
                 .driverId(driver.getDriverId())
@@ -314,7 +403,10 @@ public class AuthServiceImpl implements AuthService {
                 .roles(driver.getRoles())
                 .tokenType("Bearer")
                 .phoneVerified(driver.isPhoneVerified())
+                .registrationStatus(driver.getRegistrationStatus().name()) // Add this
                 .driverDetails(driverDetails)
+                .vehicleDetails(vehicleDetails)
+                .documents(documents)
                 .build();
     }
 

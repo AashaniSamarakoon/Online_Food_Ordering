@@ -29,7 +29,17 @@ public class DriverCredential {
     @Column(nullable = false, unique = true)
     private String phoneNumber;
 
+    // Updated to include unique constraint and make it nullable=false
+    @Column(nullable = false, unique = true)
     private String email;
+
+    // Added first name field
+    @Column(nullable = false)
+    private String firstName;
+
+    // Added last name field
+    @Column(nullable = false)
+    private String lastName;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "driver_roles", joinColumns = @JoinColumn(name = "driver_id"))
@@ -53,6 +63,10 @@ public class DriverCredential {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "registration_status")
+    private RegistrationStatus registrationStatus = RegistrationStatus.PENDING;
 
     @PrePersist
     protected void onCreate() {

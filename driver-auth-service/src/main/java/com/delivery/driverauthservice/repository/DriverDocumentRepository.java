@@ -11,6 +11,5 @@ import java.util.Optional;
 @Repository
 public interface DriverDocumentRepository extends JpaRepository<DriverDocument, Long> {
     List<DriverDocument> findByDriverDriverId(Long driverId);
-    List<DriverDocument> findByDriverDriverIdAndDocumentType(Long driverId, DocumentType documentType);
     Optional<DriverDocument> findTopByDriverDriverIdAndDocumentTypeOrderByUploadedAtDesc(Long driverId, DocumentType documentType);
 }

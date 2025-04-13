@@ -28,50 +28,75 @@ public class DocumentServiceImpl implements DocumentService {
 
     private final DriverDocumentRepository documentRepository;
     private final DriverCredentialRepository driverRepository;
-    private final StorageService storageService;
+    private final StorageService storageService;  // Restored StorageService
 
-    @Override
-    @Transactional
-    public DocumentDTO uploadDocument(Long driverId, DocumentType documentType, MultipartFile file) {
-        try {
-            DriverCredential driver = driverRepository.findById(driverId)
-                    .orElseThrow(() -> new RuntimeException("Driver not found"));
-
-            String fileUrl = storageService.uploadFile(file, "driver-" + driverId + "/" + documentType.name().toLowerCase());
-
-            DriverDocument document = DriverDocument.builder()
-                    .driver(driver)
-                    .documentType(documentType)
-                    .fileName(file.getOriginalFilename())
-                    .fileUrl(fileUrl)
-                    .fileContentType(file.getContentType())
-                    .fileSize(file.getSize())
-                    .verified(false)
-                    .build();
-
-            document = documentRepository.save(document);
-
-            return mapToDTO(document);
-        } catch (IOException e) {
-            log.error("Error uploading document", e);
-            throw new RuntimeException("Failed to upload document: " + e.getMessage());
-        }
-    }
+//    @Override
+//    @Transactional
+//    public DocumentDTO uploadDocument(Long driverId, DocumentType documentType, MultipartFile file) {
+//        try {
+//            DriverCredential driver = driverRepository.findById(driverId)
+//                    .orElseThrow(() -> new RuntimeException("Driver not found"));
+//
+//            String fileUrl = storageService.uploadFile(file, "driver-" + driverId + "/" + documentType.name().toLowerCase());
+//
+//            DriverDocument document = DriverDocument.builder()
+//                    .driver(driver)
+//                    .documentType(documentType)
+//                    .fileName(file.getOriginalFilename())
+//                    .fileUrl(fileUrl)
+//                    .fileContentType(file.getContentType())
+//                    .fileSize(file.getSize())
+//                    .verified(false)
+//                    .build();
+//
+//            document = documentRepository.save(document);
+//
+//            return mapToDTO(document);
+//        } catch (IOException e) {
+//            log.error("Error uploading document", e);
+//            throw new RuntimeException("Failed to upload document: " + e.getMessage());
+//        }
+//    }
 
     @Override
     @Transactional
     public DocumentDTO uploadDocumentBase64(DocumentUploadRequest request) {
         try {
+            // Process the base64 string to handle data URL format
+            String base64Data = request.getBase64Image();
+            String contentType = request.getContentType();
+
+            // Handle data URL format (e.g., "data:image/jpeg;base64,...")
+            if (base64Data.contains(",")) {
+                String[] parts = base64Data.split(",");
+                if (parts.length > 1) {
+                    // If there's content type info in the data URL, extract it
+                    if (parts[0].contains("data:") && parts[0].contains(";base64")) {
+                        String dataTypePart = parts[0].substring(5, parts[0].indexOf(";base64"));
+                        if (dataTypePart.length() > 0) {
+                            contentType = dataTypePart; // Use content type from data URL if available
+                        }
+                    }
+                    base64Data = parts[1];
+                }
+            }
+
             DriverCredential driver = driverRepository.findById(request.getDriverId())
-                    .orElseThrow(() -> new RuntimeException("Driver not found"));
+                    .orElseThrow(() -> new RuntimeException("Driver not found with ID: " + request.getDriverId()));
 
             // Decode base64 string to byte[]
-            byte[] imageBytes = Base64.getDecoder().decode(request.getBase64Image());
+            byte[] imageBytes;
+            try {
+                imageBytes = Base64.getDecoder().decode(base64Data);
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid Base64 string: {}", e.getMessage());
+                throw new RuntimeException("Invalid Base64 data: " + e.getMessage());
+            }
 
             String fileUrl = storageService.uploadBytes(
                     imageBytes,
                     request.getFileName(),
-                    request.getContentType(),
+                    contentType,
                     "driver-" + request.getDriverId() + "/" + request.getDocumentType().name().toLowerCase()
             );
 
@@ -80,10 +105,11 @@ public class DocumentServiceImpl implements DocumentService {
                     .documentType(request.getDocumentType())
                     .fileName(request.getFileName())
                     .fileUrl(fileUrl)
-                    .fileContentType(request.getContentType())
+                    .fileContentType(contentType)
                     .fileSize((long) imageBytes.length)
                     .verified(false)
                     .expiryDate(request.getExpiryDate())
+                    .uploadedAt(LocalDateTime.now())
                     .build();
 
             document = documentRepository.save(document);
@@ -141,6 +167,14 @@ public class DocumentServiceImpl implements DocumentService {
                 .orElse(false);
     }
 
+    @Override
+    @Transactional
+    public DocumentDTO getDocument(Long documentId) {
+        DriverDocument document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
+        return mapToDTO(document);
+    }
+
     private DocumentDTO mapToDTO(DriverDocument document) {
         return DocumentDTO.builder()
                 .id(document.getId())
@@ -148,7 +182,11 @@ public class DocumentServiceImpl implements DocumentService {
                 .documentType(document.getDocumentType())
                 .fileName(document.getFileName())
                 .fileUrl(document.getFileUrl())
+                .fileContentType(document.getFileContentType())
+                .fileSize(document.getFileSize())
                 .verified(document.isVerified())
+                .verificationNotes(document.getVerificationNotes())
+                .verifiedAt(document.getVerifiedAt())
                 .uploadedAt(document.getUploadedAt())
                 .expiryDate(document.getExpiryDate())
                 .build();
