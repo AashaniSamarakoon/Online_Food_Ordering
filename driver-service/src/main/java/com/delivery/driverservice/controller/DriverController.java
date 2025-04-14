@@ -4,6 +4,7 @@ import com.delivery.driverservice.dto.*;
 import com.delivery.driverservice.service.DriverService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,15 +13,31 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/drivers")
 @RequiredArgsConstructor
-public class DriverController {
+@Slf4j
+public class DriverController{
 
     private final DriverService driverService;
 
-//    // Driver Registration and Profile Management
-//    @PostMapping
-//    public ResponseEntity<DriverDTO> registerDriver(@Valid @RequestBody DriverRequest request) {
-//        return ResponseEntity.ok(driverService.registerDriver(request));
-//    }
+    @PostMapping
+    public ResponseEntity<DriverDTO> registerDriver(@RequestBody DriverRequest request) {
+        log.info("Received driver registration request: {}", request);
+
+        try {
+            DriverDTO result = driverService.registerDriver(request);
+            log.info("Successfully registered driver: {}", result);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error registering driver: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Adding a test endpoint to check connectivity
+    @GetMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("Driver service is working!");
+    }
+
 
     @GetMapping("/{driverId}")
     public ResponseEntity<DriverDTO> getDriverDetails(@PathVariable Long driverId) {

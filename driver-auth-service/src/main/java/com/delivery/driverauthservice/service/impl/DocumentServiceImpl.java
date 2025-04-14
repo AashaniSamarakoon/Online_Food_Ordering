@@ -139,12 +139,19 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     @Transactional
     public boolean verifyDocument(Long documentId, boolean verified, String notes) {
+        log.info("Verifying document ID: {}, isValid: {}, notes: {}", documentId, verified, notes);
+
         return documentRepository.findById(documentId)
                 .map(document -> {
+                    log.info("Found document: {}, current verified status: {}", document.getId(), document.isVerified());
+
+                    // Explicitly set the verified status
                     document.setVerified(verified);
                     document.setVerificationNotes(notes);
                     document.setVerifiedAt(LocalDateTime.now());
-                    documentRepository.save(document);
+
+                    DriverDocument savedDoc = documentRepository.saveAndFlush(document);
+                    log.info("Document saved with ID: {}, new verified status: {}", savedDoc.getId(), savedDoc.isVerified());
                     return true;
                 })
                 .orElse(false);
@@ -173,6 +180,18 @@ public class DocumentServiceImpl implements DocumentService {
         DriverDocument document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found with id: " + documentId));
         return mapToDTO(document);
+    }
+
+    @Override
+    public List<DriverDocument> getDocumentsByDriverId(Long driverId) {
+        return documentRepository.findByDriverDriverId(driverId);
+    }
+
+    @Override
+    public boolean areAllDocumentsVerified(Long driverId) {
+        return documentRepository.findByDriverDriverId(driverId)
+                .stream()
+                .allMatch(DriverDocument::isVerified);
     }
 
     private DocumentDTO mapToDTO(DriverDocument document) {

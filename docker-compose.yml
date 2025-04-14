@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:13
@@ -47,8 +45,6 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    # networks:
-    #   - postgres
 
   driver-service:
     build: ./driver-service
@@ -60,6 +56,41 @@ services:
       SPRING_DATASOURCE_PASSWORD: akalanka28
     depends_on:
       - postgres
+
+  driver-auth-service:
+    build: ./driver-auth-service
+    ports:
+      - "8085:8085"
+    environment:
+      # Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_auth_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: akalanka28
+      
+      # JWT Configuration
+      JWT_SECRET_KEY: rzxlszyykpbgqcflzxsqcysyhljt
+      JWT_EXPIRATION_TIME: 3600
+      JWT_REFRESH_EXPIRATION_DAYS: 30
+      
+      # Service URLs
+      DRIVER_SERVICE_URL: http://driver-service:8082
+      
+      # RabbitMQ Configuration
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      
+      # Storage Configuration
+      AZURE_STORAGE_ENABLED: "false"
+      LOCAL_STORAGE_ENABLED: "true"
+      STORAGE_LOCATION: /app/uploads
+    volumes:
+      - driver-auth-uploads:/app/uploads
+    depends_on:
+      - postgres
+      - rabbitmq
+      - driver-service
 
   order-assignment-service:
     build: ./order-assignment-service
@@ -97,3 +128,4 @@ volumes:
   pgdata:
   mongodb_data:
   redis_data:
+  driver-auth-uploads: 

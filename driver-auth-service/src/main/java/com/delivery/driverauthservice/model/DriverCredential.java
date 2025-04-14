@@ -65,8 +65,8 @@ public class DriverCredential {
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "registration_status")
-    private RegistrationStatus registrationStatus = RegistrationStatus.PENDING;
+    @Column(name = "registration_status", nullable = false)
+    private RegistrationStatus registrationStatus;
 
     @PrePersist
     protected void onCreate() {

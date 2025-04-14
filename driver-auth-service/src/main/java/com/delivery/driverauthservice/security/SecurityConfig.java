@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/login", "/api/auth/register",
                                 "/api/auth/verify", "/api/auth/send-verification",
-                                "/api/auth/refresh-token", "/api/auth/reset-password",
+                                "/api/auth/refresh-token", "/api/auth/reset-password", "/api/admin/register",
                                 "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )

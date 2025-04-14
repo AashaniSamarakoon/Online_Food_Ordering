@@ -1,12 +1,12 @@
 package com.delivery.driverauthservice.service.impl;
 
+import com.delivery.driverauthservice.client.DriverServiceClient;
 import com.delivery.driverauthservice.dto.*;
 import com.delivery.driverauthservice.exception.InvalidCredentialsException;
 import com.delivery.driverauthservice.exception.ResourceAlreadyExistsException;
 import com.delivery.driverauthservice.exception.TokenRefreshException;
 import com.delivery.driverauthservice.exception.VerificationException;
 import com.delivery.driverauthservice.messaging.DriverEventPublisher;
-import com.delivery.driverauthservice.messaging.DriverRegistrationEvent;
 import com.delivery.driverauthservice.model.*;
 import com.delivery.driverauthservice.repository.DriverCredentialRepository;
 import com.delivery.driverauthservice.repository.RefreshTokenRepository;
@@ -18,6 +18,7 @@ import com.delivery.driverauthservice.security.TokenBlacklistService;
 import com.delivery.driverauthservice.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -44,14 +44,11 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider tokenProvider;
     private final TokenBlacklistService tokenBlacklistService;
     private final SmsService smsService;
+    private final DriverServiceClient driverServiceClient;
     private final VehicleService vehicleService;
     private final DocumentService documentService;
     private final SequenceGenerator sequenceGenerator;
     private final DriverEventPublisher driverEventPublisher;
-
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final String VERIFICATION_CODE_CHARS = "0123456789";
-    private static final int VERIFICATION_CODE_LENGTH = 6;
 
     @Override
     @Transactional
@@ -61,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
                 new UsernamePasswordAuthenticationToken(loginRequest.getLoginIdentifier(), loginRequest.getPassword())
         );
 
-        var userDetails = (CustomUserDetails) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         // Check if phone is verified
         if (!userDetails.isPhoneVerified()) {
@@ -72,22 +69,6 @@ public class AuthServiceImpl implements AuthService {
         DriverCredential driver = driverCredentialRepository.findById(userDetails.getDriverId())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
-        updateDriverLoginInfo(driver, loginRequest);
-
-        // Generate tokens
-        String accessToken = tokenProvider.generateToken(driver);
-        RefreshToken refreshToken = createRefreshToken(driver.getDriverId(), loginRequest.getDeviceId());
-
-        // Get vehicle details and driver documents
-        var authResponse = createAuthResponse(driver, accessToken, refreshToken.getToken());
-
-        // Publish driver login event to driver management service
-        publishDriverLoginEvent(driver, "ONLINE");
-
-        return authResponse;
-    }
-
-    private void updateDriverLoginInfo(DriverCredential driver, LoginRequest loginRequest) {
         // Update device information if provided
         if (loginRequest.getDeviceId() != null) {
             driver.setDeviceId(loginRequest.getDeviceId());
@@ -100,26 +81,151 @@ public class AuthServiceImpl implements AuthService {
         driver.setLastLoginTime(LocalDateTime.now());
         driver.setFailedLoginAttempts(0); // Reset failed attempts on successful login
         driverCredentialRepository.save(driver);
+
+        // Generate tokens
+        String accessToken = tokenProvider.generateToken(driver);
+        RefreshToken refreshToken = createRefreshToken(driver.getDriverId(), loginRequest.getDeviceId());
+
+        // Get vehicle details
+        VehicleDTO vehicleDetails = vehicleService.getVehicleByDriverId(driver.getDriverId());
+
+        // Get driver documents
+        List<DocumentDTO> documents = documentService.getDriverDocuments(driver.getDriverId());
+
+        // Create and return the authentication response
+        return AuthResponse.builder()
+                .driverId(driver.getDriverId())
+                .username(driver.getUsername())
+                .firstName(driver.getFirstName())
+                .lastName(driver.getLastName())
+                .phoneNumber(driver.getPhoneNumber())
+                .email(driver.getEmail())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .expiresIn(tokenProvider.getTokenExpirationInSeconds())
+                .roles(driver.getRoles())
+                .tokenType("Bearer")
+                .phoneVerified(driver.isPhoneVerified())
+                .registrationStatus(driver.getRegistrationStatus().name())
+                .vehicleDetails(vehicleDetails)
+                .documents(documents)
+                .build();
     }
 
     @Override
     @Transactional
     public AuthResponse register(RegistrationRequest registrationRequest) {
-        validateRegistrationData(registrationRequest);
+        // Check if username already exists
+        if (driverCredentialRepository.existsByUsername(registrationRequest.getUsername())) {
+            throw new ResourceAlreadyExistsException("Username already exists");
+        }
+
+        // Check if phone number already exists
+        if (driverCredentialRepository.existsByPhoneNumber(registrationRequest.getPhoneNumber())) {
+            throw new ResourceAlreadyExistsException("Phone number already registered");
+        }
+
+        // Check if email already exists (if provided)
+        if (registrationRequest.getEmail() != null && !registrationRequest.getEmail().isEmpty() &&
+                driverCredentialRepository.existsByEmail(registrationRequest.getEmail())) {
+            throw new ResourceAlreadyExistsException("Email already registered");
+        }
+
+        // Validate required documents
+        validateRequiredDocuments(registrationRequest.getDocuments());
 
         // Generate a temporary ID for the driver
         Long tempDriverId = sequenceGenerator.nextId();
 
-        // Create driver credentials and vehicle
-        DriverCredential driverCredential = createDriverCredential(registrationRequest, tempDriverId);
-        Vehicle vehicle = createVehicle(registrationRequest, driverCredential);
+        // Create driver credentials first
+        Set<String> roles = new HashSet<>();
+        roles.add("ROLE_DRIVER");
 
-        // Process document uploads
-        var documentResult = processDocuments(driverCredential.getDriverId(), registrationRequest.getDocuments());
-        List<DocumentDTO> uploadedDocuments = documentResult.getKey();
-        Map<DocumentType, Long> documentIds = documentResult.getValue();
+        DriverCredential driverCredential = DriverCredential.builder()
+                .driverId(tempDriverId)
+                .username(registrationRequest.getUsername())
+                .password(passwordEncoder.encode(registrationRequest.getPassword()))
+                .phoneNumber(registrationRequest.getPhoneNumber())
+                .email(registrationRequest.getEmail())
+                .firstName(registrationRequest.getFirstName())
+                .lastName(registrationRequest.getLastName())
+                .roles(roles)
+                .phoneVerified(false)
+                .accountLocked(false)
+                .registrationStatus(RegistrationStatus.PENDING_VERIFICATION) // Changed to PENDING_VERIFICATION
+                .failedLoginAttempts(0)
+                .build();
 
-        // Send verification code
+        driverCredentialRepository.save(driverCredential);
+
+        // Register vehicle information
+        Vehicle vehicle = Vehicle.builder()
+                .driver(driverCredential)
+                .brand(registrationRequest.getVehicleBrand())
+                .model(registrationRequest.getVehicleModel())
+                .year(registrationRequest.getVehicleYear())
+                .licensePlate(registrationRequest.getLicensePlate())
+                .color(registrationRequest.getVehicleColor())
+                .vehicleType(registrationRequest.getVehicleType())
+                .verified(false) // Document needs to be verified
+                .build();
+
+        vehicleRepository.save(vehicle);
+
+        // Process document uploads and store them locally
+        Map<DocumentType, Long> documentIds = new HashMap<>();
+        List<DocumentDTO> uploadedDocuments = new ArrayList<>();
+
+        if (registrationRequest.getDocuments() != null && !registrationRequest.getDocuments().isEmpty()) {
+            for (Map.Entry<DocumentType, DocumentUploadMetadata> entry : registrationRequest.getDocuments().entrySet()) {
+                DocumentType documentType = entry.getKey();
+                DocumentUploadMetadata metadata = entry.getValue();
+
+                log.info("Processing document of type: {}", documentType);
+
+                if (metadata == null) {
+                    log.warn("Metadata is null for document type: {}", documentType);
+                    continue;
+                }
+
+                if (metadata.getBase64Image() == null) {
+                    log.warn("Base64 image is null for document type: {}", documentType);
+                    continue;
+                }
+
+                if (!isValidBase64(metadata.getBase64Image())) {
+                    log.warn("Invalid base64 data for document type: {}", documentType);
+                    continue;
+                }
+
+                try {
+                    DocumentUploadRequest docRequest = new DocumentUploadRequest();
+                    docRequest.setDriverId(driverCredential.getDriverId());
+                    docRequest.setDocumentType(documentType);
+                    docRequest.setBase64Image(metadata.getBase64Image());
+                    docRequest.setFileName(metadata.getFileName() != null ?
+                            metadata.getFileName() : generateDefaultFileName(documentType));
+                    docRequest.setContentType(metadata.getContentType() != null ?
+                            metadata.getContentType() : "image/jpeg");
+                    docRequest.setExpiryDate(metadata.getExpiryDate());
+                    docRequest.setVerified(false);
+
+                    log.info("Uploading document for driver: {}, type: {}, filename: {}",
+                            driverCredential.getDriverId(), documentType, docRequest.getFileName());
+
+                    DocumentDTO document = documentService.uploadDocumentBase64(docRequest);
+                    uploadedDocuments.add(document);
+                    documentIds.put(documentType, document.getId());
+
+                    log.info("Successfully uploaded document with ID: {}", document.getId());
+                } catch (Exception e) {
+                    log.error("Error uploading document of type {}: {}", documentType, e.getMessage(), e);
+                    // Continue with other documents even if one fails
+                }
+            }
+        }
+
+        // Send verification code for phone verification
         try {
             sendVerificationCode(new SendVerificationRequest(registrationRequest.getPhoneNumber()));
         } catch (Exception e) {
@@ -127,13 +233,20 @@ public class AuthServiceImpl implements AuthService {
             // Continue with registration even if SMS fails
         }
 
-        // Publish registration event
-        publishRegistrationEvent(driverCredential, registrationRequest, documentIds);
-
         // Create vehicle DTO for response
-        VehicleDTO vehicleDTO = createVehicleDTO(vehicle);
+        VehicleDTO vehicleDTO = VehicleDTO.builder()
+                .id(vehicle.getId())
+                .driverId(driverCredential.getDriverId())
+                .brand(vehicle.getBrand())
+                .model(vehicle.getModel())
+                .year(vehicle.getYear())
+                .licensePlate(vehicle.getLicensePlate())
+                .color(vehicle.getColor())
+                .vehicleType(vehicle.getVehicleType())
+                .verified(vehicle.getVerified())
+                .build();
 
-        // Return response without tokens (user needs to verify phone first)
+        // Return response without tokens (user needs to verify phone and documents first)
         return AuthResponse.builder()
                 .driverId(driverCredential.getDriverId())
                 .username(driverCredential.getUsername())
@@ -142,129 +255,171 @@ public class AuthServiceImpl implements AuthService {
                 .phoneNumber(driverCredential.getPhoneNumber())
                 .email(driverCredential.getEmail())
                 .phoneVerified(false)
-                .registrationStatus(RegistrationStatus.PENDING.name())
-                .roles(driverCredential.getRoles())
+                .registrationStatus(RegistrationStatus.PENDING_VERIFICATION.name())
+                .roles(roles)
                 .vehicleDetails(vehicleDTO)
                 .documents(uploadedDocuments)
                 .build();
     }
 
-    private void validateRegistrationData(RegistrationRequest request) {
+    @Override
+    @Transactional
+    public AuthResponse registerAdmin(AdminRegistrationRequest registrationRequest) {
+        // Log the incoming request
+        log.info("Registering new admin: {}", registrationRequest.getUsername());
+
         // Check if username already exists
-        if (driverCredentialRepository.existsByUsername(request.getUsername())) {
+        if (driverCredentialRepository.existsByUsername(registrationRequest.getUsername())) {
             throw new ResourceAlreadyExistsException("Username already exists");
         }
 
-        // Check if phone number already exists
-        if (driverCredentialRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new ResourceAlreadyExistsException("Phone number already registered");
-        }
-
         // Check if email already exists (if provided)
-        if (request.getEmail() != null && !request.getEmail().isEmpty() &&
-                driverCredentialRepository.existsByEmail(request.getEmail())) {
+        if (registrationRequest.getEmail() != null && !registrationRequest.getEmail().isEmpty() &&
+                driverCredentialRepository.existsByEmail(registrationRequest.getEmail())) {
             throw new ResourceAlreadyExistsException("Email already registered");
         }
 
-        // Validate required documents
-        validateRequiredDocuments(request.getDocuments());
-    }
+        // Generate an ID for the admin
+        Long adminId = sequenceGenerator.nextId();
 
-    private DriverCredential createDriverCredential(RegistrationRequest request, Long driverId) {
+        // Create admin credentials
         Set<String> roles = new HashSet<>();
-        roles.add("ROLE_DRIVER");
+        roles.add("ROLE_ADMIN");
 
-        DriverCredential driverCredential = DriverCredential.builder()
-                .driverId(driverId)
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phoneNumber(request.getPhoneNumber())
-                .email(request.getEmail())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
+        DriverCredential adminCredential = DriverCredential.builder()
+                .driverId(adminId)
+                .username(registrationRequest.getUsername())
+                .password(passwordEncoder.encode(registrationRequest.getPassword()))
+                .phoneNumber(registrationRequest.getPhoneNumber())
+                .email(registrationRequest.getEmail())
+                .firstName(registrationRequest.getFirstName())
+                .lastName(registrationRequest.getLastName())
                 .roles(roles)
-                .phoneVerified(false)
+                .phoneVerified(true)  // Admins don't need phone verification
                 .accountLocked(false)
-                .registrationStatus(RegistrationStatus.PENDING)
+                .registrationStatus(RegistrationStatus.COMPLETED)  // Admin accounts are immediately active
                 .failedLoginAttempts(0)
                 .build();
 
-        return driverCredentialRepository.save(driverCredential);
-    }
+        driverCredentialRepository.save(adminCredential);
 
-    private Vehicle createVehicle(RegistrationRequest request, DriverCredential driver) {
-        Vehicle vehicle = Vehicle.builder()
-                .driver(driver)
-                .brand(request.getVehicleBrand())
-                .model(request.getVehicleModel())
-                .year(request.getVehicleYear())
-                .licensePlate(request.getLicensePlate())
-                .color(request.getVehicleColor())
-                .vehicleType(request.getVehicleType())
-                .verified(false)
+        // Return response without tokens (for security, tokens are only generated on login)
+        return AuthResponse.builder()
+                .driverId(adminCredential.getDriverId())
+                .username(adminCredential.getUsername())
+                .firstName(adminCredential.getFirstName())
+                .lastName(adminCredential.getLastName())
+                .phoneNumber(adminCredential.getPhoneNumber())
+                .email(adminCredential.getEmail())
+                .phoneVerified(true)
+                .registrationStatus(RegistrationStatus.COMPLETED.name())
+                .roles(roles)
                 .build();
-
-        return vehicleRepository.save(vehicle);
     }
 
-    private Map.Entry<List<DocumentDTO>, Map<DocumentType, Long>> processDocuments(
-            Long driverId, Map<DocumentType, DocumentUploadMetadata> documents) {
+    /**
+     * Method to register driver with management service after verification is complete
+     * This will be called by admin after verifying documents and vehicle
+     */
+    @Transactional
+    public DriverDetailsDTO completeDriverRegistration(Long driverId) {
+        DriverCredential driver = driverCredentialRepository.findByDriverId(driverId)
+                .orElseThrow(() -> new ResourceAlreadyExistsException("Driver not found"));
 
-        Map<DocumentType, Long> documentIds = new HashMap<>();
-        List<DocumentDTO> uploadedDocuments = new ArrayList<>();
+        // Check if documents are verified
+        boolean allDocumentsVerified = documentService.areAllDocumentsVerified(driverId);
 
-        if (documents != null && !documents.isEmpty()) {
-            documents.forEach((documentType, metadata) -> {
-                if (metadata == null || metadata.getBase64Image() == null ||
-                        !isValidBase64(metadata.getBase64Image())) {
-                    log.warn("Skipping invalid document data for type: {}", documentType);
-                    return;
-                }
-
-                DocumentUploadRequest docRequest = new DocumentUploadRequest();
-                docRequest.setDriverId(driverId);
-                docRequest.setDocumentType(documentType);
-                docRequest.setBase64Image(metadata.getBase64Image());
-                docRequest.setFileName(metadata.getFileName() != null ?
-                        metadata.getFileName() : generateDefaultFileName(documentType));
-                docRequest.setContentType(metadata.getContentType() != null ?
-                        metadata.getContentType() : "image/jpeg");
-                docRequest.setExpiryDate(metadata.getExpiryDate());
-
-                try {
-                    DocumentDTO document = documentService.uploadDocumentBase64(docRequest);
-                    uploadedDocuments.add(document);
-                    documentIds.put(documentType, document.getId());
-                } catch (Exception e) {
-                    log.error("Error uploading document of type {}: {}", documentType, e.getMessage());
-                }
-            });
+        if (!allDocumentsVerified) {
+            throw new VerificationException("All documents must be verified before completing registration");
         }
 
-        return Map.entry(uploadedDocuments, documentIds);
+
+        // Check if vehicle is verified
+        Vehicle vehicle = vehicleRepository.findByDriverId(driverId)
+                .orElseThrow(() -> new VerificationException("Vehicle details not found"));
+
+        if (!vehicle.getVerified()) {
+            throw new VerificationException("Vehicle must be verified before completing registration");
+        }
+
+        // Check if phone is verified
+        if (!driver.isPhoneVerified()) {
+            throw new VerificationException("Phone number must be verified before completing registration");
+        }
+
+        try {
+            // Create registration DTO
+            DriverRegistrationDTO dto = DriverRegistrationDTO.builder()
+                    .driverId(driver.getDriverId()) // Use .id instead of .driverId
+                    .username(driver.getUsername())
+                    .firstName(driver.getFirstName())
+                    .lastName(driver.getLastName())
+                    .phoneNumber(driver.getPhoneNumber())
+                    .email(driver.getEmail())
+                    .licenseNumber(vehicle.getLicensePlate()) // Using license plate as a fallback for license number
+                    .vehicleType(vehicle.getVehicleType())
+                    .vehicleBrand(vehicle.getBrand())
+                    .vehicleModel(vehicle.getModel())
+                    .vehicleYear(vehicle.getYear())
+                    .licensePlate(vehicle.getLicensePlate())
+                    .vehicleColor(vehicle.getColor())
+                    .latitude(0.0)  // Default until driver updates
+                    .longitude(0.0) // Default until driver updates
+                    .build();
+
+            // Register with driver service
+            DriverDetailsDTO driverDetails = driverServiceClient.registerDriver(dto);
+
+            // Update driver status to COMPLETED
+            driver.setRegistrationStatus(RegistrationStatus.COMPLETED);
+            driverCredentialRepository.save(driver);
+
+            log.info("Successfully completed registration for driver: {}", driver.getUsername());
+
+            return driverDetails;
+        } catch (Exception e) {
+            log.error("Failed to complete registration for driver {}: {}",
+                    driver.getUsername(), e.getMessage());
+            throw new RuntimeException("Failed to complete driver registration: " + e.getMessage());
+        }
     }
 
-    private void publishRegistrationEvent(DriverCredential driver, RegistrationRequest request,
-                                          Map<DocumentType, Long> documentIds) {
-        DriverRegistrationEvent event = DriverRegistrationEvent.builder()
-                .tempDriverId(driver.getDriverId())
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .phoneNumber(request.getPhoneNumber())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .licenseNumber(request.getLicenseNumber())
-                .vehicleType(request.getVehicleType())
-                .vehicleBrand(request.getVehicleBrand())
-                .vehicleModel(request.getVehicleModel())
-                .vehicleYear(request.getVehicleYear())
-                .licensePlate(request.getLicensePlate())
-                .vehicleColor(request.getVehicleColor())
-                .documentIds(documentIds)
-                .build();
 
-        driverEventPublisher.publishDriverRegistration(event);
+    // Update the verifyDocument method to include notes parameter
+    @Transactional
+    public boolean verifyDocument(Long documentId, boolean isValid, String remarks) {
+        log.info("AuthServiceImpl - Verifying document ID: {}, isValid: {}, remarks: {}",
+                documentId, isValid, remarks);
+
+        boolean success = documentService.verifyDocument(documentId, isValid, remarks);
+
+        if (!success) {
+            throw new ResourceAlreadyExistsException("Document not found with ID: " + documentId);
+        }
+        return success;
     }
+
+
+    /**
+     * Verify a driver vehicle
+     */
+    /**
+     * Verify a driver vehicle
+     */
+    @Transactional
+    public void verifyVehicle(Long vehicleId, boolean isValid) {
+        log.info("Verifying vehicle ID: {}, isValid: {}", vehicleId, isValid);
+
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceAlreadyExistsException("Vehicle not found with ID: " + vehicleId));
+
+        vehicle.setVerified(isValid);
+        vehicleRepository.saveAndFlush(vehicle); // Use saveAndFlush to ensure immediate persistence
+
+        log.info("Vehicle verification updated. Vehicle ID: {}, New verification status: {}",
+                vehicle.getId(), vehicle.getVerified());
+    }
+
 
     private boolean isValidBase64(String base64String) {
         try {
@@ -317,8 +472,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public boolean sendVerificationCode(SendVerificationRequest request) {
-        // Generate a 6-digit code using SecureRandom
-        String code = generateSecureRandomCode();
+        // Generate a 6-digit code
+        String code = RandomStringUtils.randomNumeric(6);
 
         // Create verification code record
         VerificationCode verificationCode = VerificationCode.builder()
@@ -336,20 +491,11 @@ public class AuthServiceImpl implements AuthService {
         return smsService.sendSms(request.getPhoneNumber(), message);
     }
 
-    private String generateSecureRandomCode() {
-        StringBuilder sb = new StringBuilder(VERIFICATION_CODE_LENGTH);
-        for (int i = 0; i < VERIFICATION_CODE_LENGTH; i++) {
-            int randomIndex = SECURE_RANDOM.nextInt(VERIFICATION_CODE_CHARS.length());
-            sb.append(VERIFICATION_CODE_CHARS.charAt(randomIndex));
-        }
-        return sb.toString();
-    }
-
     @Override
     @Transactional
     public boolean verifyPhoneNumber(PhoneVerificationRequest request) {
         // Find active verification code
-        var verificationCodeOpt = verificationCodeRepository.findActiveCodeByPhoneNumber(
+        Optional<VerificationCode> verificationCodeOpt = verificationCodeRepository.findActiveCodeByPhoneNumber(
                 request.getPhoneNumber(), LocalDateTime.now());
 
         if (verificationCodeOpt.isEmpty()) {
@@ -381,14 +527,11 @@ public class AuthServiceImpl implements AuthService {
         verificationCodeRepository.save(verificationCode);
 
         // Update driver phone verification status
-        var driverOpt = driverCredentialRepository.findByPhoneNumber(request.getPhoneNumber());
+        Optional<DriverCredential> driverOpt = driverCredentialRepository.findByPhoneNumber(request.getPhoneNumber());
         if (driverOpt.isPresent()) {
             DriverCredential driver = driverOpt.get();
             driver.setPhoneVerified(true);
             driverCredentialRepository.save(driver);
-
-            // Publish phone verification event to driver management service
-            publishDriverVerificationEvent(driver);
         }
 
         return true;
@@ -402,8 +545,17 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(requestRefreshToken)
                 .orElseThrow(() -> new TokenRefreshException("Refresh token not found"));
 
-        // Check if token is expired or device mismatch
-        validateRefreshToken(refreshToken, refreshTokenRequest.getDeviceId());
+        // Check if token is expired
+        if (refreshToken.isExpired()) {
+            refreshTokenRepository.delete(refreshToken);
+            throw new TokenRefreshException("Refresh token expired. Please login again.");
+        }
+
+        // Check device ID if provided
+        if (refreshTokenRequest.getDeviceId() != null &&
+                !refreshTokenRequest.getDeviceId().equals(refreshToken.getDeviceId())) {
+            throw new TokenRefreshException("Invalid device. Please login again.");
+        }
 
         // Get driver
         DriverCredential driver = driverCredentialRepository.findById(refreshToken.getDriverId())
@@ -416,30 +568,13 @@ public class AuthServiceImpl implements AuthService {
         // Delete old refresh token
         refreshTokenRepository.delete(refreshToken);
 
-        // Create and return the authentication response
-        return createAuthResponse(driver, accessToken, newRefreshToken.getToken());
-    }
-
-    private void validateRefreshToken(RefreshToken refreshToken, String deviceId) {
-        // Check if token is expired
-        if (refreshToken.isExpired()) {
-            refreshTokenRepository.delete(refreshToken);
-            throw new TokenRefreshException("Refresh token expired. Please login again.");
-        }
-
-        // Check device ID if provided
-        if (deviceId != null && !deviceId.equals(refreshToken.getDeviceId())) {
-            throw new TokenRefreshException("Invalid device. Please login again.");
-        }
-    }
-
-    private AuthResponse createAuthResponse(DriverCredential driver, String accessToken, String refreshToken) {
         // Get vehicle details
         VehicleDTO vehicleDetails = vehicleService.getVehicleByDriverId(driver.getDriverId());
 
         // Get driver documents
         List<DocumentDTO> documents = documentService.getDriverDocuments(driver.getDriverId());
 
+        // Create and return the authentication response
         return AuthResponse.builder()
                 .driverId(driver.getDriverId())
                 .username(driver.getUsername())
@@ -448,7 +583,7 @@ public class AuthServiceImpl implements AuthService {
                 .phoneNumber(driver.getPhoneNumber())
                 .email(driver.getEmail())
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(newRefreshToken.getToken())
                 .expiresIn(tokenProvider.getTokenExpirationInSeconds())
                 .roles(driver.getRoles())
                 .tokenType("Bearer")
@@ -456,20 +591,6 @@ public class AuthServiceImpl implements AuthService {
                 .registrationStatus(driver.getRegistrationStatus().name())
                 .vehicleDetails(vehicleDetails)
                 .documents(documents)
-                .build();
-    }
-
-    private VehicleDTO createVehicleDTO(Vehicle vehicle) {
-        return VehicleDTO.builder()
-                .id(vehicle.getId())
-                .driverId(vehicle.getDriver().getDriverId())
-                .brand(vehicle.getBrand())
-                .model(vehicle.getModel())
-                .year(vehicle.getYear())
-                .licensePlate(vehicle.getLicensePlate())
-                .color(vehicle.getColor())
-                .vehicleType(vehicle.getVehicleType())
-                .verified(vehicle.getVerified())
                 .build();
     }
 
@@ -501,17 +622,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public boolean logout(Authentication authentication, String token) {
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails principal) {
-            Long driverId = principal.getDriverId();
-
-            // Find driver
-            driverCredentialRepository.findById(driverId).ifPresent(driver -> {
-                // Publish driver logout event to driver management service
-                publishDriverLoginEvent(driver, "OFFLINE");
-            });
-        }
-
-        // Blacklist current access token
+        // Just blacklist the token, no need to update driver status
         if (token != null && !token.isEmpty()) {
             tokenBlacklistService.blacklistToken(token, tokenProvider.getTokenExpirationInSeconds());
             return true;
@@ -535,47 +646,5 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         return refreshTokenRepository.save(refreshToken);
-    }
-
-    /**
-     * Publishes a driver login/logout event to the driver management service
-     */
-    private void publishDriverLoginEvent(DriverCredential driver, String status) {
-        try {
-            // Create a login status event and publish it
-            Map<String, Object> event = new HashMap<>();
-            event.put("driverId", driver.getDriverId());
-            event.put("status", status);
-            event.put("timestamp", LocalDateTime.now());
-
-            // Use the driver event publisher to send this event
-            driverEventPublisher.publishDriverStatusUpdate(event);
-
-            log.info("Published driver status update: {}", status);
-        } catch (Exception e) {
-            log.error("Failed to publish driver status update: {}", e.getMessage());
-            // Continue anyway - don't block authentication for this
-        }
-    }
-
-    /**
-     * Publishes a driver verification event to the driver management service
-     */
-    private void publishDriverVerificationEvent(DriverCredential driver) {
-        try {
-            // Create an event with verification info
-            Map<String, Object> event = new HashMap<>();
-            event.put("driverId", driver.getDriverId());
-            event.put("phoneVerified", true);
-            event.put("timestamp", LocalDateTime.now());
-
-            // Use the driver event publisher to send this event
-            driverEventPublisher.publishDriverVerification(event);
-
-            log.info("Published driver verification event for driver ID: {}", driver.getDriverId());
-        } catch (Exception e) {
-            log.error("Failed to publish driver verification event: {}", e.getMessage());
-            // Continue anyway - don't block verification process for this
-        }
     }
 }

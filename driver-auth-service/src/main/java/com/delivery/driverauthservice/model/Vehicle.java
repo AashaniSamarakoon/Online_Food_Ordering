@@ -41,7 +41,18 @@ public class Vehicle {
     @Column(nullable = false)
     private String vehicleType; // CAR, MOTORCYCLE, SCOOTER, etc.
 
-    private Boolean verified;
+    // Make sure the verified field is properly defined and has correct getters/setters
+    @Column(nullable = false)
+    private Boolean verified = false;
+
+    // If needed, you can add these explicit methods to ensure proper behavior
+    public boolean isVerified() {
+        return verified != null && verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
 
     private LocalDateTime createdAt;
 

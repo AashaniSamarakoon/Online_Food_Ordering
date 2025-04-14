@@ -27,12 +27,12 @@ public class DriverServiceImpl implements DriverService {
     @Override
     @Transactional
     public DriverDTO registerDriver(DriverRequest request) {
+        log.info("Processing driver registration: {}", request);
+
         // Check if driver with same driverId already exists
         Optional<Driver> existingDriver = driverRepository.findByDriverId(request.getDriverId());
 
         if (existingDriver.isPresent()) {
-            // Instead of throwing an exception, update the existing driver's information
-            // This handles scenarios where the auth service sends multiple registration events
             Driver driver = existingDriver.get();
 
             // Update basic information
@@ -41,12 +41,11 @@ public class DriverServiceImpl implements DriverService {
             driver.setLastName(request.getLastName());
             driver.setEmail(request.getEmail());
 
-            // Only update phone if the incoming one isn't null
             if (request.getPhoneNumber() != null) {
                 driver.setPhoneNumber(request.getPhoneNumber());
             }
 
-            // Update vehicle information
+            // Update vehicle information - make sure field names match
             driver.setLicenseNumber(request.getLicenseNumber());
             driver.setVehicleType(request.getVehicleType());
             driver.setVehicleBrand(request.getVehicleBrand());
@@ -55,9 +54,6 @@ public class DriverServiceImpl implements DriverService {
             driver.setLicensePlate(request.getLicensePlate());
             driver.setVehicleColor(request.getVehicleColor());
 
-            // Don't update status, rating, or trip count for existing drivers
-
-            // Update location if provided
             if (request.getLatitude() != null) {
                 driver.setLatitude(request.getLatitude());
             }
@@ -69,7 +65,7 @@ public class DriverServiceImpl implements DriverService {
             return modelMapper.map(driverRepository.save(driver), DriverDTO.class);
         }
 
-        // Create a new driver if not found
+        // Create a new driver with field names matching the request
         Driver driver = Driver.builder()
                 .driverId(request.getDriverId())
                 .username(request.getUsername())
@@ -84,7 +80,7 @@ public class DriverServiceImpl implements DriverService {
                 .vehicleYear(request.getVehicleYear())
                 .licensePlate(request.getLicensePlate())
                 .vehicleColor(request.getVehicleColor())
-                .status("OFFLINE") // Start as offline until explicitly set online
+                .status("OFFLINE")
                 .rating(0.0)
                 .totalTrips(0)
                 .latitude(request.getLatitude() != null ? request.getLatitude() : 0.0)
@@ -96,7 +92,9 @@ public class DriverServiceImpl implements DriverService {
                 .build();
 
         log.info("Registered new driver with ID: {}", driver.getDriverId());
-        return modelMapper.map(driverRepository.save(driver), DriverDTO.class);
+        Driver savedDriver = driverRepository.save(driver);
+        log.info("Driver saved with ID: {}", savedDriver.getId());
+        return modelMapper.map(savedDriver, DriverDTO.class);
     }
 
     @Override

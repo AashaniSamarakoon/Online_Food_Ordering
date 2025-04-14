@@ -1,12 +1,14 @@
 package com.delivery.driverservice.dto;
 
-import lombok.*;
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class DriverDTO {
     private Long id;
     private Long driverId;
@@ -29,6 +31,4 @@ public class DriverDTO {
     private Double longitude;
     private Boolean isActive;
     private Boolean isVerified;
-    private LocalDateTime registeredAt;
-    private LocalDateTime lastActiveAt;
 }

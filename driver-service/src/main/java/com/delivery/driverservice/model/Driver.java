@@ -1,7 +1,11 @@
 package com.delivery.driverservice.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,70 +20,69 @@ public class Driver {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private Long driverId; // Matching driverId from auth service
+    @Column(name = "driver_id", unique = true)
+    private Long driverId;
 
-    @Column(nullable = false)
+    @Column(name = "username")
     private String username;
 
-    @Column(nullable = false)
+    @Column(name = "firstname")
     private String firstName;
 
-    @Column(nullable = false)
+    @Column(name = "lastname")
     private String lastName;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(unique = true)
+    @Column(name = "email")
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "license_number")
     private String licenseNumber;
 
-    @Column(nullable = false)
+    @Column(name = "vehicle_type")
     private String vehicleType;
 
+    @Column(name = "vehicle_brand")
     private String vehicleBrand;
 
+    @Column(name = "vehicle_model")
     private String vehicleModel;
 
+    @Column(name = "vehicle_year")
     private Integer vehicleYear;
 
+    @Column(name = "license_plate")
     private String licensePlate;
 
+    @Column(name = "vehicle_color")
     private String vehicleColor;
 
-    @Column(nullable = false)
-    private String status; // AVAILABLE, BUSY, OFFLINE
+    @Column(name = "status")
+    private String status;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Double rating = 0.0;
+    @Column(name = "rating")
+    private Double rating;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Integer totalTrips = 0;
+    @Column(name = "total_trips")
+    private Integer totalTrips;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Double latitude = 0.0;
+    @Column(name = "latitude")
+    private Double latitude;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Double longitude = 0.0;
+    @Column(name = "longitude")
+    private Double longitude;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean isActive = true;
+    @Column(name = "is_active")
+    private Boolean isActive;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean isVerified = false;
+    @Column(name = "is_verified")
+    private Boolean isVerified;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private LocalDateTime registeredAt = LocalDateTime.now();
+    @Column(name = "registered_at")
+    private LocalDateTime registeredAt;
 
+    @Column(name = "last_active_at")
     private LocalDateTime lastActiveAt;
 }

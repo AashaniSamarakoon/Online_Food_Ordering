@@ -34,4 +34,5 @@ public class AuthResponse {
     // Related data from auth service only
     private VehicleDTO vehicleDetails;
     private List<DocumentDTO> documents;
+
 }
