@@ -4,6 +4,8 @@ services:
     environment:
       POSTGRES_PASSWORD: akalanka28
       POSTGRES_USER: postgres
+      POSTGRES_MULTIPLE_DATABASES: "driver_auth_db, driver_db, order_assignment_db"  
+
     ports:
       - "5432:5432"
     volumes:
@@ -62,6 +64,7 @@ services:
     ports:
       - "8085:8085"
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       # Database Configuration
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_auth_db
       SPRING_DATASOURCE_USERNAME: postgres
