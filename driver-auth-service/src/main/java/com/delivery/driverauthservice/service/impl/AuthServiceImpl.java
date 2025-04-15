@@ -7,11 +7,9 @@ import com.delivery.driverauthservice.exception.ResourceAlreadyExistsException;
 import com.delivery.driverauthservice.exception.TokenRefreshException;
 import com.delivery.driverauthservice.exception.VerificationException;
 import com.delivery.driverauthservice.messaging.DriverEventPublisher;
+import com.delivery.driverauthservice.messaging.DriverRegistrationEvent;
 import com.delivery.driverauthservice.model.*;
-import com.delivery.driverauthservice.repository.DriverCredentialRepository;
-import com.delivery.driverauthservice.repository.RefreshTokenRepository;
-import com.delivery.driverauthservice.repository.VehicleRepository;
-import com.delivery.driverauthservice.repository.VerificationCodeRepository;
+import com.delivery.driverauthservice.repository.*;
 import com.delivery.driverauthservice.security.CustomUserDetails;
 import com.delivery.driverauthservice.security.JwtTokenProvider;
 import com.delivery.driverauthservice.security.TokenBlacklistService;
@@ -29,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +48,8 @@ public class AuthServiceImpl implements AuthService {
     private final DocumentService documentService;
     private final SequenceGenerator sequenceGenerator;
     private final DriverEventPublisher driverEventPublisher;
+    private final DriverDocumentRepository driverDocumentRepository;
+
 
     @Override
     @Transactional
@@ -320,6 +321,7 @@ public class AuthServiceImpl implements AuthService {
     /**
      * Method to register driver with management service after verification is complete
      * This will be called by admin after verifying documents and vehicle
+     * Now with RabbitMQ fallback for resilience using existing publisher
      */
     @Transactional
     public DriverDetailsDTO completeDriverRegistration(Long driverId) {
@@ -332,7 +334,6 @@ public class AuthServiceImpl implements AuthService {
         if (!allDocumentsVerified) {
             throw new VerificationException("All documents must be verified before completing registration");
         }
-
 
         // Check if vehicle is verified
         Vehicle vehicle = vehicleRepository.findByDriverId(driverId)
@@ -348,7 +349,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         try {
-            // Create registration DTO
+            // Create registration DTO - KEEP THIS UNCHANGED as requested
             DriverRegistrationDTO dto = DriverRegistrationDTO.builder()
                     .driverId(driver.getDriverId()) // Use .id instead of .driverId
                     .username(driver.getUsername())
@@ -378,12 +379,61 @@ public class AuthServiceImpl implements AuthService {
 
             return driverDetails;
         } catch (Exception e) {
-            log.error("Failed to complete registration for driver {}: {}",
+            log.error("Failed to complete registration for driver {} through direct API: {}",
                     driver.getUsername(), e.getMessage());
-            throw new RuntimeException("Failed to complete driver registration: " + e.getMessage());
+
+            // Fallback to RabbitMQ using the existing DriverEventPublisher
+            try {
+                // Fetch document IDs for this driver
+                List<DriverDocument> documents = driverDocumentRepository.findByDriverDriverId(driverId);
+                Map<DocumentType, Long> documentIds = documents.stream()
+                        .collect(Collectors.toMap(DriverDocument::getDocumentType, DriverDocument::getId));
+
+                // Create event for asynchronous processing
+                DriverRegistrationEvent event = DriverRegistrationEvent.builder()
+                        .tempDriverId(driver.getDriverId())
+                        .username(driver.getUsername())
+                        .email(driver.getEmail())
+                        .phoneNumber(driver.getPhoneNumber())
+                        .firstName(driver.getFirstName())
+                        .lastName(driver.getLastName())
+                        .licenseNumber(vehicle.getLicensePlate())
+                        .vehicleType(vehicle.getVehicleType())
+                        .vehicleBrand(vehicle.getBrand())
+                        .vehicleModel(vehicle.getModel())
+                        .vehicleYear(vehicle.getYear())
+                        .licensePlate(vehicle.getLicensePlate())
+                        .vehicleColor(vehicle.getColor())
+                        .documentIds(documentIds)
+                        .build();
+
+                // Mark as pending for asynchronous processing
+                driver.setRegistrationStatus(RegistrationStatus.PENDING);
+                driverCredentialRepository.save(driver);
+
+                // Use the existing publisher to publish the event
+                driverEventPublisher.publishDriverRegistration(event);
+
+                log.info("Registration event published for driver: {} with ID: {}",
+                        driver.getUsername(), driver.getDriverId());
+
+                return DriverDetailsDTO.builder()
+                        .id(driver.getDriverId())
+                        .username(driver.getUsername())
+                        .firstName(driver.getFirstName())
+                        .lastName(driver.getLastName())
+                        .status("PENDING")
+                        .message("Registration in progress. You'll be notified when completed.")
+                        .build();
+
+            } catch (Exception mqException) {
+                // Both direct API and RabbitMQ failed
+                log.error("Failed to publish driver registration event: {}", mqException.getMessage());
+                // Re-throw the original exception
+                throw new RuntimeException("Failed to complete driver registration: " + e.getMessage());
+            }
         }
     }
-
 
     // Update the verifyDocument method to include notes parameter
     @Transactional

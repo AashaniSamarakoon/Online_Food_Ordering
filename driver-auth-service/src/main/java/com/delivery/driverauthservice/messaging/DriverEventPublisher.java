@@ -23,12 +23,6 @@ public class DriverEventPublisher {
     @Value("${rabbitmq.routing-key.registration:driver.registration}")
     private String registrationRoutingKey;
 
-    @Value("${rabbitmq.routing-key.status:driver.status}")
-    private String statusRoutingKey;
-
-    @Value("${rabbitmq.routing-key.verification:driver.verification}")
-    private String verificationRoutingKey;
-
     /**
      * Publishes a driver registration event to the driver management service
      */
@@ -41,27 +35,4 @@ public class DriverEventPublisher {
         }
     }
 
-    /**
-     * Publishes a driver status update event (login/logout) to the driver management service
-     */
-    public void publishDriverStatusUpdate(Map<String, Object> event) {
-        try {
-            log.info("Publishing driver status update event");
-            rabbitTemplate.convertAndSend(exchange, statusRoutingKey, event);
-        } catch (Exception e) {
-            log.error("Failed to publish driver status update event: {}", e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Publishes a driver verification event to the driver management service
-     */
-    public void publishDriverVerification(Map<String, Object> event) {
-        try {
-            log.info("Publishing driver verification event");
-            rabbitTemplate.convertAndSend(exchange, verificationRoutingKey, event);
-        } catch (Exception e) {
-            log.error("Failed to publish driver verification event: {}", e.getMessage(), e);
-        }
-    }
 }

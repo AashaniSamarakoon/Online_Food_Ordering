@@ -12,11 +12,13 @@ import lombok.NoArgsConstructor;
 public class DriverDetailsDTO {
 
     private Long id;
+    private String username;
     private String firstName;
     private String lastName;
     private String licenseNumber;
     private String vehicleType;
     private String status;
     private Double rating;
+    private String message;
     private Boolean isActive;
 }
