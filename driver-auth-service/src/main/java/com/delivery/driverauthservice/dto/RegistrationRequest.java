@@ -1,41 +1,54 @@
 package com.delivery.driverauthservice.dto;
 
+import com.delivery.driverauthservice.model.DocumentType;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+import java.util.Map;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegistrationRequest {
+    @NotBlank(message = "Username is required")
+    private String username;
+
+    @NotBlank(message = "Password is required")
+    private String password;
+
+    @NotBlank(message = "First name is required")
+    private String firstName;
+
+    @NotBlank(message = "Last name is required")
+    private String lastName;
 
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number format")
     private String phoneNumber;
 
-    @NotBlank(message = "Username is required")
-    private String username;
-
-    @NotBlank(message = "Password is required")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$",
-            message = "Password must be at least 8 characters and include a number, uppercase, lowercase, and special character")
-    private String password;
-
+    @Email(message = "Invalid email format")
     private String email;
 
     @NotBlank(message = "License number is required")
     private String licenseNumber;
 
-    @NotBlank(message = "Full name is required")
-    private String fullName;
-
     // Vehicle details
+    @NotBlank(message = "Vehicle type is required")
+    private String vehicleType;
+
     @NotBlank(message = "Vehicle brand is required")
     private String vehicleBrand;
 
     @NotBlank(message = "Vehicle model is required")
     private String vehicleModel;
 
-    @NotNull(message = "Vehicle year is required")
     private Integer vehicleYear;
 
     @NotBlank(message = "License plate is required")
@@ -43,6 +56,6 @@ public class RegistrationRequest {
 
     private String vehicleColor;
 
-    @NotBlank(message = "Vehicle type is required")
-    private String vehicleType;
+    // Documents as a map where key is DocumentType and value is base64 encoded image
+    private Map<DocumentType, DocumentUploadMetadata> documents;
 }

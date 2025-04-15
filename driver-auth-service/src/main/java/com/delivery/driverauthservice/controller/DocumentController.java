@@ -20,16 +20,16 @@ public class DocumentController {
 
     private final DocumentService documentService;
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('DRIVER') or hasRole('ADMIN')")
-    public ResponseEntity<DocumentDTO> uploadDocument(
-            @RequestParam("driverId") Long driverId,
-            @RequestParam("documentType") DocumentType documentType,
-            @RequestParam("file") MultipartFile file) {
-
-        DocumentDTO document = documentService.uploadDocument(driverId, documentType, file);
-        return ResponseEntity.ok(document);
-    }
+//    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @PreAuthorize("hasRole('DRIVER') or hasRole('ADMIN')")
+//    public ResponseEntity<DocumentDTO> uploadDocument(
+//            @RequestParam("driverId") Long driverId,
+//            @RequestParam("documentType") DocumentType documentType,
+//            @RequestParam("file") MultipartFile file) {
+//
+//        DocumentDTO document = documentService.uploadDocument(driverId, documentType, file);
+//        return ResponseEntity.ok(document);
+//    }
 
     @PostMapping("/upload-base64")
     @PreAuthorize("hasRole('DRIVER') or hasRole('ADMIN')")

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,8 +37,9 @@ public class DriverDocument {
 
     private Long fileSize;
 
+    // Make sure this is correctly mapped as a boolean
     @Column(nullable = false)
-    private boolean verified;
+    private boolean verified = false;
 
     private String verificationNotes;
 
@@ -48,9 +48,4 @@ public class DriverDocument {
     private LocalDateTime uploadedAt;
 
     private LocalDateTime expiryDate;
-
-    @PrePersist
-    protected void onCreate() {
-        uploadedAt = LocalDateTime.now();
-    }
 }

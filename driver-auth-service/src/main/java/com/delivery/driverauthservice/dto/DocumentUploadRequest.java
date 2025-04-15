@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 public class DocumentUploadRequest {
     private Long driverId;
     private DocumentType documentType;
-    private String base64Image; // For API-based uploads
-    // Optional metadata
+    private String base64Image;
     private String fileName;
     private String contentType;
     private LocalDateTime expiryDate;
+    private boolean verified;
 }

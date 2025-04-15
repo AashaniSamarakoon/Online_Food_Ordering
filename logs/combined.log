@@ -1,0 +1,108 @@
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-13T11:44:34.508Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-13T11:44:34.841Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-13T11:44:34.856Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-13T11:44:34.878Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-13T11:44:34.979Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-13T11:44:34.991Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-13T11:44:35.018Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T12:00:00.024Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T12:00:00.217Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T14:58:00.079Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T14:58:00.223Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T14:58:00.785Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T14:58:00.785Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T15:00:00.012Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T15:00:00.139Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T16:00:00.047Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T16:00:00.278Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-13T16:15:53.367Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-13T16:15:53.592Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-13T16:15:53.607Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-13T16:15:53.626Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-13T16:15:53.683Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-13T16:15:53.688Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-13T16:15:53.733Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T17:00:00.018Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T17:00:00.200Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T18:00:00.017Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T18:00:00.142Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T19:00:00.017Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T19:00:00.133Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-13T20:00:00.034Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-13T20:00:00.206Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-13T20:35:51.706Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-14T08:22:21.728Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-14T08:22:21.858Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-14T08:22:21.865Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-14T08:22:21.873Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-14T08:22:21.905Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-14T08:22:21.906Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-14T08:22:21.923Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-14T09:00:00.007Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-14T09:00:00.113Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-14T09:16:20.050Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-15T07:31:59.728Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-15T07:31:59.859Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-15T07:31:59.876Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-15T07:31:59.883Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T07:31:59.905Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T07:31:59.907Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-15T07:31:59.923Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-15T07:50:19.852Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-15T07:50:41.311Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-15T07:50:41.439Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-15T07:50:41.444Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-15T07:50:41.456Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T07:50:41.485Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T07:50:41.488Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-15T07:50:41.509Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-15T07:56:15.423Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-15T07:58:10.588Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-15T07:58:10.712Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-15T07:58:10.716Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-15T07:58:10.728Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T07:58:10.773Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T07:58:10.775Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-15T07:58:10.804Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-15T08:00:00.014Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-15T08:00:00.151Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-15T08:01:29.957Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-15T08:20:58.913Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:20:59.120Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:20:59.132Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-15T08:20:59.148Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:20:59.193Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:20:59.195Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-15T08:20:59.227Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-15T08:24:13.932Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-15T08:24:36.378Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:24:36.476Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:24:36.482Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-15T08:24:36.490Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:24:36.512Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:24:36.513Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-15T08:24:36.539Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-15T08:29:50.441Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-15T08:30:12.668Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:30:12.762Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:30:12.768Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-15T08:30:12.775Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:30:12.811Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:30:12.812Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-15T08:30:12.831Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-15T08:37:51.847Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-15T08:38:04.332Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:38:04.453Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:38:04.460Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-15T08:38:04.471Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:38:04.503Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:38:04.505Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-15T08:38:04.527Z"}
+{"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-15T08:46:26.103Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-15T08:46:39.782Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:46:39.892Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-15T08:46:39.899Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-15T08:46:39.910Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:46:39.936Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-15T08:46:39.938Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-15T08:46:39.957Z"}

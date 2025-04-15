@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,9 +19,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final DriverCredentialRepository driverCredentialRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        DriverCredential driver = driverCredentialRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        // Try to find by username, email, or phone number
+        Optional<DriverCredential> driverOpt = driverCredentialRepository.findByUsername(login);
+
+        if (driverOpt.isEmpty()) {
+            driverOpt = driverCredentialRepository.findByEmail(login);
+        }
+
+        if (driverOpt.isEmpty()) {
+            driverOpt = driverCredentialRepository.findByPhoneNumber(login);
+        }
+
+        DriverCredential driver = driverOpt.orElseThrow(() ->
+                new UsernameNotFoundException("User not found with username/email/phone: " + login));
 
         CustomUserDetails userDetails = new CustomUserDetails(
                 driver.getUsername(),
