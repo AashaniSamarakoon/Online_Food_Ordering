@@ -5,7 +5,7 @@ import com.delivery.driverauthservice.dto.DriverRegistrationDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "driver-service", url = "${driver.service.url}")
+@FeignClient(name = "driver-service", url = "${driver-service.url}")
 public interface DriverServiceClient {
 
     /**

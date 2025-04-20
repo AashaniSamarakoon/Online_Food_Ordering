@@ -19,8 +19,15 @@ spec:
           ports:
             - containerPort: 8082
           env:
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgres:5432/driver_db"
-            # - name: SPRING_PROFILES_ACTIVE
-            #   value: "k8s"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+            # - name: SPRING_DATASOURCE_URL
+            #   value: "jdbc:postgresql://postgres:5432/driver_db"
+            # - name: SPRING_DATASOURCE_USERNAME
+            #   value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: postgres-password
       restartPolicy: Always

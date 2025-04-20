@@ -1,0 +1,63 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  ingressClassName: nginx
+  rules:
+    # Rule for localhost access
+    - host: localhost
+      http:
+        paths:
+          - path: /(api/auth/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-auth-service
+                port:
+                  number: 80
+          - path: /(api/tracking/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tracking-service
+                port:
+                  number: 80
+          - path: /(api/drivers/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-service
+                port:
+                  number: 80
+    # Add rule for api.local
+    - host: api.192.168.49.2.nip.io
+      http:
+        paths:
+          - path: /(api/auth/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-auth-service
+                port:
+                  number: 80
+          - path: /(api/tracking/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tracking-service
+                port:
+                  number: 80
+          - path: /(api/drivers/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-service
+                port:
+                  number: 80

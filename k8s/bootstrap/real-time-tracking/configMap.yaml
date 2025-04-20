@@ -5,6 +5,28 @@ metadata:
 data:
   mongo-uri: "mongodb://mongodb:27017/tracking_db"
   redis-url: "redis://redis:6379"
-  order-service-url: "http://order-service:8080"
-  driver-service-url: "http://driver-service:8082"
-  notification-service-url: "http://notification-service:8080"
+  order-service-url: "http://order-service"
+  driver-service-url: "http://driver-service"
+  notification-service-url: "http://notification-service"
+
+
+
+#   apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: tracking-service-config
+# data:
+#   # Other config entries
+#   redis-url: "redis://redis:6379"
+#   order-service-url: "http://order-service"
+#   driver-service-url: "http://driver-service"
+#   notification-service-url: "http://notification-service"
+# ---
+# # Store the MongoDB URI in a Secret (more secure for credentials)
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: mongodb-atlas-credentials
+# type: Opaque
+# stringData:
+#   mongo-uri: "mongodb+srv://AkalankaDIas:<db_password>@cluster1.wkorqmy.mongodb.net/tracking?retryWrites=true&w=majority&appName=Cluster1"

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driver-auth-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: driver-auth-service
+  template:
+    metadata:
+      labels:
+        app: driver-auth-service
+    spec:
+      containers:
+        - name: driver-auth-service
+          image: akalankadias/driver-auth-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8085
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+            # - name: SPRING_DATASOURCE_URL
+            #   value: "jdbc:postgresql://postgres:5432/driver_auth_db"
+            # - name: SPRING_DATASOURCE_USERNAME
+            #   value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: postgres-password
+      restartPolicy: Always

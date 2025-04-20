@@ -6,10 +6,10 @@ const LocationSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  orderId: {
-    type: String,
-    index: true
-  },
+  // orderId: {
+  //   type: String,
+  //   index: true
+  // },
   location: {
     type: {
       type: String,
