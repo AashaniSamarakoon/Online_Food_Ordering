@@ -24,18 +24,18 @@ public class CartService {
     private final JwtUtil jwtUtil;
 
     public Cart getCart(String token) {
-        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
-        return cartRepository.findByUsername(username).orElseGet(() -> {
+        Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
+        return cartRepository.findByUserId(userId).orElseGet(() -> {
             Cart newCart = Cart.builder()
-                    .username(username)
-                    .items(new ArrayList<>()) // ✅ explicitly initialize
+                    .userId(userId)
+                    .items(new ArrayList<>())
                     .build();
             return cartRepository.save(newCart);
         });
     }
 
     public Cart addItemToCart(String token, Long restaurantId, Long foodItemId, int quantity) {
-        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+        Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
         Cart cart = getCart(token);
 
         RestaurantResponse restaurant = restaurantClient.getRestaurantById(restaurantId);
@@ -54,14 +54,12 @@ public class CartService {
                 .build();
 
         cart.getItems().add(cartItem);
-        cartRepository.save(cart); // cascade saves the item
+        cartRepository.save(cart);
         return cart;
     }
 
     public void removeItemFromCart(String token, Long cartItemId) {
-        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
         Cart cart = getCart(token);
-
         cart.getItems().removeIf(item -> item.getId().equals(cartItemId));
         cartRepository.save(cart);
     }

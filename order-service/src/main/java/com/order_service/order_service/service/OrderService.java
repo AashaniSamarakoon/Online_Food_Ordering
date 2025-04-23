@@ -1,8 +1,8 @@
-// service/OrderService.java
 package com.order_service.order_service.service;
 
 import com.order_service.order_service.client.RestaurantClient;
 import com.order_service.order_service.dto.*;
+import com.order_service.order_service.model.Coordinates;
 import com.order_service.order_service.model.Order;
 import com.order_service.order_service.model.OrderedItem;
 import com.order_service.order_service.repository.OrderRepository;
@@ -19,10 +19,10 @@ public class OrderService {
 
     private final RestaurantClient restaurantClient;
     private final OrderRepository orderRepository;
-    private final JwtUtil jwtUtils;
+    private final JwtUtil jwtUtil;
 
     public OrderResponse placeOrder(OrderRequest request, String token) {
-        String username = jwtUtils.extractUsername(token.replace("Bearer ", ""));
+        Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
         RestaurantResponse restaurant = restaurantClient.getRestaurantById(request.getRestaurantId());
 
         double total = 0;
@@ -37,23 +37,36 @@ public class OrderService {
             OrderedItem orderedItem = OrderedItem.builder()
                     .foodItemId(item.getId())
                     .name(item.getName())
+                    .description(item.getDescription())
+                    .category(item.getCategory())
+                    .imageUrl(item.getImageUrl())
                     .price(item.getPrice())
                     .quantity(itemRequest.getQuantity())
+                    .subtotal(item.getPrice() * itemRequest.getQuantity())
+                    .available(item.isAvailable())
                     .build();
 
             total += item.getPrice() * itemRequest.getQuantity();
             orderedItems.add(orderedItem);
         }
 
+        Coordinates restaurantCoordinates = restaurant.getRestaurantCoordinates(); // ✅ Now this will work
+
+
+        Coordinates customerCoordinates = request.getCustomerCoordinates(); // sent from frontend
+
         Order order = Order.builder()
-                .username(username)
+                .userId(userId)
                 .restaurantId(request.getRestaurantId())
                 .items(orderedItems)
                 .totalPrice(total)
                 .status("PLACED")
+                .restaurantCoordinates(restaurantCoordinates)
+                .customerCoordinates(customerCoordinates)
                 .build();
 
         Order savedOrder = orderRepository.save(order);
         return OrderResponse.from(savedOrder);
     }
+
 }

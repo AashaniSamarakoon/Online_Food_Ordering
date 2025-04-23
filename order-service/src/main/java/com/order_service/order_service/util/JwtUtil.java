@@ -11,13 +11,12 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    public String extractUsername(String token) {
-        return Jwts.parser()
+    public Long extractUserId(String token) {
+        Claims claims = Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
+
+        return Long.parseLong(claims.getSubject()); // userId is stored as subject
     }
 }
-
-

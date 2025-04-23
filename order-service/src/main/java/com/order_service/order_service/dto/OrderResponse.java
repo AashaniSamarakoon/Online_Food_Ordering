@@ -1,6 +1,6 @@
-// dto/OrderResponse.java
 package com.order_service.order_service.dto;
 
+import com.order_service.order_service.model.Coordinates;
 import com.order_service.order_service.model.Order;
 import com.order_service.order_service.model.OrderedItem;
 import lombok.*;
@@ -13,18 +13,24 @@ import java.util.List;
 @Builder
 public class OrderResponse {
     private Long id;
-    private String username;
+    private Long userId;
     private List<OrderedItem> items;
     private Long restaurantId;
+    private Coordinates restaurantCoordinates;
+    private Coordinates customerCoordinates;
+    private Double deliveryCharges;
     private Double totalPrice;
     private String status;
 
     public static OrderResponse from(Order order) {
         return OrderResponse.builder()
                 .id(order.getId())
-                .username(order.getUsername())
+                .userId(order.getUserId())
                 .items(order.getItems())
                 .restaurantId(order.getRestaurantId())
+                .restaurantCoordinates(order.getRestaurantCoordinates())
+                .customerCoordinates(order.getCustomerCoordinates())
+                .deliveryCharges(order.getDeliveryCharges())
                 .totalPrice(order.getTotalPrice())
                 .status(order.getStatus())
                 .build();

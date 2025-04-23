@@ -32,16 +32,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String username = jwtUtil.extractUsername(token);
+        try {
+            Long userId = jwtUtil.extractUserId(token);
 
-        // 🔍 Log the username
-        System.out.println("✅ JWT Verified. Username from token: " + username);
+            System.out.println("✅ JWT Verified. User ID from token: " + userId);
 
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                username, null, Collections.emptyList());
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    userId, null, Collections.emptyList());
 
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
         chain.doFilter(request, response);
     }
 }
-

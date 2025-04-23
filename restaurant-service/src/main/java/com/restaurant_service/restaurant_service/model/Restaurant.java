@@ -18,16 +18,17 @@ public class Restaurant {
 
     private String name;
     private String address;
-    private boolean Open;
+    private boolean open;
+    private String imageUrl;
 
-    @Column(nullable = false)
-    private Double latitude;
-
-    @Column(nullable = false)
-    private Double longitude;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "latitude", column = @Column(name = "restaurant_latitude", nullable = false)),
+            @AttributeOverride(name = "longitude", column = @Column(name = "restaurant_longitude", nullable = false))
+    })
+    private Coordinates restaurantCoordinates;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<FoodItem> items;
 }
-

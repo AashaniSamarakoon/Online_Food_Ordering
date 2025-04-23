@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-
-
 @Component
 public class JwtUtil {
 
@@ -17,21 +15,26 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    public String generateToken(String username) {
+    // Generate token using userId
+    public String generateTokenWithUserId(Long userId) {
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setSubject(String.valueOf(userId)) // userId as subject
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    // Extract userId (as Long) from token
+    public Long extractUserId(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return Long.parseLong(claims.getSubject());
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new RuntimeException("Invalid or expired JWT token");
+        }
     }
 }
-

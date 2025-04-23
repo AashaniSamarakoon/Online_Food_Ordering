@@ -25,22 +25,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader("Authorization");
 
-        logger.info("logger in jwtauth ");
-
-
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             try {
-                String username = jwtUtil.extractUsername(token);
-                logger.info("logger in trycatch:try");
-                logger.info(username);
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                Long userId = jwtUtil.extractUserId(token);
+                if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(username, null, null);
+                            new UsernamePasswordAuthenticationToken(userId, null, null);
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (Exception e) {
-                logger.info("logger in trycatch:catch");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }

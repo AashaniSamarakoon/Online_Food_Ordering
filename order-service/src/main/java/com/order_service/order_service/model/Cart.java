@@ -1,4 +1,3 @@
-// model/Order.java
 package com.order_service.order_service.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -8,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,11 +23,40 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username; // associated user
+    private Long userId; // associated user
+
+    private String status; // e.g., "ACTIVE", "COMPLETED", "ABANDONED"
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<CartItem> items = new ArrayList<>();
+
+    @Column(name = "total_price")
+    private Double totalPrice; // total price including discounts, delivery, etc.
+
+    @Column(name = "discount_code")
+    private String discountCode; // store discount code applied
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt; // cart creation timestamp
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt; // cart last update timestamp
+
+    @Column(name = "delivery_address")
+    private String deliveryAddress; // optional, can be linked with user delivery address or added here
+
+    @Column(name = "payment_method")
+    private String paymentMethod; // optional, e.g., "CREDIT_CARD", "PAYPAL"
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
-
-

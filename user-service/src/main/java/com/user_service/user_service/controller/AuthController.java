@@ -27,8 +27,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
@@ -37,13 +37,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        User existing = userRepository.findByUsername(user.getUsername())
+        User existing = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!passwordEncoder.matches(user.getPassword(), existing.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(existing.getUsername());
+        String token = jwtUtil.generateTokenWithUserId(existing.getId());
         return ResponseEntity.ok(Collections.singletonMap("token", token));
     }
 }
