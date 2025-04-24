@@ -21,10 +21,6 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "k8s"
-            # - name: SPRING_DATASOURCE_URL
-            #   value: "jdbc:postgresql://postgres:5432/driver_auth_db"
-            # - name: SPRING_DATASOURCE_USERNAME
-            #   value: "postgres"
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:

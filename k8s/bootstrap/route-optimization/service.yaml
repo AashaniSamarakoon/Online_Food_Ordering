@@ -9,4 +9,4 @@
 #     - protocol: TCP
 #       port: 80
 #       targetPort: 8082
-#   type: LoadBalancer
+#   type: NodePort

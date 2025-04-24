@@ -266,3 +266,33 @@
 {"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-20T17:00:00.035Z"}
 {"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-20T17:00:00.103Z"}
 {"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-20T17:39:10.222Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-20T19:59:40.030Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-20T19:59:40.217Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-20T19:59:40.221Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-20T19:59:40.231Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-20T19:59:40.266Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-20T19:59:40.267Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-20T19:59:40.294Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-20T20:00:00.015Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-20T20:00:00.043Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-20T21:00:00.032Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-20T21:00:00.106Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-20T22:00:00.019Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-20T22:00:00.042Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-21T16:10:21.558Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-21T16:10:21.790Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-21T16:10:21.801Z"}
+{"level":"info","message":"Tracking service running on port 8084","service":"tracking-service","timestamp":"2025-04-21T16:10:21.814Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-21T16:10:21.842Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-21T16:10:21.843Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-21T16:10:21.876Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-21T17:00:00.096Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-21T17:00:00.400Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-21T18:00:00.043Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-21T18:00:00.210Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-21T19:00:00.018Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-21T19:00:00.056Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-21T20:00:00.026Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-21T20:00:00.082Z"}
+{"level":"info","message":"Starting heatmap data generation task","service":"tracking-service","timestamp":"2025-04-21T21:00:00.015Z"}
+{"level":"info","message":"Heatmap generation completed","service":"tracking-service","timestamp":"2025-04-21T21:00:00.060Z"}
