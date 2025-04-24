@@ -5,7 +5,7 @@ metadata:
   labels:
     app: tracking-service
 spec:
-  replicas: 3
+  replicas: 2 
   selector:
     matchLabels:
       app: tracking-service
@@ -21,16 +21,16 @@ spec:
     spec:
       containers:
       - name: tracking-service
-        image: ${DOCKER_REGISTRY}/tracking-service:latest
+        image: akalankadias/tracking-service:latest
         ports:
         - containerPort: 8084
         resources:
           limits:
-            cpu: "1"
-            memory: "1Gi"
+            cpu: "500m"     # Reduced from 1 CPU
+            memory: "512Mi"  # Reduced from 1Gi for testing
           requests:
-            cpu: "500m"
-            memory: "512Mi"
+            cpu: "200m"     # Reduced from 500m for testing
+            memory: "256Mi"  # Reduced from 512Mi for testing
         env:
         - name: PORT
           value: "8084"
@@ -61,15 +61,3 @@ spec:
             configMapKeyRef:
               name: tracking-service-config
               key: notification-service-url
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8084
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: 8084
-          initialDelaySeconds: 5
-          periodSeconds: 5

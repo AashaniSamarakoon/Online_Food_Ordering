@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+  annotations:
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "*"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  ingressClassName: nginx
+  rules:      
+    - http:  # Remove the host specification to allow any host header
+        paths:
+          - path: /(api/auth/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-auth-service
+                port:
+                  number: 80
+          - path: /(api/tracking/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tracking-service
+                port:
+                  number: 80
+          - path: /(api/drivers/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-service
+                port:
+                  number: 80

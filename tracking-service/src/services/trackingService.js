@@ -3,7 +3,9 @@ const Trip = require("../models/Trip");
 const { getRedisClient } = require("../config/redis");
 const { calculateETA, calculateDistance } = require("../utils/geoUtils");
 const logger = require("../utils/logger");
-const { orderClient, driverClient, notificationClient } = require("../clients");
+const { notificationClient } = require("../clients/notificationClient");
+const { orderClient } = require("../clients/orderClient");
+const { driverClient } = require("../clients/driverClient");
 
 const redis = getRedisClient();
 const LOCATION_CACHE_TTL = 300; // 5 minutes in seconds
@@ -12,7 +14,10 @@ const isMongoConnected = () => {
   return mongoose.connection && mongoose.connection.readyState === 1;
 };
 
-// Then in each function that requires MongoDB:
+
+/**
+ * Get the latest driver location
+ */
 async function getDriverLocation(driverId) {
   try {
     // Try to get from Redis first
@@ -40,15 +45,35 @@ async function getDriverLocation(driverId) {
       return null;
     }
 
-    // Rest of the function...
+    const locationData = {
+      latitude: location.location.coordinates[1],
+      longitude: location.location.coordinates[0],
+      speed: location.speed,
+      heading: location.heading,
+      accuracy: location.accuracy,
+      batteryLevel: location.batteryLevel,
+      status: location.status,
+      timestamp: location.timestamp,
+    };
+
+    // Update cache
+    await redis.set(
+      locationKey,
+      JSON.stringify(locationData),
+      "EX",
+      LOCATION_CACHE_TTL
+    );
+
+    return locationData;
   } catch (error) {
     logger.error(`Error getting driver location: ${error.message}`, {
       driverId,
       error,
     });
-    return null; // Return null instead of throwing
+    throw error;
   }
 }
+
 /**
  * Update driver location
  */
@@ -93,6 +118,9 @@ async function updateDriverLocation(driverId, locationData) {
     // Update active trips for this driver
     await updateActiveTrips(driverId, locationData);
 
+    // //  Update driver status to AVAILABLE
+    // await driverClient.updateDriverStatus(location.driverId, "AVAILABLE");
+
     return { success: true, location };
   } catch (error) {
     logger.error(`Error updating driver location: ${error.message}`, {
@@ -103,56 +131,7 @@ async function updateDriverLocation(driverId, locationData) {
   }
 }
 
-/**
- * Get the latest driver location
- */
-async function getDriverLocation(driverId) {
-  try {
-    // Try to get from Redis first
-    const locationKey = `driver:${driverId}:location`;
-    const cachedLocation = await redis.get(locationKey);
 
-    if (cachedLocation) {
-      return JSON.parse(cachedLocation);
-    }
-
-    // Fall back to database
-    const location = await Location.findOne({ driverId })
-      .sort({ timestamp: -1 })
-      .limit(1);
-
-    if (!location) {
-      return null;
-    }
-
-    const locationData = {
-      latitude: location.location.coordinates[1],
-      longitude: location.location.coordinates[0],
-      speed: location.speed,
-      heading: location.heading,
-      accuracy: location.accuracy,
-      batteryLevel: location.batteryLevel,
-      status: location.status,
-      timestamp: location.timestamp,
-    };
-
-    // Update cache
-    await redis.set(
-      locationKey,
-      JSON.stringify(locationData),
-      "EX",
-      LOCATION_CACHE_TTL
-    );
-
-    return locationData;
-  } catch (error) {
-    logger.error(`Error getting driver location: ${error.message}`, {
-      driverId,
-      error,
-    });
-    throw error;
-  }
-}
 
 /**
  * Create a new trip
@@ -283,7 +262,7 @@ async function updateActiveTrips(driverId, locationData) {
         // Update order status via client
         await orderClient.updateOrderStatus(trip.orderId, "DELIVERED");
 
-        // Update driver status to AVAILABLE
+        // // Update driver status to AVAILABLE
         await driverClient.updateDriverStatus(trip.driverId, "AVAILABLE");
       }
 
@@ -370,7 +349,7 @@ async function getNearbyDrivers(
           },
           distanceField: "distance",
           maxDistance: radius,
-          query: { status: "IDLE" },
+          query: { status: "AVAILABLE" },
           spherical: true,
         },
       },
