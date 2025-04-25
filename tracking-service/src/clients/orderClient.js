@@ -33,15 +33,15 @@ const orderClient = {
     }
   },
   
-  async updateOrderStatus(orderId, status) {
-    try {
-      const response = await axios.patch(`${this.baseURL}/api/orders/${orderId}/status`, { status });
-      return response.data;
-    } catch (error) {
-      logger.error(`Error updating order status: ${error.message}`, { orderId, status });
-      throw error;
-    }
-  }
+  // async updateOrderStatus(orderId, status) {
+  //   try {
+  //     const response = await axios.patch(`${this.baseURL}/api/orders/${orderId}/status`, { status });
+  //     return response.data;
+  //   } catch (error) {
+  //     logger.error(`Error updating order status: ${error.message}`, { orderId, status });
+  //     throw error;
+  //   }
+  // }
 };
 
 

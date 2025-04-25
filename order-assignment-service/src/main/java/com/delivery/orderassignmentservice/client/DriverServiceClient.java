@@ -14,8 +14,8 @@ public interface DriverServiceClient {
     @GetMapping("/api/drivers/{driverId}")
     DriverDTO getDriverDetails(@PathVariable Long driverId);
 
-    @GetMapping("/api/drivers/{driverId}/available")
-    Boolean checkDriverAvailability(@PathVariable Long driverId);
+//    @GetMapping("/api/drivers/{driverId}/available")
+//    Boolean checkDriverAvailability(@PathVariable Long driverId);
 
     @PutMapping("/api/drivers/{driverId}/assign")
     void assignOrderToDriver(
