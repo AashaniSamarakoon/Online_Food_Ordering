@@ -13,5 +13,6 @@ public class RestaurantResponse {
     private boolean isOpen;
     private Coordinates restaurantCoordinates;
     private Double distance;
+    private String imageUrl;
     private List<FoodItemResponse> items;
 }

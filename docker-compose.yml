@@ -1,134 +1,167 @@
-services:
-  postgres:
-    image: postgres:13
-    environment:
-      POSTGRES_PASSWORD: akalanka28
-      POSTGRES_USER: postgres
-      POSTGRES_MULTIPLE_DATABASES: "driver_auth_db, driver_db, order_assignment_db"  
+# services:
+#   postgres:
+#     image: postgres:13
+#     environment:
+#       POSTGRES_PASSWORD: akalanka28
+#       POSTGRES_USER: postgres
+#       POSTGRES_MULTIPLE_DATABASES: "driver_auth_db, driver_db, order_assignment_db"  
 
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh 
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+#       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh 
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
+#   pgadmin:
+#     image: dpage/pgadmin4
+#     environment:
+#       PGADMIN_DEFAULT_EMAIL: admin@admin.com
+#       PGADMIN_DEFAULT_PASSWORD: admin
+#     ports:
+#       - "5050:80"
+#     depends_on:
+#       - postgres
 
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
+#   mongodb:
+#     image: mongo:latest
+#     ports:
+#       - "27017:27017"
+#     volumes:
+#       - mongodb_data:/data/db
 
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+#   redis:
+#     image: redis:alpine
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis_data:/data
     
-  rabbitmq:
-    image: rabbitmq:4.0-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+#   rabbitmq:
+#     image: rabbitmq:4.0-management
+#     container_name: rabbitmq
+#     ports:
+#       - "5672:5672"
+#       - "15672:15672"
 
-  driver-service:
-    build: ./driver-service
-    ports:
-      - "8082:8082" 
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: akalanka28
-    depends_on:
-      - postgres
+#   driver-service:
+#     build: ./driver-service
+#     ports:
+#       - "8082:8082" 
+#     environment:
+#       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_db
+#       SPRING_DATASOURCE_USERNAME: postgres
+#       SPRING_DATASOURCE_PASSWORD: akalanka28
+#     depends_on:
+#       - postgres
 
-  driver-auth-service:
-    build: ./driver-auth-service
-    ports:
-      - "8085:8085"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      # Database Configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_auth_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: akalanka28
+#   driver-auth-service:
+#     build: ./driver-auth-service
+#     ports:
+#       - "8085:8085"
+#     environment:
+#       SPRING_PROFILES_ACTIVE: docker
+#       # Database Configuration
+#       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_auth_db
+#       SPRING_DATASOURCE_USERNAME: postgres
+#       SPRING_DATASOURCE_PASSWORD: akalanka28
       
-      # JWT Configuration
-      JWT_SECRET_KEY: rzxlszyykpbgqcflzxsqcysyhljt
-      JWT_EXPIRATION_TIME: 3600
-      JWT_REFRESH_EXPIRATION_DAYS: 30
+#       # JWT Configuration
+#       JWT_SECRET_KEY: rzxlszyykpbgqcflzxsqcysyhljt
+#       JWT_EXPIRATION_TIME: 3600
+#       JWT_REFRESH_EXPIRATION_DAYS: 30
       
-      # Service URLs
-      DRIVER_SERVICE_URL: http://driver-service:8082
+#       # Service URLs
+#       DRIVER_SERVICE_URL: http://driver-service:8082
       
-      # RabbitMQ Configuration
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
+#       # RabbitMQ Configuration
+#       SPRING_RABBITMQ_HOST: rabbitmq
+#       SPRING_RABBITMQ_PORT: 5672
+#       SPRING_RABBITMQ_USERNAME: guest
+#       SPRING_RABBITMQ_PASSWORD: guest
       
-      # Storage Configuration
-      AZURE_STORAGE_ENABLED: "false"
-      LOCAL_STORAGE_ENABLED: "true"
-      STORAGE_LOCATION: /app/uploads
-    volumes:
-      - driver-auth-uploads:/app/uploads
-    depends_on:
-      - postgres
-      - rabbitmq
-      - driver-service
+#       # Storage Configuration
+#       AZURE_STORAGE_ENABLED: "false"
+#       LOCAL_STORAGE_ENABLED: "true"
+#       STORAGE_LOCATION: /app/uploads
+#     volumes:
+#       - driver-auth-uploads:/app/uploads
+#     depends_on:
+#       - postgres
+#       - rabbitmq
+#       - driver-service
 
-  order-assignment-service:
-    build: ./order-assignment-service
+#   order-assignment-service:
+#     build: ./order-assignment-service
+#     ports:
+#       - "8083:8083"
+#     environment:
+#       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_assignment_db
+#       SPRING_DATASOURCE_USERNAME: postgres
+#       SPRING_DATASOURCE_PASSWORD: akalanka28
+#       DRIVER_SERVICE_URL: http://driver-service:8082
+#     depends_on:
+#       - postgres
+#       - driver-service
+
+#   tracking-service:
+#     build: ./tracking-service
+#     ports:
+#       - "8084:8084"
+#     environment:
+#       - NODE_ENV=development
+#       - PORT=8084
+#       - MONGO_URI=mongodb://mongodb:27017/tracking_db
+#       - REDIS_URL=redis://redis:6379
+#       - DRIVER_SERVICE_URL=http://driver-service:8082
+#       - ORDER_ASSIGNMENT_SERVICE_URL=http://order-assignment-service:8083
+#     volumes:
+#       - ./logs:/app/logs
+#     depends_on:
+#       - mongodb
+#       - redis
+#       - driver-service
+#       - order-assignment-service
+
+# volumes:
+#   pgdata:
+#   mongodb_data:
+#   redis_data:
+#   driver-auth-uploads: 
+
+version: '3.8'
+
+services:
+  restaurant-service:
+    build:
+      context: ./restaurant-service
+    container_name: restaurant-service
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_assignment_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: akalanka28
-      DRIVER_SERVICE_URL: http://driver-service:8082
-    depends_on:
-      - postgres
-      - driver-service
+      - SERVER_PORT=8083
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/restaurantdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
+    networks:
+      - backend
 
-  tracking-service:
-    build: ./tracking-service
+  order-service:
+    build:
+      context: ./order-service
+    container_name: order-service
     ports:
-      - "8084:8084"
+      - "8082:8082"
     environment:
-      - NODE_ENV=development
-      - PORT=8084
-      - MONGO_URI=mongodb://mongodb:27017/tracking_db
-      - REDIS_URL=redis://redis:6379
-      - DRIVER_SERVICE_URL=http://driver-service:8082
-      - ORDER_ASSIGNMENT_SERVICE_URL=http://order-assignment-service:8083
-    volumes:
-      - ./logs:/app/logs
+      - SERVER_PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/orderdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
     depends_on:
-      - mongodb
-      - redis
-      - driver-service
-      - order-assignment-service
+      - restaurant-service
+    networks:
+      - backend
 
-volumes:
-  pgdata:
-  mongodb_data:
-  redis_data:
-  driver-auth-uploads: 
+networks:
+  backend:
+    driver: bridge

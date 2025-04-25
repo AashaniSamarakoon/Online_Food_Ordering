@@ -1,7 +1,9 @@
 package com.order_service.order_service.controller;
 
+import com.order_service.order_service.client.RestaurantClient;
 import com.order_service.order_service.dto.OrderRequest;
 import com.order_service.order_service.dto.OrderResponse;
+import com.order_service.order_service.dto.RestaurantResponse;
 import com.order_service.order_service.model.Order;
 import com.order_service.order_service.repository.OrderRepository;
 import com.order_service.order_service.service.OrderService;
@@ -19,6 +21,7 @@ public class OrderController {
 
     private final OrderService orderService;
     private final OrderRepository orderRepository;
+    private final RestaurantClient restaurantClient;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/new")
@@ -33,5 +36,18 @@ public class OrderController {
         Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
         List<Order> orders = orderRepository.findByUserId(userId);
         return ResponseEntity.ok(orders);
+    }
+
+    // New endpoint to fetch restaurants via RestaurantClient
+    @GetMapping("/restaurants")
+    public ResponseEntity<List<RestaurantResponse>> getAllRestaurants() {
+        List<RestaurantResponse> restaurants = restaurantClient.getAllRestaurants();
+        return ResponseEntity.ok(restaurants);
+    }
+
+    @GetMapping("/restaurants/{id}")
+    public ResponseEntity<RestaurantResponse> getRestaurantById(@PathVariable("id") Long id) {
+        RestaurantResponse restaurant = restaurantClient.getRestaurantById(id);
+        return ResponseEntity.ok(restaurant);
     }
 }

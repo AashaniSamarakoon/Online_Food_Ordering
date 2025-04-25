@@ -1,3 +1,4 @@
+
 package com.order_service.order_service.repository;
 
 import com.order_service.order_service.model.Cart;
@@ -8,6 +9,3 @@ import java.util.Optional;
 public interface CartRepository extends JpaRepository<Cart, Long> {
     Optional<Cart> findByUserId(Long userId);
 }
-
-
-

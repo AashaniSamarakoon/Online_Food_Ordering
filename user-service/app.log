@@ -1,315 +1,52 @@
-2025-04-23T00:37:08.191+05:30  INFO 28028 --- [user-service] [http-nio-8081-exec-10] c.u.u.security.JwtAuthenticationFilter   : logger in jwtauth 
-2025-04-23T00:37:08.273+05:30  INFO 28028 --- [user-service] [http-nio-8081-exec-1] c.u.u.security.JwtAuthenticationFilter   : logger in jwtauth 
-2025-04-23T00:37:08.283+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@75a1a732 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.286+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@56f8cec5 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.290+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@79366dc8 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.293+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@156cdeb (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.296+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@39d63542 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.300+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@29c84a5b (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.302+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@635a3a87 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.306+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@54548a92 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.308+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@5c20c97f (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T00:37:08.311+05:30  WARN 28028 --- [user-service] [http-nio-8081-exec-1] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@37d1da32 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T09:34:50.170+05:30  WARN 28028 --- [user-service] [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=8h27m10s124ms238µs100ns).
-2025-04-23T11:05:49.543+05:30  INFO 28028 --- [user-service] [http-nio-8081-exec-4] c.u.u.security.JwtAuthenticationFilter   : logger in jwtauth 
-2025-04-23T11:05:49.570+05:30  INFO 28028 --- [user-service] [http-nio-8081-exec-3] c.u.u.security.JwtAuthenticationFilter   : logger in jwtauth 
-2025-04-23T11:07:48.832+05:30  INFO 28028 --- [user-service] [http-nio-8081-exec-7] c.u.u.security.JwtAuthenticationFilter   : logger in jwtauth 
-2025-04-23T13:57:29.598+05:30  INFO 28028 --- [user-service] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-04-23T13:57:29.634+05:30  INFO 28028 --- [user-service] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-04-23T13:57:29.685+05:30  INFO 28028 --- [user-service] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-04-23T13:57:29.715+05:30  INFO 28028 --- [user-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-04-23T13:57:29.725+05:30  INFO 28028 --- [user-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-04-23T13:57:36.559+05:30  INFO 14148 --- [user-service] [main] c.u.user_service.UserServiceApplication  : Starting UserServiceApplication using Java 22.0.2 with PID 14148 (E:\GitRepos\Online_Food_Ordering\user-service\target\classes started by ASUS in E:\GitRepos\Online_Food_Ordering\user-service)
-2025-04-23T13:57:36.565+05:30  INFO 14148 --- [user-service] [main] c.u.user_service.UserServiceApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-04-23T13:57:37.809+05:30  INFO 14148 --- [user-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-04-23T13:57:37.945+05:30  INFO 14148 --- [user-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 119 ms. Found 1 JPA repository interface.
-2025-04-23T13:57:39.121+05:30  INFO 14148 --- [user-service] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
-2025-04-23T13:57:39.148+05:30  INFO 14148 --- [user-service] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-04-23T13:57:39.149+05:30  INFO 14148 --- [user-service] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
-2025-04-23T13:57:39.246+05:30  INFO 14148 --- [user-service] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-04-23T13:57:39.247+05:30  INFO 14148 --- [user-service] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2588 ms
-2025-04-23T13:57:39.595+05:30  INFO 14148 --- [user-service] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-04-23T13:57:39.690+05:30  INFO 14148 --- [user-service] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
-2025-04-23T13:57:39.750+05:30  INFO 14148 --- [user-service] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-04-23T13:57:40.259+05:30  INFO 14148 --- [user-service] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-04-23T13:57:40.306+05:30  INFO 14148 --- [user-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-04-23T13:57:44.629+05:30  INFO 14148 --- [user-service] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@48277712
-2025-04-23T13:57:44.632+05:30  INFO 14148 --- [user-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-04-23T13:57:45.899+05:30  INFO 14148 --- [user-service] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
-	Database driver: undefined/unknown
-	Database version: 17.4
-	Autocommit mode: undefined/unknown
-	Isolation level: undefined/unknown
-	Minimum pool size: undefined/unknown
-	Maximum pool size: undefined/unknown
-2025-04-23T13:57:46.992+05:30  INFO 14148 --- [user-service] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-04-23T13:57:49.740+05:30  WARN 14148 --- [user-service] [main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists users add column email varchar(255) not null" via JDBC [ERROR: column "email" of relation "users" contains null values]
-
-org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table if exists users add column email varchar(255) not null" via JDBC [ERROR: column "email" of relation "users" contains null values]
-	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.migrateTable(AbstractSchemaMigrator.java:334) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:84) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at java.base/java.util.HashMap.forEach(HashMap.java:1429) ~[na:na]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:324) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:463) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1517) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:66) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:419) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:400) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1859) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1808) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:347) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:970) ~[spring-context-6.2.5.jar:6.2.5]
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627) ~[spring-context-6.2.5.jar:6.2.5]
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.4.4.jar:3.4.4]
-	at com.user_service.user_service.UserServiceApplication.main(UserServiceApplication.java:10) ~[classes/:na]
-Caused by: org.postgresql.util.PSQLException: ERROR: column "email" of relation "users" contains null values
-	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:356) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:341) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:317) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:312) ~[postgresql-42.7.5.jar:42.7.5]
-	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94) ~[HikariCP-5.1.0.jar:na]
-	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java) ~[HikariCP-5.1.0.jar:na]
-	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	... 37 common frames omitted
-
-2025-04-23T13:57:50.352+05:30  WARN 14148 --- [user-service] [main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists users add column is_active boolean not null" via JDBC [ERROR: column "is_active" of relation "users" contains null values]
-
-org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table if exists users add column is_active boolean not null" via JDBC [ERROR: column "is_active" of relation "users" contains null values]
-	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.migrateTable(AbstractSchemaMigrator.java:334) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:84) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at java.base/java.util.HashMap.forEach(HashMap.java:1429) ~[na:na]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:324) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:463) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1517) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:66) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:419) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:400) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1859) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1808) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:347) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:970) ~[spring-context-6.2.5.jar:6.2.5]
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627) ~[spring-context-6.2.5.jar:6.2.5]
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.4.4.jar:3.4.4]
-	at com.user_service.user_service.UserServiceApplication.main(UserServiceApplication.java:10) ~[classes/:na]
-Caused by: org.postgresql.util.PSQLException: ERROR: column "is_active" of relation "users" contains null values
-	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:356) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:341) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:317) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:312) ~[postgresql-42.7.5.jar:42.7.5]
-	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94) ~[HikariCP-5.1.0.jar:na]
-	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java) ~[HikariCP-5.1.0.jar:na]
-	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	... 37 common frames omitted
-
-2025-04-23T13:57:50.657+05:30  WARN 14148 --- [user-service] [main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists users add column is_verified boolean not null" via JDBC [ERROR: column "is_verified" of relation "users" contains null values]
-
-org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table if exists users add column is_verified boolean not null" via JDBC [ERROR: column "is_verified" of relation "users" contains null values]
-	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.migrateTable(AbstractSchemaMigrator.java:334) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:84) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at java.base/java.util.HashMap.forEach(HashMap.java:1429) ~[na:na]
-	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:324) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:463) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1517) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:66) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:419) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:400) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366) ~[spring-orm-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1859) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1808) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:347) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207) ~[spring-beans-6.2.5.jar:6.2.5]
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:970) ~[spring-context-6.2.5.jar:6.2.5]
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627) ~[spring-context-6.2.5.jar:6.2.5]
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.4.4.jar:3.4.4]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.4.4.jar:3.4.4]
-	at com.user_service.user_service.UserServiceApplication.main(UserServiceApplication.java:10) ~[classes/:na]
-Caused by: org.postgresql.util.PSQLException: ERROR: column "is_verified" of relation "users" contains null values
-	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:356) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:341) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:317) ~[postgresql-42.7.5.jar:42.7.5]
-	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:312) ~[postgresql-42.7.5.jar:42.7.5]
-	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94) ~[HikariCP-5.1.0.jar:na]
-	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java) ~[HikariCP-5.1.0.jar:na]
-	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80) ~[hibernate-core-6.6.11.Final.jar:6.6.11.Final]
-	... 37 common frames omitted
-
-2025-04-23T13:57:53.840+05:30  WARN 14148 --- [user-service] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-04-23T13:57:53.840+05:30  WARN 14148 --- [user-service] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk6dotkott2kjsp8vw4d0m25fb7" of relation "users" does not exist, skipping
-2025-04-23T13:57:54.087+05:30  INFO 14148 --- [user-service] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-04-23T13:57:54.767+05:30  WARN 14148 --- [user-service] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-04-23T13:57:54.825+05:30  WARN 14148 --- [user-service] [main] .s.s.UserDetailsServiceAutoConfiguration : 
-
-Using generated security password: fa6489f5-e18b-480f-9ac6-204b8fed378a
-
-This generated password is for development use only. Your security configuration must be updated before running your application in production.
-
-2025-04-23T13:57:54.842+05:30  INFO 14148 --- [user-service] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
-2025-04-23T13:57:55.705+05:30  INFO 14148 --- [user-service] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
-2025-04-23T13:57:55.717+05:30  INFO 14148 --- [user-service] [main] c.u.user_service.UserServiceApplication  : Started UserServiceApplication in 20.04 seconds (process running for 20.634)
-2025-04-23T13:59:13.542+05:30  INFO 14148 --- [user-service] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-04-23T13:59:13.569+05:30  INFO 14148 --- [user-service] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-04-23T13:59:13.578+05:30  INFO 14148 --- [user-service] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-04-23T13:59:13.584+05:30  INFO 14148 --- [user-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-04-23T13:59:16.263+05:30  INFO 14148 --- [user-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-04-23T13:59:19.224+05:30  INFO 22940 --- [user-service] [main] c.u.user_service.UserServiceApplication  : Starting UserServiceApplication using Java 22.0.2 with PID 22940 (E:\GitRepos\Online_Food_Ordering\user-service\target\classes started by ASUS in E:\GitRepos\Online_Food_Ordering\user-service)
-2025-04-23T13:59:19.229+05:30  INFO 22940 --- [user-service] [main] c.u.user_service.UserServiceApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-04-23T13:59:20.497+05:30  INFO 22940 --- [user-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-04-23T13:59:20.614+05:30  INFO 22940 --- [user-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 99 ms. Found 1 JPA repository interface.
-2025-04-23T13:59:21.607+05:30  INFO 22940 --- [user-service] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
-2025-04-23T13:59:21.638+05:30  INFO 22940 --- [user-service] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-04-23T13:59:21.639+05:30  INFO 22940 --- [user-service] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
-2025-04-23T13:59:21.710+05:30  INFO 22940 --- [user-service] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-04-23T13:59:21.710+05:30  INFO 22940 --- [user-service] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2396 ms
-2025-04-23T13:59:22.010+05:30  INFO 22940 --- [user-service] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-04-23T13:59:22.106+05:30  INFO 22940 --- [user-service] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
-2025-04-23T13:59:22.187+05:30  INFO 22940 --- [user-service] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-04-23T13:59:22.622+05:30  INFO 22940 --- [user-service] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-04-23T13:59:22.669+05:30  INFO 22940 --- [user-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-04-23T13:59:25.947+05:30  INFO 22940 --- [user-service] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@47f0f414
-2025-04-23T13:59:25.950+05:30  INFO 22940 --- [user-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-04-23T13:59:27.189+05:30  INFO 22940 --- [user-service] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
-	Database driver: undefined/unknown
-	Database version: 17.4
-	Autocommit mode: undefined/unknown
-	Isolation level: undefined/unknown
-	Minimum pool size: undefined/unknown
-	Maximum pool size: undefined/unknown
-2025-04-23T13:59:29.509+05:30  INFO 22940 --- [user-service] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-04-23T13:59:31.321+05:30  WARN 22940 --- [user-service] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-04-23T13:59:31.322+05:30  WARN 22940 --- [user-service] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk6dotkott2kjsp8vw4d0m25fb7" of relation "users" does not exist, skipping
-2025-04-23T13:59:31.930+05:30  WARN 22940 --- [user-service] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-04-23T13:59:31.932+05:30  WARN 22940 --- [user-service] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukr43af9ap4edm43mmtq01oddj6" of relation "users" does not exist, skipping
-2025-04-23T13:59:32.240+05:30  INFO 22940 --- [user-service] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-04-23T13:59:33.827+05:30  WARN 22940 --- [user-service] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-04-23T13:59:34.071+05:30  WARN 22940 --- [user-service] [main] .s.s.UserDetailsServiceAutoConfiguration : 
-
-Using generated security password: 2c96b8de-1940-43b2-bc05-3246be9ac636
-
-This generated password is for development use only. Your security configuration must be updated before running your application in production.
-
-2025-04-23T13:59:34.110+05:30  INFO 22940 --- [user-service] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
-2025-04-23T13:59:36.416+05:30  INFO 22940 --- [user-service] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
-2025-04-23T13:59:36.447+05:30  INFO 22940 --- [user-service] [main] c.u.user_service.UserServiceApplication  : Started UserServiceApplication in 18.128 seconds (process running for 18.823)
-2025-04-23T14:02:39.410+05:30  INFO 22940 --- [user-service] [http-nio-8081-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-04-23T14:02:39.411+05:30  INFO 22940 --- [user-service] [http-nio-8081-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-04-23T14:02:39.414+05:30  INFO 22940 --- [user-service] [http-nio-8081-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2025-04-23T15:56:02.946+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@785a904d (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.953+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@f205812 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.955+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@186c6fe (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.957+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2df2f67b (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.959+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7cd5a855 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.961+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@71388f15 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.963+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@463e06fa (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.964+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7cc57168 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.965+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2d83e9a5 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T15:56:02.974+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2e494705 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:26.710+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@6d66cab4 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:31.972+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@5cc12604 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:37.242+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@d4935fb (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:42.507+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@106eb4b3 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:42.511+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@9074c13 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:42.516+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@1e82c430 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:42.519+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7b2c307f (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:42.521+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@1c9ba97d (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:42.523+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2f4f1929 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T16:47:42.525+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-10] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2764ebb4 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.944+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@4f6ed7e7 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.947+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7e6b995e (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.950+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@16a90475 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.951+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2f4128a8 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.953+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@71fa749b (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.954+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@53f9a293 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.955+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@dad8e35 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.956+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2b0ff340 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.959+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@9730416 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T17:34:05.961+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@1700d291 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:16:55.235+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2dfddb6 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:16:59.184+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-4] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@56fa0dc4 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:17:00.528+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@6b8771ec (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:17:02.629+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@790f5230 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:17:02.791+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7cfac8dd (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:17:04.448+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-4] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@4831c026 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:17:05.775+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@5eb9b1d0 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:17:07.894+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@45bf6bc5 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:17:08.060+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@1d873705 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
-2025-04-23T18:17:09.731+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-4] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@67e6de20 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T11:01:11.019+05:30  WARN 22940 --- [user-service] [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=9h50m25s397ms950µs600ns).
+2025-04-25T12:13:16.965+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@4553e72 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:16.981+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@1d6aca81 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:16.997+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@4d6723f0 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:16.998+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@60ec2280 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:17.012+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@68b270e7 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:17.014+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@234781b2 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:17.016+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@574b4e89 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:17.018+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@56b28ec2 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:17.020+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2d7ce9bb (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T12:13:17.021+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@32a9b7b7 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.760+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@21892f06 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.764+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@4302fb66 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.765+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2976fb84 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.766+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@41ef10b3 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.766+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@34ce11f1 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.767+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@60c305c5 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.769+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7ef76882 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.769+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@47a48567 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.770+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@3a155fb (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T15:27:41.771+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-3] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7bb49567 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T17:57:08.957+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-8] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@3453fca2 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.800+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@46406aa2 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.856+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@116ce99c (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.860+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@4bc13762 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.862+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@e9151c2 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.864+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@652e7a9a (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.865+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@13f85faa (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.868+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@51c01090 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.872+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@555b542b (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.874+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@43b70eb0 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T20:13:22.877+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-6] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@12e30c63 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.077+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@782f2cdf (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.080+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@556461ac (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.082+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2fb978a6 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.084+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@2e71f05a (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.086+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@6c7c352d (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.091+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@1ae3500f (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.094+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7efb77bd (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.095+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@5fa9bb18 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.098+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@52f1389d (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:19:51.099+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-9] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@521269e4 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.551+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@570a9424 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.562+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@59f5a004 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.565+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@5da2b5f3 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.566+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@5e0ab1d7 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.568+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@3c567a9a (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.571+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@48571894 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.573+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@923140 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.575+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@b9dac8c (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.577+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@41085cf (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2025-04-25T23:43:37.578+05:30  WARN 22940 --- [user-service] [http-nio-8081-exec-5] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7473ae61 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.

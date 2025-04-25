@@ -25,6 +25,7 @@ public class CartItem {
     private Double price;
     private Integer quantity;
     private Long restaurantId;
+    private String restaurantName;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")

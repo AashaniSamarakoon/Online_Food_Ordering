@@ -3,6 +3,7 @@ package com.order_service.order_service.service;
 import com.order_service.order_service.client.RestaurantClient;
 import com.order_service.order_service.dto.*;
 import com.order_service.order_service.model.Coordinates;
+import com.order_service.order_service.model.CustomerLocation;
 import com.order_service.order_service.model.Order;
 import com.order_service.order_service.model.OrderedItem;
 import com.order_service.order_service.repository.OrderRepository;
@@ -20,6 +21,7 @@ public class OrderService {
     private final RestaurantClient restaurantClient;
     private final OrderRepository orderRepository;
     private final JwtUtil jwtUtil;
+    private final CustomerLocationService customerLocationService;
 
     public OrderResponse placeOrder(OrderRequest request, String token) {
         Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
@@ -46,23 +48,24 @@ public class OrderService {
                     .available(item.isAvailable())
                     .build();
 
-            total += item.getPrice() * itemRequest.getQuantity();
+           // total += orderedItem.getSubtotal();
             orderedItems.add(orderedItem);
         }
 
-        Coordinates restaurantCoordinates = restaurant.getRestaurantCoordinates(); // ✅ Now this will work
+        Coordinates restaurantCoordinates = restaurant.getRestaurantCoordinates(); // ✅
 
-
-        Coordinates customerCoordinates = request.getCustomerCoordinates(); // sent from frontend
+        CustomerLocation location = customerLocationService.getLocationByUser(token); // ✅
+        Coordinates customerCoordinates = new Coordinates(location.getLatitude(), location.getLongitude()); // ✅
 
         Order order = Order.builder()
                 .userId(userId)
                 .restaurantId(request.getRestaurantId())
                 .items(orderedItems)
-                .totalPrice(total)
+                .totalPrice(request.getTotalPrice())
                 .status("PLACED")
                 .restaurantCoordinates(restaurantCoordinates)
                 .customerCoordinates(customerCoordinates)
+                .deliveryCharges(request.getDeliveryCharges())
                 .build();
 
         Order savedOrder = orderRepository.save(order);

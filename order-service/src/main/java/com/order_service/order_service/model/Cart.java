@@ -27,6 +27,8 @@ public class Cart {
 
     private String status; // e.g., "ACTIVE", "COMPLETED", "ABANDONED"
 
+    private Long restaurantId;
+
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<CartItem> items = new ArrayList<>();
@@ -43,11 +45,6 @@ public class Cart {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt; // cart last update timestamp
 
-    @Column(name = "delivery_address")
-    private String deliveryAddress; // optional, can be linked with user delivery address or added here
-
-    @Column(name = "payment_method")
-    private String paymentMethod; // optional, e.g., "CREDIT_CARD", "PAYPAL"
 
     @PrePersist
     protected void onCreate() {

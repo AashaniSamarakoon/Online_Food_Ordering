@@ -11,4 +11,6 @@ public class OrderRequest {
     private List<FoodItemOrderRequest> items;
     private Coordinates customerCoordinates;
     private Coordinates restaurantCoordinates;
+    private Double totalPrice;
+    private Double deliveryCharges;
 }

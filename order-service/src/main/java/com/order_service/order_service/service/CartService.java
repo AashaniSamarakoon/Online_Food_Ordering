@@ -44,19 +44,33 @@ public class CartService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Item not found or unavailable"));
 
-        CartItem cartItem = CartItem.builder()
-                .foodItemId(foodItemId)
-                .name(item.getName())
-                .price(item.getPrice())
-                .quantity(quantity)
-                .restaurantId(restaurantId)
-                .cart(cart)
-                .build();
+        // Check if item already exists in the cart for the same restaurant
+        CartItem existingItem = cart.getItems().stream()
+                .filter(i -> i.getFoodItemId().equals(foodItemId) && i.getRestaurantId().equals(restaurantId))
+                .findFirst()
+                .orElse(null);
 
-        cart.getItems().add(cartItem);
-        cartRepository.save(cart);
-        return cart;
+        if (existingItem != null) {
+            // If item already in cart, increment quantity
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+        } else {
+            // Otherwise, add new item to the cart
+            CartItem cartItem = CartItem.builder()
+                    .foodItemId(foodItemId)
+                    .name(item.getName())
+                    .price(item.getPrice())
+                    .quantity(quantity)
+                    .restaurantId(restaurantId)
+                    .restaurantName(restaurant.getName())
+                    .cart(cart)
+                    .build();
+
+            cart.getItems().add(cartItem);
+        }
+
+        return cartRepository.save(cart);
     }
+
 
     public void removeItemFromCart(String token, Long cartItemId) {
         Cart cart = getCart(token);
