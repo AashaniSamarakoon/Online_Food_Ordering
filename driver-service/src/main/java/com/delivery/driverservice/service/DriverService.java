@@ -15,19 +15,19 @@ public interface DriverService {
     void reactivateDriver(Long driverId);
 
     // Driver verification
-    DriverDTO updateDriverVerification(Long driverId, boolean isVerified);
+//    DriverDTO updateDriverVerification(Long driverId, boolean isVerified);
     DriverDTO updateDriverVerificationStatus(Long driverId, DriverVerificationUpdate verificationUpdate);
     Boolean isDriverVerified(Long driverId);
 
     // Driver availability
     Boolean isDriverAvailable(Long driverId);
     List<DriverDTO> getAvailableDrivers();
-    List<DriverDTO> getAvailableVerifiedDrivers();
+//    List<DriverDTO> getAvailableVerifiedDrivers();
 
     // Driver location and proximity
     DriverDTO updateDriverLocation(DriverLocationUpdate locationUpdate);
-    List<DriverDTO> getNearbyAvailableDrivers(Double lat, Double lng, Double radius);
-    List<DriverDTO> getNearbyAvailableDriversByVehicleType(Double lat, Double lng, Double radius, String vehicleType);
+//    List<DriverDTO> getNearbyAvailableDrivers(Double lat, Double lng, Double radius);
+//    List<DriverDTO> getNearbyAvailableDriversByVehicleType(Double lat, Double lng, Double radius, String vehicleType);
 
     // Order assignment flow
     DriverDTO handleOrderAssignment(OrderAssignmentRequest assignmentRequest);

@@ -14,7 +14,6 @@ const isMongoConnected = () => {
   return mongoose.connection && mongoose.connection.readyState === 1;
 };
 
-
 /**
  * Get the latest driver location
  */
@@ -130,8 +129,6 @@ async function updateDriverLocation(driverId, locationData) {
     throw error;
   }
 }
-
-
 
 /**
  * Create a new trip
@@ -340,6 +337,13 @@ async function getNearbyDrivers(
   limit = 10
 ) {
   try {
+    // 1. Get available driver IDs from driver service
+    const availableDrivers = await driverClient.getAvailableDrivers();
+    const availableDriverIds = availableDrivers.map(
+      (driver) => driver.driverId
+    );
+
+    // 2. Use MongoDB geospatial indexing to find nearby drivers from the available pool
     const drivers = await Location.aggregate([
       {
         $geoNear: {
@@ -349,7 +353,10 @@ async function getNearbyDrivers(
           },
           distanceField: "distance",
           maxDistance: radius,
-          query: { status: "AVAILABLE" },
+          // Filter to only include drivers from the available list
+          query: {
+            driverId: { $in: availableDriverIds },
+          },
           spherical: true,
         },
       },
@@ -369,6 +376,7 @@ async function getNearbyDrivers(
       },
     ]);
 
+    // 3. Map to the expected format
     return drivers.map((driver) => ({
       driverId: driver._id,
       latitude: driver.location.coordinates[1],

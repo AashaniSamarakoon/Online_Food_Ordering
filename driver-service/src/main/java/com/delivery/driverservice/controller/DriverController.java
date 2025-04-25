@@ -62,13 +62,13 @@ public class DriverController{
         return ResponseEntity.noContent().build();
     }
 
-    // Driver Verification
-    @PatchMapping("/{driverId}/verification")
-    public ResponseEntity<DriverDTO> updateDriverVerification(
-            @PathVariable Long driverId,
-            @RequestParam boolean isVerified) {
-        return ResponseEntity.ok(driverService.updateDriverVerification(driverId, isVerified));
-    }
+//    // Driver Verification
+//    @PatchMapping("/{driverId}/verification")
+//    public ResponseEntity<DriverDTO> updateDriverVerification(
+//            @PathVariable Long driverId,
+//            @RequestParam boolean isVerified) {
+//        return ResponseEntity.ok(driverService.updateDriverVerification(driverId, isVerified));
+//    }
 
     @PatchMapping("/{driverId}/verification-status")
     public ResponseEntity<DriverDTO> updateDriverVerificationStatus(
@@ -112,14 +112,14 @@ public class DriverController{
         return ResponseEntity.ok(driverService.getNearbyAvailableDrivers(lat, lng, radius));
     }
 
-    @GetMapping("/nearby/by-vehicle")
-    public ResponseEntity<List<DriverDTO>> getNearbyAvailableDriversByVehicleType(
-            @RequestParam Double lat,
-            @RequestParam Double lng,
-            @RequestParam(defaultValue = "5.0") Double radius,
-            @RequestParam String vehicleType) {
-        return ResponseEntity.ok(driverService.getNearbyAvailableDriversByVehicleType(lat, lng, radius, vehicleType));
-    }
+//    @GetMapping("/nearby/by-vehicle")
+//    public ResponseEntity<List<DriverDTO>> getNearbyAvailableDriversByVehicleType(
+//            @RequestParam Double lat,
+//            @RequestParam Double lng,
+//            @RequestParam(defaultValue = "5.0") Double radius,
+//            @RequestParam String vehicleType) {
+//        return ResponseEntity.ok(driverService.getNearbyAvailableDriversByVehicleType(lat, lng, radius, vehicleType));
+//    }
 
     // Order Assignment Flow
     @PostMapping("/assign-order")

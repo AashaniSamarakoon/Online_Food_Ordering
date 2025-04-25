@@ -234,26 +234,26 @@ public class DriverServiceImpl implements DriverService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<DriverDTO> getAvailableVerifiedDrivers() {
-        return driverRepository.findVerifiedAvailableDrivers().stream()
-                .map(driver -> modelMapper.map(driver, DriverDTO.class))
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<DriverDTO> getAvailableVerifiedDrivers() {
+//        return driverRepository.findVerifiedAvailableDrivers().stream()
+//                .map(driver -> modelMapper.map(driver, DriverDTO.class))
+//                .collect(Collectors.toList());
+//    }
 
-    @Override
-    public List<DriverDTO> getNearbyAvailableDrivers(Double lat, Double lng, Double radius) {
-        return driverRepository.findNearbyAvailableDrivers(lat, lng, radius).stream()
-                .map(driver -> modelMapper.map(driver, DriverDTO.class))
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<DriverDTO> getNearbyAvailableDrivers(Double lat, Double lng, Double radius) {
+//        return driverRepository.findNearbyAvailableDrivers(lat, lng, radius).stream()
+//                .map(driver -> modelMapper.map(driver, DriverDTO.class))
+//                .collect(Collectors.toList());
+//    }
 
-    @Override
-    public List<DriverDTO> getNearbyAvailableDriversByVehicleType(Double lat, Double lng, Double radius, String vehicleType) {
-        return driverRepository.findNearbyAvailableDriversByVehicleType(lat, lng, radius, vehicleType).stream()
-                .map(driver -> modelMapper.map(driver, DriverDTO.class))
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<DriverDTO> getNearbyAvailableDriversByVehicleType(Double lat, Double lng, Double radius, String vehicleType) {
+//        return driverRepository.findNearbyAvailableDriversByVehicleType(lat, lng, radius, vehicleType).stream()
+//                .map(driver -> modelMapper.map(driver, DriverDTO.class))
+//                .collect(Collectors.toList());
+//    }
 
     @Override
     public DriverDTO getDriverDetails(Long driverId) {
@@ -298,15 +298,15 @@ public class DriverServiceImpl implements DriverService {
         return driver.getIsVerified();
     }
 
-    @Override
-    @Transactional
-    public DriverDTO updateDriverVerification(Long driverId, boolean isVerified) {
-        Driver driver = driverRepository.findByDriverId(driverId)
-                .orElseThrow(() -> new DriverNotFoundException("Driver not found with ID: " + driverId));
-        driver.setIsVerified(isVerified);
-        log.info("Driver {} verification status updated to {}", driverId, isVerified);
-        return modelMapper.map(driverRepository.save(driver), DriverDTO.class);
-    }
+//    @Override
+//    @Transactional
+//    public DriverDTO updateDriverVerification(Long driverId, boolean isVerified) {
+//        Driver driver = driverRepository.findByDriverId(driverId)
+//                .orElseThrow(() -> new DriverNotFoundException("Driver not found with ID: " + driverId));
+//        driver.setIsVerified(isVerified);
+//        log.info("Driver {} verification status updated to {}", driverId, isVerified);
+//        return modelMapper.map(driverRepository.save(driver), DriverDTO.class);
+//    }
 
     @Override
     @Transactional
