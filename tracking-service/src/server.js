@@ -45,7 +45,7 @@ require('./tasks/cleanUpTask').startCleanupTask();
 require('./tasks/heatMapGenerationTask').startHeatmapGeneration();
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8089;
 server.listen(PORT, () => {
   logger.info(`Tracking service running on port ${PORT}`);
 });

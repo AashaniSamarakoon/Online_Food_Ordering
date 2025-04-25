@@ -1,4 +1,4 @@
-package com.delivery.driverauthservice.service.impl;
+package com.delivery.driverauthservice.service;
 
 import com.delivery.driverauthservice.repository.DriverCredentialRepository;
 import jakarta.annotation.PostConstruct;
