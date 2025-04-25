@@ -51,43 +51,44 @@ services:
   driver-service:
     build: ./driver-service
     ports:
-      - "8082:8082" 
+      - "8087:8087" 
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: akalanka28
+      SPRING_PROFILES_ACTIVE: docker
+      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_db
+      # SPRING_DATASOURCE_USERNAME: postgres
+      # SPRING_DATASOURCE_PASSWORD: akalanka28
     depends_on:
       - postgres
 
   driver-auth-service:
     build: ./driver-auth-service
     ports:
-      - "8085:8085"
+      - "8086:8086"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      # Database Configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_auth_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: akalanka28
+      # # Database Configuration
+      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_auth_db
+      # SPRING_DATASOURCE_USERNAME: postgres
+      # SPRING_DATASOURCE_PASSWORD: akalanka28
       
-      # JWT Configuration
-      JWT_SECRET_KEY: rzxlszyykpbgqcflzxsqcysyhljt
-      JWT_EXPIRATION_TIME: 3600
-      JWT_REFRESH_EXPIRATION_DAYS: 30
+      # # JWT Configuration
+      # JWT_SECRET_KEY: rzxlszyykpbgqcflzxsqcysyhljt
+      # JWT_EXPIRATION_TIME: 3600
+      # JWT_REFRESH_EXPIRATION_DAYS: 30
       
-      # Service URLs
-      DRIVER_SERVICE_URL: http://driver-service:8082
+      # # Service URLs
+      # DRIVER_SERVICE_URL: http://driver-service:8087
       
-      # RabbitMQ Configuration
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
+      # # RabbitMQ Configuration
+      # SPRING_RABBITMQ_HOST: rabbitmq
+      # SPRING_RABBITMQ_PORT: 5672
+      # SPRING_RABBITMQ_USERNAME: guest
+      # SPRING_RABBITMQ_PASSWORD: guest
       
-      # Storage Configuration
-      AZURE_STORAGE_ENABLED: "false"
-      LOCAL_STORAGE_ENABLED: "true"
-      STORAGE_LOCATION: /app/uploads
+      # # Storage Configuration
+      # AZURE_STORAGE_ENABLED: "false"
+      # LOCAL_STORAGE_ENABLED: "true"
+      # STORAGE_LOCATION: /app/uploads
     volumes:
       - driver-auth-uploads:/app/uploads
     depends_on:
@@ -98,12 +99,14 @@ services:
   order-assignment-service:
     build: ./order-assignment-service
     ports:
-      - "8083:8083"
+      - "8088:8088"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_assignment_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: akalanka28
-      DRIVER_SERVICE_URL: http://driver-service:8082
+      SPRING_PROFILES_ACTIVE: docker
+
+      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_assignment_db
+      # SPRING_DATASOURCE_USERNAME: postgres
+      # SPRING_DATASOURCE_PASSWORD: akalanka28
+      # DRIVER_SERVICE_URL: http://driver-service:8087
     depends_on:
       - postgres
       - driver-service
@@ -111,14 +114,14 @@ services:
   tracking-service:
     build: ./tracking-service
     ports:
-      - "8084:8084"
+      - "8089:8089"
     environment:
       - NODE_ENV=development
-      - PORT=8084
+      - PORT=8089
       - MONGO_URI=mongodb://mongodb:27017/tracking_db
       - REDIS_URL=redis://redis:6379
-      - DRIVER_SERVICE_URL=http://driver-service:8082
-      - ORDER_ASSIGNMENT_SERVICE_URL=http://order-assignment-service:8083
+      - DRIVER_SERVICE_URL=http://driver-service:8087
+      - ORDER_ASSIGNMENT_SERVICE_URL=http://order-assignment-service:8088
     volumes:
       - ./logs:/app/logs
     depends_on:
