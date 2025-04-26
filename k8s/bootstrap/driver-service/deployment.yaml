@@ -26,11 +26,11 @@ spec:
                 secretKeyRef:
                   name: neon-db-secrets
                   key: postgres-password
-          volumeMounts:
-            - name: config-volume
-              mountPath: /app/config
-      volumes:
-        - name: config-volume
-          configMap:
-            name: driver-service-config
+      #     volumeMounts:
+      #       - name: config-volume
+      #         mountPath: /app/config
+      # volumes:
+      #   - name: config-volume
+      #     configMap:
+      #       name: driver-service-config
       restartPolicy: Always

@@ -20,17 +20,24 @@ spec:
                 name: driver-auth-service
                 port:
                   number: 80
-          - path: /api/tracking/(.*)  # Fix this pattern too
+          - path: /(api/tracking/.*)  
             pathType: ImplementationSpecific
             backend:
               service:
                 name: tracking-service
                 port:
                   number: 80
-          - path: /api/drivers/(.*)  # And this one
+          - path: /(api/drivers/.*) 
             pathType: ImplementationSpecific
             backend:
               service:
                 name: driver-service
+                port:
+                  number: 80
+          - path: /(api/assignments/.*) 
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-assignment-service
                 port:
                   number: 80
