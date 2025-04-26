@@ -13,7 +13,6 @@ data:
       CREATE DATABASE driver_auth_db;
       CREATE DATABASE driver_db;
       CREATE DATABASE order_assignment_db;
-      CREATE DATABASE tracking_db;
     EOSQL
   
   postgresql.conf: |
