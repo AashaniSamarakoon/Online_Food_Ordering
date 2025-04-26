@@ -5,7 +5,6 @@ services:
       POSTGRES_PASSWORD: akalanka28
       POSTGRES_USER: postgres
       POSTGRES_MULTIPLE_DATABASES: "driver_auth_db, driver_db, order_assignment_db"  
-
     ports:
       - "5432:5432"
     volumes:
@@ -44,6 +43,11 @@ services:
   rabbitmq:
     image: rabbitmq:4.0-management
     container_name: rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -54,11 +58,17 @@ services:
       - "8087:8087" 
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_db
-      # SPRING_DATASOURCE_USERNAME: postgres
-      # SPRING_DATASOURCE_PASSWORD: akalanka28
+      SERVER_PORT: 8087
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   driver-auth-service:
     build: ./driver-auth-service
@@ -66,35 +76,19 @@ services:
       - "8086:8086"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      # # Database Configuration
-      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driver_auth_db
-      # SPRING_DATASOURCE_USERNAME: postgres
-      # SPRING_DATASOURCE_PASSWORD: akalanka28
-      
-      # # JWT Configuration
-      # JWT_SECRET_KEY: rzxlszyykpbgqcflzxsqcysyhljt
-      # JWT_EXPIRATION_TIME: 3600
-      # JWT_REFRESH_EXPIRATION_DAYS: 30
-      
-      # # Service URLs
-      # DRIVER_SERVICE_URL: http://driver-service:8087
-      
-      # # RabbitMQ Configuration
-      # SPRING_RABBITMQ_HOST: rabbitmq
-      # SPRING_RABBITMQ_PORT: 5672
-      # SPRING_RABBITMQ_USERNAME: guest
-      # SPRING_RABBITMQ_PASSWORD: guest
-      
-      # # Storage Configuration
-      # AZURE_STORAGE_ENABLED: "false"
-      # LOCAL_STORAGE_ENABLED: "true"
-      # STORAGE_LOCATION: /app/uploads
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
     volumes:
       - driver-auth-uploads:/app/uploads
     depends_on:
-      - postgres
-      - rabbitmq
-      - driver-service
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      driver-service:
+        condition: service_started
 
   order-assignment-service:
     build: ./order-assignment-service
@@ -102,14 +96,19 @@ services:
       - "8088:8088"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-
-      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_assignment_db
-      # SPRING_DATASOURCE_USERNAME: postgres
-      # SPRING_DATASOURCE_PASSWORD: akalanka28
-      # DRIVER_SERVICE_URL: http://driver-service:8087
+      SERVER_PORT: 8088
+      
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
     depends_on:
-      - postgres
-      - driver-service
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      driver-service:
+        condition: service_started
 
   tracking-service:
     build: ./tracking-service
@@ -125,13 +124,17 @@ services:
     volumes:
       - ./logs:/app/logs
     depends_on:
-      - mongodb
-      - redis
-      - driver-service
-      - order-assignment-service
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+      driver-service:
+        condition: service_started
+      order-assignment-service:
+        condition: service_started
 
 volumes:
   pgdata:
   mongodb_data:
   redis_data:
-  driver-auth-uploads: 
+  driver-auth-uploads:
