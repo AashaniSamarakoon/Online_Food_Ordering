@@ -372,3 +372,10 @@
 {"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-26T04:47:36.402Z"}
 {"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-26T04:47:36.417Z"}
 {"level":"info","message":"SIGTERM received, shutting down gracefully","service":"tracking-service","timestamp":"2025-04-26T04:53:09.081Z"}
+{"level":"info","message":"Connecting to MongoDB at mongodb://mongodb:27017/tracking_db (attempt 1/5)","service":"tracking-service","timestamp":"2025-04-26T04:53:45.680Z"}
+{"level":"info","message":"Cleanup task scheduled","service":"tracking-service","timestamp":"2025-04-26T04:53:45.761Z"}
+{"level":"info","message":"Heatmap generation task scheduled","service":"tracking-service","timestamp":"2025-04-26T04:53:45.764Z"}
+{"level":"info","message":"Tracking service running on port 8089","service":"tracking-service","timestamp":"2025-04-26T04:53:45.772Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-26T04:53:45.797Z"}
+{"level":"info","message":"Connected to Redis","service":"tracking-service","timestamp":"2025-04-26T04:53:45.798Z"}
+{"level":"info","message":"Connected to MongoDB","service":"tracking-service","timestamp":"2025-04-26T04:53:45.816Z"}
