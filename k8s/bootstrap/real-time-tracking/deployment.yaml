@@ -23,7 +23,7 @@ spec:
       - name: tracking-service
         image: akalankadias/tracking-service:latest
         ports:
-        - containerPort: 8084
+        - containerPort: 8089
         resources:
           limits:
             cpu: "500m"     # Reduced from 1 CPU
@@ -33,7 +33,7 @@ spec:
             memory: "256Mi"  # Reduced from 512Mi for testing
         env:
         - name: PORT
-          value: "8084"
+          value: "8089"
         - name: NODE_ENV
           value: "production"
         - name: MONGO_URI

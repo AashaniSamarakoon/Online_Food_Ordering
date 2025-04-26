@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: driver-auth-config
+data:
+  application-k8s.properties: |
+    spring.datasource.url=jdbc:postgresql://postgres:5432/driver_auth_db
+    spring.datasource.username=postgres
+    spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
+    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+    server.port=8086
