@@ -19,8 +19,18 @@ spec:
           ports:
             - containerPort: 8088
           env:
-            # - name: SPRING_DATASOURCE_URL
-            #   value: "jdbc:postgresql://postgres:5432/order_assignment_db"
             - name: SPRING_PROFILES_ACTIVE
               value: "k8s"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: neon-db-secrets
+                  key: postgres-password
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: order-assignment-config
       restartPolicy: Always

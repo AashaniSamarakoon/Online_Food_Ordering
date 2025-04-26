@@ -24,7 +24,7 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secrets
+                  name: neon-db-secrets
                   key: postgres-password
           volumeMounts:
             - name: config-volume

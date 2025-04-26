@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: driver-auth-config
+  name: driver-service-config
 data:
   application-k8s.properties: |
-    spring.datasource.url=jdbc:postgresql://ep-long-brook-a4bpeyso-pooler.us-east-1.aws.neon.tech/driver_auth_db?sslmode=require
+    spring.datasource.url=jdbc:postgresql://ep-long-brook-a4bpeyso-pooler.us-east-1.aws.neon.tech/driver_db?sslmode=require
     spring.datasource.username=neondb_owner
     spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
     spring.jpa.hibernate.ddl-auto=update
