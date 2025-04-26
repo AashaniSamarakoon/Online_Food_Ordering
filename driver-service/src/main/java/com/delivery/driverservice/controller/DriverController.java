@@ -93,10 +93,10 @@ public class DriverController{
         return ResponseEntity.ok(driverService.getAvailableDrivers());
     }
 
-    @GetMapping("/available/verified")
-    public ResponseEntity<List<DriverDTO>> getAvailableVerifiedDrivers() {
-        return ResponseEntity.ok(driverService.getAvailableVerifiedDrivers());
-    }
+//    @GetMapping("/available/verified")
+//    public ResponseEntity<List<DriverDTO>> getAvailableVerifiedDrivers() {
+//        return ResponseEntity.ok(driverService.getAvailableVerifiedDrivers());
+//    }
 
     // Driver Location and Proximity
     @PutMapping("/location")
@@ -104,13 +104,13 @@ public class DriverController{
         return ResponseEntity.ok(driverService.updateDriverLocation(update));
     }
 
-    @GetMapping("/nearby")
-    public ResponseEntity<List<DriverDTO>> getNearbyAvailableDrivers(
-            @RequestParam Double lat,
-            @RequestParam Double lng,
-            @RequestParam(defaultValue = "5.0") Double radius) {
-        return ResponseEntity.ok(driverService.getNearbyAvailableDrivers(lat, lng, radius));
-    }
+//    @GetMapping("/nearby")
+//    public ResponseEntity<List<DriverDTO>> getNearbyAvailableDrivers(
+//            @RequestParam Double lat,
+//            @RequestParam Double lng,
+//            @RequestParam(defaultValue = "5.0") Double radius) {
+//        return ResponseEntity.ok(driverService.getNearbyAvailableDrivers(lat, lng, radius));
+//    }
 
 //    @GetMapping("/nearby/by-vehicle")
 //    public ResponseEntity<List<DriverDTO>> getNearbyAvailableDriversByVehicleType(
