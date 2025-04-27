@@ -14,5 +14,11 @@ data:
     # Service discovery for driver-service
     driver.service.url=http://driver-service
 
+    # RabbitMQ settings
+    spring.rabbitmq.host=rabbitmq
+    spring.rabbitmq.port=5672
+    spring.rabbitmq.username=guest
+    spring.rabbitmq.password=guest
+
 
     
