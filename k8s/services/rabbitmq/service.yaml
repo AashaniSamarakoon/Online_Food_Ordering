@@ -12,5 +12,6 @@ spec:
   - port: 15672
     name: management
     targetPort: 15672
+  type: NodePort
   selector:
     app: rabbitmq

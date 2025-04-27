@@ -8,7 +8,6 @@ spec:
   ports:
   - port: 80
     targetPort: 80
-    nodePort: 30080
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/component: controller
