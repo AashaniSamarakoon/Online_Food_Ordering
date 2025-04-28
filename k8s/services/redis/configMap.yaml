@@ -5,11 +5,11 @@ metadata:
 data:
   redis.conf: |
     bind 0.0.0.0
-    protected-mode yes
+    protected-mode no
     port 6379
     tcp-backlog 511
     timeout 0
     tcp-keepalive 300
     daemonize no
-    maxmemory 256mb
-    maxmemory-policy allkeys-lru
+    # Remove the password requirement
+    # requirepass redispassword

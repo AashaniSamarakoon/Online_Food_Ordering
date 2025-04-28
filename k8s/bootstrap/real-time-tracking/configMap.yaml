@@ -3,9 +3,6 @@ kind: ConfigMap
 metadata:
   name: tracking-service-config
 data:
-  mongo-uri: "mongodb://mongodb:27017/tracking_db"
-  redis-url: "redis://redis:6379"
-  order-service-url: "http://order-service"
+  order-service-url: "http://order-service" 
   driver-service-url: "http://driver-service"
   notification-service-url: "http://notification-service"
-

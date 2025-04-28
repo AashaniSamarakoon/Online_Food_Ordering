@@ -3,10 +3,10 @@ kind: Deployment
 metadata:
   name: redis
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: redis
-  replicas: 1
   template:
     metadata:
       labels:
@@ -14,24 +14,15 @@ spec:
     spec:
       containers:
       - name: redis
-        image: redis:7.0-alpine
+        image: redis:alpine
+        args: ["redis-server", "/usr/local/etc/redis/redis.conf"]
         ports:
         - containerPort: 6379
-          name: redis
         volumeMounts:
         - name: redis-config
-          mountPath: /usr/local/etc/redis/redis.conf
-          subPath: redis.conf
+          mountPath: /usr/local/etc/redis
         - name: redis-data
           mountPath: /data
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
-        command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
       volumes:
       - name: redis-config
         configMap:

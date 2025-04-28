@@ -2,14 +2,15 @@ const axios = require('axios');
 const logger = require('../utils/logger');
 const { getRedisClient } = require('../config/redis');
 
-const redis = getRedisClient();
-
 // Order service client
 const orderClient = {
   baseURL: process.env.ORDER_SERVICE_URL || 'http://order-service:8086',
   
   async getOrderDetails(orderId) {
     try {
+      // Get Redis client at function call time, not module load time
+      const redis = getRedisClient();
+      
       // Try cache first
       const cacheKey = `order:${orderId}:details`;
       const cachedData = await redis.get(cacheKey);
@@ -23,7 +24,7 @@ const orderClient = {
       
       // Cache the result
       if (response.data) {
-        await redis.set(cacheKey, JSON.stringify(response.data), 'EX', 300); // 5 minutes
+        await redis.set(cacheKey, JSON.stringify(response.data), { EX: 300 }); // 5 minutes
       }
       
       return response.data;
@@ -32,18 +33,7 @@ const orderClient = {
       throw error;
     }
   },
-  
-  // async updateOrderStatus(orderId, status) {
-  //   try {
-  //     const response = await axios.patch(`${this.baseURL}/api/orders/${orderId}/status`, { status });
-  //     return response.data;
-  //   } catch (error) {
-  //     logger.error(`Error updating order status: ${error.message}`, { orderId, status });
-  //     throw error;
-  //   }
-  // }
 };
-
 
 module.exports = {
   orderClient,
