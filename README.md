@@ -60,6 +60,7 @@ cd Online_Food_Ordering
   RABBITMQ_URL=amqp://rabbitmq-service:5672
   REDIS_URL=redis://redis-service:6379
   ```
+---
 
 ## 🐳 Docker Setup
 To run this project seamlessly using Docker Compose:
@@ -131,6 +132,64 @@ cd ../restaurant-service && docker build -t quick-serve/restaurant:v1 .
 ---
 
 ## ⚓ Kubernetes Setup
+
+### 1. Prerequisites
+- Kubernetes cluster (local like Minikube, Docker Desktop, or cloud-based)
+- `kubectl CLI` tool configured to access your cluster
+- Docker Hub access (to pull application images)
+
+### 2. Clone the Repository if you haven't already cloned it
+```bash
+git clone https://github.com/AashaniSamarakoon/Online_Food_Ordering.git
+cd Online_Food_Ordering
+```
+
+Before deploying the application, you need to create the necessary secrets:
+
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: neon-db-secrets
+type: Opaque
+stringData:
+  # Base64 encoding is handled automatically when using stringData
+  postgres-password: "your-postgres-password"
+  postgres-user: "your-postgres-user"
+  postgres-database: "your-database-name"
+  postgres-host: "your-neon-db-host.provider.com"
+  postgres-port: "5432"
+```
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-atlas-credentials
+type: Opaque
+stringData:
+  # Replace with your MongoDB Atlas connection string
+  mongo-uri: "mongodb+srv://USERNAME:PASSWORD@cluster.example.mongodb.net/tracking_db?retryWrites=true&w=majority"
+```
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-credentials
+type: Opaque
+stringData:
+  redis-username: "username"
+  redis-password: "password"
+  redis-host: "redis-service"
+  redis-port: "6379"
+```
+
+### 3. Apply the secrets to your cluster:
+```bash
+kubectl apply -f bootstrap/redis-credentials.yaml
+kubectl apply -f bootstrap/mongo-db-secrets.yaml
+kubectl apply -f bootstrap/neon-db-secrets.yaml
+```
+
 
 ### 4. Deploy to Kubernetes
 ```bash
