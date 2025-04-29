@@ -53,7 +53,7 @@ docker-compose up --build
 
 The application will be available at:
 ```bash
-http://localhost:YOUR_PORT
+http://localhost:YOUR_PORT 
 ```
 
 ### 🛠️ Services Overview
