@@ -56,14 +56,14 @@ public class Restaurant implements UserDetails {
     private boolean isActive;
 
     @Column(nullable = false)
-    private String adminId;
+    private String ownerUsername;  // Changed from adminId to ownerUsername
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItem> menuItems;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("RESTAURANT"));
+        return List.of(new SimpleGrantedAuthority("RESTAURANT_OWNER"));
     }
 
     @Override
@@ -86,11 +86,11 @@ public class Restaurant implements UserDetails {
         return isActive;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
+    public void updateDetails(String name, String address, String phone, String email, String openingHours) {
+        this.name = name;
+        this.address = address;
+        this.phone = phone;
+        this.email = email;
+        this.openingHours = openingHours;
     }
 }

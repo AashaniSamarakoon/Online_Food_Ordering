@@ -13,12 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 public class RestaurantResponse {
     private Long id;
+    private String username;
     private String name;
     private String address;
     private String phone;
     private String email;
     private Boolean isActive;
     private String openingHours;
-    private String adminId;
+    private String ownerUsername;  // Changed from adminId to ownerUsername
     private List<MenuItemResponse> menuItems;
 }

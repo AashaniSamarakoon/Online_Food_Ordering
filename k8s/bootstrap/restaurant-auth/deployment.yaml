@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restaurant-auth-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: restaurant-auth-service
+  template:
+    metadata:
+      labels:
+        app: restaurant-auth-service
+    spec:
+      containers:
+        - name: restaurant-auth-service
+          image: aashanisamarakoon/restaurant-auth-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: neon-db-secrets
+                  key: postgres-password
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: restaurant-auth-config
+      restartPolicy: Always

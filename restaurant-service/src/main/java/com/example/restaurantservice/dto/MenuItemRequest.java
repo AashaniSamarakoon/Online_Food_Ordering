@@ -3,7 +3,6 @@ package com.example.restaurantservice.dto;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
-
 @Data
 public class MenuItemRequest {
     @NotBlank(message = "Item name is required")
@@ -18,12 +17,13 @@ public class MenuItemRequest {
 
     @NotBlank(message = "Status is required")
     @Pattern(regexp = "AVAILABLE|OUT_OF_STOCK|LIMITED_AVAILABILITY",
-            flags = Pattern.Flag.CASE_INSENSITIVE,
             message = "Status must be AVAILABLE, OUT_OF_STOCK or LIMITED_AVAILABILITY")
     private String status;
 
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;
 
-    private MultipartFile image;
+    private String imageUrl; // Changed from MultipartFile to String URL
+
+
 }

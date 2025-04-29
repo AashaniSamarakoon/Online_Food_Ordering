@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: banking-service
+  template:
+    metadata:
+      labels:
+        app: banking-service
+    spec:
+      containers:
+        - name: banking-service
+          image: aashanisamarakoon/banking-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: neon-db-secrets
+                  key: postgres-password
+#          volumeMounts:
+#            - name: config-volume
+#              mountPath: /app/config
+#      volumes:
+#        - name: config-volume
+#          configMap:
+#            name: banking-service
+      restartPolicy: Always

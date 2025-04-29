@@ -5,12 +5,12 @@ import com.example.restaurantservice.dto.RestaurantResponse;
 import com.example.restaurantservice.service.RestaurantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/restaurants")
@@ -20,11 +20,12 @@ public class RestaurantController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public RestaurantResponse createRestaurant(
             @Valid @RequestBody RestaurantRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
-        String adminId = jwt.getSubject();
-        return restaurantService.createRestaurant(request, adminId);
+            Authentication authentication) {
+        String ownerUsername = authentication.getName();
+        return restaurantService.createRestaurant(request, ownerUsername);
     }
 
     @GetMapping("/{id}")
@@ -33,27 +34,39 @@ public class RestaurantController {
     }
 
     @GetMapping
-    public List<RestaurantResponse> getAllRestaurants() {
-        return restaurantService.getAllRestaurants();
+    public Page<RestaurantResponse> getAllRestaurants(Pageable pageable) {
+        return restaurantService.getAllRestaurants(pageable);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('RESTAURANT_OWNER')")
     public RestaurantResponse updateRestaurant(
             @PathVariable Long id,
-            @Valid @RequestBody RestaurantRequest request) {
+            @Valid @RequestBody RestaurantRequest request,
+            Authentication authentication) {
+        // Verify ownership
+        restaurantService.verifyOwnership(id, authentication.getName());
         return restaurantService.updateRestaurant(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteRestaurant(@PathVariable Long id) {
         restaurantService.deleteRestaurant(id);
     }
 
     @PatchMapping("/{id}/availability")
+    @PreAuthorize("hasRole('RESTAURANT_OWNER') or hasRole('ADMIN')")
     public RestaurantResponse setRestaurantAvailability(
             @PathVariable Long id,
-            @RequestParam Boolean isActive) {
+            @RequestParam Boolean isActive,
+            Authentication authentication) {
+        // Verify ownership if not admin
+        if (!authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+            restaurantService.verifyOwnership(id, authentication.getName());
+        }
         return restaurantService.setRestaurantAvailability(id, isActive);
     }
 }

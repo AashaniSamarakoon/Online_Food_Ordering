@@ -28,7 +28,6 @@ public class MenuItemService {
 
     private final MenuItemRepository menuItemRepository;
     private final RestaurantRepository restaurantRepository;
-    private final FileStorageService fileStorageService;
 
     @Transactional
     @CacheEvict(value = "menuItems", key = "#restaurantId")
@@ -36,18 +35,13 @@ public class MenuItemService {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        String imageUrl = null;
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
-            imageUrl = fileStorageService.storeFile(request.getImage());
-        }
-
         MenuItem menuItem = MenuItem.builder()
                 .name(request.getName())
                 .category(request.getCategory())
                 .price(request.getPrice())
                 .status(convertToItemStatus(request.getStatus()))
                 .description(request.getDescription())
-                .imageUrl(imageUrl)
+                .imageUrl(request.getImageUrl())  // Using direct URL from request
                 .restaurant(restaurant)
                 .build();
 
@@ -76,9 +70,9 @@ public class MenuItemService {
         MenuItem menuItem = menuItemRepository.findByIdAndRestaurantId(menuItemId, restaurantId)
                 .orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
 
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
-            String imageUrl = fileStorageService.storeFile(request.getImage());
-            menuItem.setImageUrl(imageUrl);
+        // Update image URL directly from request
+        if (request.getImageUrl() != null) {
+            menuItem.setImageUrl(request.getImageUrl());
         }
 
         menuItem.setName(request.getName());
@@ -121,6 +115,7 @@ public class MenuItemService {
         return menuItemRepository.findByRestaurantIdAndNameContainingIgnoreCase(restaurantId, query, pageable)
                 .map(this::mapToResponse);
     }
+
     private MenuItemResponse mapToResponse(MenuItem menuItem) {
         return MenuItemResponse.builder()
                 .id(menuItem.getId())
