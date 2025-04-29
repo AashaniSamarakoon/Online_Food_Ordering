@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/ecaeb4b1-fce3-4262-bace-df4502387144)# Quick Serve - Food Delivery System
+# Quick Serve - Food Delivery System
 
 Quick Serve is a distributed food ordering and delivery management platform built using a microservices architecture. It connects restaurants, customers, and delivery drivers seamlessly, ensuring scalability, reliability, and real-time coordination.
 
