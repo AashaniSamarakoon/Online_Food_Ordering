@@ -192,14 +192,42 @@ kubectl apply -f bootstrap/neon-db-secrets.yaml
 
 
 ### 4. Deploy to Kubernetes
+
+Inside your `k8s/` folder, just run
 ```bash
-kubectl apply -f k8s/auth-deployment.yaml
-kubectl apply -f k8s/restaurant-deployment.yaml
-kubectl apply -f k8s/rabbitmq-deployment.yaml
+kubectl apply -R -f .
+```
+`-R` tells `kubectl` to recursively go into subfolders and only apply files with `.yaml/.yml/.json`.
+
+Or Deploy supporting services:
+```bash
+kubectl apply -f k8s/services/redis/
+kubectl apply -f services/zipkin/
+# Repeat for all services
+```
+And Deploy backend microservices:
+```bash
+kubectl apply -f bootstrap/driver-auth/
+kubectl apply -f bootstrap/driver-service/
 # Repeat for all services
 ```
 
-## Running the Application
+### 5. Deploy the API Gateway (Nginx Ingress):
+```bash
+# Install Nginx Ingress Controller if not already installed
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/cloud/deploy.yaml
+```
+```bash
+# Wait for ingress controller to be ready
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+```
+```bash
+# Apply API Gateway configuration
+kubectl apply -f services/api-gateway/
+```
 
 - Access the application via the Ingress URL (e.g., `http://quickserve.local`).
 - Key endpoints:
@@ -209,13 +237,45 @@ kubectl apply -f k8s/rabbitmq-deployment.yaml
 
 ---
 
-## Monitoring & Logs
+## Common Troubleshooting
+
+### 1. 502 Bad Gateway errors:
+Check if the target service has active endpoints:
+```bash
+kubectl get endpoints <service-name>
+```
+Check service logs:
+```bash
+kubectl logs -l app=<service-name>
+```
+### 2. Image Pull Issues:
+To force pull the latest image:
+
+```bash
+kubectl rollout restart deployment <deployment-name>
+```
+### 3. Debug Ingress Issues:
+```bash
+kubectl logs -n ingress-nginx deploy/ingress-nginx-controller
+```
 
 ### View Kubernetes Logs
 ```bash
 kubectl logs -f deployment/auth-service
 ```
 
+## External Access
+After deployment, you can access the services through the ingress controller:
+```bash
+http://localhost/api/auth/login
+```
+
+## For local development with port forwarding:
+```bash
+kubectl port-forward svc/auth-service 8086:80
+```
+
+##
 ### Monitor RabbitMQ Events
 ```bash
 rabbitmqctl list_queues
@@ -227,7 +287,7 @@ rabbitmqctl list_queues
 
 | Issue                        | Resolution                                                                 |
 |------------------------------|---------------------------------------------------------------------------|
-| JWT validation fails         | Verify `JWT_SECRET` matches across all services.                         |
+| 502 Bad Gateway errors        | Verify `JWT_SECRET` matches across all services.                         |
 | RabbitMQ connection timeout  | Check `RABBITMQ_URL` in environment variables.                           |
 | Map not loading              | Confirm Mapbox token is valid.                                           |
 | Kubernetes pod not starting  | Run `kubectl describe pod <pod-name>` for more details.                  |
