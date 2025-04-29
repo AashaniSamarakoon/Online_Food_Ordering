@@ -117,6 +117,8 @@ docker-compose down -v
 docker-compose down
 docker-compose up --build
 ```
+- If your port 5432, 8086-8089, 5050, etc., are busy, change them in docker-compose.yml.
+- Always check container health (`docker ps` and `docker inspect`) before blaming the code 😉
 
 ### 1. Prerequisites
 
