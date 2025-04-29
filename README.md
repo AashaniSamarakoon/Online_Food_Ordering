@@ -68,6 +68,7 @@ http://localhost:YOUR_PORT
 | **Driver Service**        | `8087`           | Microservice for driver operations |
 | **Order Assignment Service** | `8088`        | Handles order-to-driver assignments |
 | **Tracking Service**      | `8089`           | Real-time tracking of orders and drivers |
+| **Payment Service**      | `8099`           | Real-time Payment service using Stripe API |
 
 
 ### 📦 Volumes Created
