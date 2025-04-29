@@ -229,68 +229,17 @@ kubectl wait --namespace ingress-nginx \
 kubectl apply -f services/api-gateway/
 ```
 
-- Access the application via the Ingress URL (e.g., `http://quickserve.local`).
-- Key endpoints:
-  - **Auth Service:** `POST /api/auth/register` (Register users)
-  - **Order Service:** `GET /api/orders` (Fetch orders)
-  - **WebSocket Tracking:** `ws://<ingress-url>/ws/tracking`
-
----
-
 ## Common Troubleshooting
-
-### 1. 502 Bad Gateway errors:
-Check if the target service has active endpoints:
-```bash
-kubectl get endpoints <service-name>
-```
-Check service logs:
-```bash
-kubectl logs -l app=<service-name>
-```
-### 2. Image Pull Issues:
-To force pull the latest image:
-
-```bash
-kubectl rollout restart deployment <deployment-name>
-```
-### 3. Debug Ingress Issues:
-```bash
-kubectl logs -n ingress-nginx deploy/ingress-nginx-controller
-```
-
-### View Kubernetes Logs
-```bash
-kubectl logs -f deployment/auth-service
-```
-
-## External Access
-After deployment, you can access the services through the ingress controller:
-```bash
-http://localhost/api/auth/login
-```
-
-## For local development with port forwarding:
-```bash
-kubectl port-forward svc/auth-service 8086:80
-```
-
-##
-### Monitor RabbitMQ Events
-```bash
-rabbitmqctl list_queues
-```
-
----
-
-## Troubleshooting
-
-| Issue                        | Resolution                                                                 |
-|------------------------------|---------------------------------------------------------------------------|
-| 502 Bad Gateway errors        | Verify `JWT_SECRET` matches across all services.                         |
-| RabbitMQ connection timeout  | Check `RABBITMQ_URL` in environment variables.                           |
-| Map not loading              | Confirm Mapbox token is valid.                                           |
-| Kubernetes pod not starting  | Run `kubectl describe pod <pod-name>` for more details.                  |
+| Issue | Resolution |
+|-------|------------|
+| 502 Bad Gateway errors | 1. Check if the target service has active endpoints: `kubectl get endpoints <service-name>`<br>2. Check service logs: `kubectl logs -l app=<service-name>` |
+| Image Pull Issues | Force pull the latest image: `kubectl rollout restart deployment <deployment-name>` |
+| Debug Ingress Issues | Check ingress controller logs: `kubectl logs -n ingress-nginx deploy/ingress-nginx-controller` |
+| Kubernetes pod not starting | Run `kubectl describe pod <pod-name>` for more details |
+| External Access Issues | Access services through ingress: `http://localhost/api/auth/login` |
+| Local Development | Use port forwarding: `kubectl port-forward svc/auth-service 8086:80` |
+| Monitor RabbitMQ | View queues with: `rabbitmqctl list_queues` |
+| RabbitMQ connection timeout | Check `RABBITMQ_URL` in environment variables |
 
 ---
 
