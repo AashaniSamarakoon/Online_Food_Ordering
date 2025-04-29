@@ -249,7 +249,7 @@ http://localhost/api/auth/login
 ```
 For local development with port forwarding:
 ```bash
-kubectl port-forward svc/tracking-service 8086:80
+kubectl port-forward svc/auth-service 8086:80
 ```
 ## Monitoring
 Check the status of your deployments:
