@@ -76,7 +76,6 @@ http://localhost:YOUR_PORT
 | `pgdata`              | PostgreSQL persistent storage  |
 | `mongodb_data`        | MongoDB persistent storage     |
 | `redis_data`          | Redis persistent storage       |
-| `driver-auth-uploads` | Uploads folder for auth service |
 
 ### 🧹 Tear Down
 ```bash
