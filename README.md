@@ -30,12 +30,6 @@ Quick Serve is a distributed food ordering and delivery management platform buil
 ## Architecture
 [Architecture Diagram](path/to/architecture-diagram.png) <!-- Optional -->
 
----
-
-## Prerequisites
-> ⚠️ Note: You do NOT need to install PostgreSQL, Redis, or RabbitMQ locally — they're automatically provisioned via Docker/Kubernetes.
-
----
 
 ## Setup Instructions
 
