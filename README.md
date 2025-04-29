@@ -28,7 +28,7 @@ Quick Serve is a distributed food ordering and delivery management platform buil
 ---
 
 ## Architecture
-![Architecture Diagram](path/to/architecture-diagram.png) <!-- Optional -->
+[Architecture Diagram](path/to/architecture-diagram.png) <!-- Optional -->
 
 ---
 
@@ -61,7 +61,65 @@ cd Online_Food_Ordering
   REDIS_URL=redis://redis-service:6379
   ```
 
-### 3. Build Docker Images
+## 🐳 Docker Setup
+To run this project seamlessly using Docker Compose:
+
+### 1. Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) Installed
+
+### 2. Clone the Repository if you haven't already cloned it
+```bash
+git clone https://github.com/AashaniSamarakoon/Online_Food_Ordering.git
+cd Online_Food_Ordering
+```
+
+### 3. Run with Docker Compose
+```bash
+docker-compose up --build
+```
+✅ This will spin up PostgreSQL, MongoDB, Redis, RabbitMQ, PgAdmin, and all application services automatically.
+
+The application will be available at:
+```bash
+http://localhost:YOUR_PORT
+```
+
+### 🛠️ Services Overview
+| Service Name            | Port(s) Exposed | Description |
+|--------------------------|-----------------|-------------|
+| **PostgreSQL**            | `5432`           | Primary relational database |
+| **MongoDB**               | `27017`          | NoSQL database for tracking service |
+| **Redis**                 | `6379`           | Caching layer for tracking |
+| **RabbitMQ**              | `5672`, `15672`  | Message broker for microservice communication |
+| **PgAdmin**               | `5050`           | DB management UI for PostgreSQL |
+| **Driver Auth Service**   | `8086`           | Authentication microservice for drivers |
+| **Driver Service**        | `8087`           | Microservice for driver operations |
+| **Order Assignment Service** | `8088`        | Handles order-to-driver assignments |
+| **Tracking Service**      | `8089`           | Real-time tracking of orders and drivers |
+
+
+### 📦 Volumes Created
+| Volume Name          | Purpose                         |
+|-----------------------|---------------------------------|
+| `pgdata`              | PostgreSQL persistent storage  |
+| `mongodb_data`        | MongoDB persistent storage     |
+| `redis_data`          | Redis persistent storage       |
+| `driver-auth-uploads` | Uploads folder for auth service |
+
+### 🧹 Tear Down
+```bash
+docker-compose down -v
+```
+-v flag ensures volumes are also deleted (clean fresh start).
+
+### If you change init-db.sh, restart Postgres by doing:
+```bash
+docker-compose down
+docker-compose up --build
+```
+
+### 1. Prerequisites
+
 ```bash
 cd auth-service && docker build -t quick-serve/auth:v1 .
 cd ../restaurant-service && docker build -t quick-serve/restaurant:v1 .
