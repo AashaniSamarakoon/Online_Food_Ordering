@@ -268,10 +268,3 @@ Logs for specific pods
 kubectl logs <pod-name>
 ```
 
-## Contributing
-Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
-
----
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
