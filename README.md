@@ -236,12 +236,37 @@ kubectl apply -f services/api-gateway/
 | Image Pull Issues | Force pull the latest image: `kubectl rollout restart deployment <deployment-name>` |
 | Debug Ingress Issues | Check ingress controller logs: `kubectl logs -n ingress-nginx deploy/ingress-nginx-controller` |
 | Kubernetes pod not starting | Run `kubectl describe pod <pod-name>` for more details |
-| External Access Issues | Access services through ingress: `http://localhost/api/auth/login` |
-| Local Development | Use port forwarding: `kubectl port-forward svc/auth-service 8086:80` |
 | Monitor RabbitMQ | View queues with: `rabbitmqctl list_queues` |
 | RabbitMQ connection timeout | Check `RABBITMQ_URL` in environment variables |
 
 ---
+
+## External Access
+After deployment, you can access the services through the ingress controller:
+
+```bash
+http://localhost/api/auth/login
+```
+For local development with port forwarding:
+```bash
+kubectl port-forward svc/tracking-service 8086:80
+```
+## Monitoring
+Check the status of your deployments:
+```bash
+kubectl get all
+
+Or
+
+kubectl get pods
+kubectl get deployments
+kubectl get services
+kubectl get ingress
+```
+Logs for specific pods
+```bash
+kubectl logs <pod-name>
+```
 
 ## Contributing
 Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
