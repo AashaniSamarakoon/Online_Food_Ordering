@@ -76,20 +76,6 @@ kubectl apply -f k8s/rabbitmq-deployment.yaml
 # Repeat for all services
 ```
 
-### 5. Frontend Setup
-- **Web App (Restaurant & Admin Dashboards):**
-  ```bash
-  cd frontend/web && npm install
-  REACT_APP_API_URL=http://api.quickserve.com npm run build
-  docker build -t quick-serve/web:v1 .
-  ```
-- **Mobile Apps (Customer & Driver):**
-  ```bash
-  cd frontend/mobile && expo build:android
-  ```
-
----
-
 ## Running the Application
 
 - Access the application via the Ingress URL (e.g., `http://quickserve.local`).
