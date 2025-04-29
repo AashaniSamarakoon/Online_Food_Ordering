@@ -13,10 +13,10 @@ Quick Serve is a distributed food ordering and delivery management platform buil
 - **Super Admin Dashboard** (React)
 
 ✅ Core Functionalities:
-- Real-time order tracking (WebSocket + Mapbox/Here Maps)
+- Real-time order tracking (WebSocket + Mapbox/Here Maps + Redis + MongoDB)
 - Automated driver assignment (Redis Geospatial + RabbitMQ)
 - Secure authentication (JWT + OTP)
-- Multi-payment integration (PayHere, FriMi, Stripe)
+- Multi-payment integration (Strip, COD)
 - Dynamic menu & order management
 
 ✅ Tech Stack:
