@@ -33,34 +33,11 @@ Quick Serve is a distributed food ordering and delivery management platform buil
 ---
 
 ## Prerequisites
-
-Ensure you have the following installed:
-- **Docker** 20.10+
-- **Kubernetes** (Minikube/Kind/EKS/GKE)
-- **PostgreSQL** 14+
-- **Redis** 7+
-- **RabbitMQ** 3.10+
-- **Node.js** 18+ (for frontend)
+> ⚠️ Note: You do NOT need to install PostgreSQL, Redis, or RabbitMQ locally — they're automatically provisioned via Docker/Kubernetes.
 
 ---
 
 ## Setup Instructions
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/AashaniSamarakoon/Online_Food_Ordering.git
-cd Online_Food_Ordering
-```
-
-### 2. Configure Environment Variables
-- Create a `.env` file for each service (e.g., `auth-service/.env`) with the following:
-  ```
-  JWT_SECRET=your_secret_key
-  POSTGRES_URL=jdbc:postgresql://postgres-service:5432/quickserve
-  RABBITMQ_URL=amqp://rabbitmq-service:5672
-  REDIS_URL=redis://redis-service:6379
-  ```
----
 
 ## 🐳 Docker Setup
 To run this project seamlessly using Docker Compose:
