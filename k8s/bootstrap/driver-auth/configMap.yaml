@@ -11,9 +11,6 @@ data:
     spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
     server.port=8086
 
-    # Service discovery for driver-service
-    driver.service.url=http://driver-service
-
     # RabbitMQ settings
     spring.rabbitmq.host=rabbitmq
     spring.rabbitmq.port=5672

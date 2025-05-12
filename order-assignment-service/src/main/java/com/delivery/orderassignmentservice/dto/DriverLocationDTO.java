@@ -5,7 +5,7 @@ import java.time.Instant;
 
 @Data
 public class DriverLocationDTO {
-    private String driverId;
+    private Long driverId;
     private double latitude;
     private double longitude;
     private double distance;  // distance in meters from requested coordinates

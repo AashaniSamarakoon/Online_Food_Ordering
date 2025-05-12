@@ -1,5 +1,6 @@
 package com.delivery.driverservice.controller;
 
+import com.delivery.driverservice.client.OrderAssignmentServiceClient;
 import com.delivery.driverservice.dto.*;
 import com.delivery.driverservice.service.DriverService;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import java.util.List;
 public class DriverController{
 
     private final DriverService driverService;
+    private final OrderAssignmentServiceClient OrderAssignmentServiceClient;
 
     @PostMapping
     public ResponseEntity<DriverDTO> registerDriver(@RequestBody DriverRequest request) {
@@ -45,21 +47,27 @@ public class DriverController{
     }
 
     // Driver Status Management
-    @PatchMapping("/status")
-    public ResponseEntity<DriverDTO> updateDriverStatus(@Valid @RequestBody DriverStatusUpdate update) {
+    @PatchMapping("/{driverId}/status")
+    public ResponseEntity<DriverDTO> updateDriverStatus(
+            @PathVariable Long driverId,
+            @Valid @RequestBody DriverStatusUpdate update
+    ) {
+        // Validation
+        if (!driverId.equals(update.getDriverId())) {
+            throw new IllegalArgumentException("Path ID and body ID mismatch");
+        }
+
         return ResponseEntity.ok(driverService.updateDriverStatus(update));
     }
 
-    @DeleteMapping("/{driverId}")
-    public ResponseEntity<Void> deactivateDriver(@PathVariable Long driverId) {
-        driverService.deactivateDriver(driverId);
-        return ResponseEntity.noContent().build();
-    }
+    @GetMapping("/{driverId}/current-order")
+    public ResponseEntity<OrderDetailsDTO> getCurrentOrderDetails(@PathVariable Long driverId) {
+        // Verify driver exists
+//        driverService.verifyDriverExists(driverId);
 
-    @PostMapping("/{driverId}/reactivate")
-    public ResponseEntity<Void> reactivateDriver(@PathVariable Long driverId) {
-        driverService.reactivateDriver(driverId);
-        return ResponseEntity.noContent().build();
+        // Get order details from order service
+        OrderDetailsDTO orderDetails = OrderAssignmentServiceClient.getDriverActiveOrderDetails(driverId);
+        return ResponseEntity.ok(orderDetails);
     }
 
 //    // Driver Verification
@@ -70,12 +78,12 @@ public class DriverController{
 //        return ResponseEntity.ok(driverService.updateDriverVerification(driverId, isVerified));
 //    }
 
-    @PatchMapping("/{driverId}/verification-status")
-    public ResponseEntity<DriverDTO> updateDriverVerificationStatus(
-            @PathVariable Long driverId,
-            @Valid @RequestBody DriverVerificationUpdate update) {
-        return ResponseEntity.ok(driverService.updateDriverVerificationStatus(driverId, update));
-    }
+//    @PatchMapping("/{driverId}/verification-status")
+//    public ResponseEntity<DriverDTO> updateDriverVerificationStatus(
+//            @PathVariable Long driverId,
+//            @Valid @RequestBody DriverVerificationUpdate update) {
+//        return ResponseEntity.ok(driverService.updateDriverVerificationStatus(driverId, update));
+//    }
 
     @GetMapping("/{driverId}/verified")
     public ResponseEntity<Boolean> isDriverVerified(@PathVariable Long driverId) {
@@ -93,49 +101,16 @@ public class DriverController{
         return ResponseEntity.ok(driverService.getAvailableDrivers());
     }
 
-//    @GetMapping("/available/verified")
-//    public ResponseEntity<List<DriverDTO>> getAvailableVerifiedDrivers() {
-//        return ResponseEntity.ok(driverService.getAvailableVerifiedDrivers());
-//    }
-
     // Driver Location and Proximity
     @PutMapping("/location")
     public ResponseEntity<DriverDTO> updateDriverLocation(@Valid @RequestBody DriverLocationUpdate update) {
         return ResponseEntity.ok(driverService.updateDriverLocation(update));
     }
 
-//    @GetMapping("/nearby")
-//    public ResponseEntity<List<DriverDTO>> getNearbyAvailableDrivers(
-//            @RequestParam Double lat,
-//            @RequestParam Double lng,
-//            @RequestParam(defaultValue = "5.0") Double radius) {
-//        return ResponseEntity.ok(driverService.getNearbyAvailableDrivers(lat, lng, radius));
+//    @PostMapping("/complete-order")
+//    public ResponseEntity<DriverDTO> completeOrder(@Valid @RequestBody OrderCompletionRequest request) {
+//        return ResponseEntity.ok(driverService.completeOrder(request));
 //    }
-
-//    @GetMapping("/nearby/by-vehicle")
-//    public ResponseEntity<List<DriverDTO>> getNearbyAvailableDriversByVehicleType(
-//            @RequestParam Double lat,
-//            @RequestParam Double lng,
-//            @RequestParam(defaultValue = "5.0") Double radius,
-//            @RequestParam String vehicleType) {
-//        return ResponseEntity.ok(driverService.getNearbyAvailableDriversByVehicleType(lat, lng, radius, vehicleType));
-//    }
-
-    // Order Assignment Flow
-    @PostMapping("/assign-order")
-    public ResponseEntity<DriverDTO> assignOrderToDriver(@Valid @RequestBody OrderAssignmentRequest request) {
-        return ResponseEntity.ok(driverService.handleOrderAssignment(request));
-    }
-
-    @PostMapping("/order-response")
-    public ResponseEntity<DriverDTO> handleOrderAcceptance(@Valid @RequestBody OrderAcceptanceRequest request) {
-        return ResponseEntity.ok(driverService.handleOrderAcceptance(request));
-    }
-
-    @PostMapping("/complete-order")
-    public ResponseEntity<DriverDTO> completeOrder(@Valid @RequestBody OrderCompletionRequest request) {
-        return ResponseEntity.ok(driverService.completeOrder(request));
-    }
 
     // Rating Management
     @PatchMapping("/{driverId}/rating")

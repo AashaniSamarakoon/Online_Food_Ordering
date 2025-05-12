@@ -5,8 +5,12 @@ import com.delivery.orderassignmentservice.client.OrderServiceClient;
 import com.delivery.orderassignmentservice.client.TrackingServiceClient;
 import com.delivery.orderassignmentservice.dto.*;
 import com.delivery.orderassignmentservice.dto.events.AssignmentCompletedEvent;
+import com.delivery.orderassignmentservice.dto.events.DriverAssignmentEvent;
+import com.delivery.orderassignmentservice.dto.notification.OrderAssignmentNotification;
 import com.delivery.orderassignmentservice.exception.AssignmentNotFoundException;
-import com.delivery.orderassignmentservice.messaging.OrderAssigmentProducer;
+import com.delivery.orderassignmentservice.exception.NoAvailableDriversException;
+import com.delivery.orderassignmentservice.exception.OrderNotFoundException;
+import com.delivery.orderassignmentservice.messaging.OrderAssignmentProducer;
 import com.delivery.orderassignmentservice.model.OrderAssignment;
 import com.delivery.orderassignmentservice.repository.OrderAssignmentRepository;
 import com.delivery.orderassignmentservice.service.OrderAssignmentService;
@@ -17,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,70 +37,83 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
     private final DriverServiceClient driverServiceClient;
     private final OrderServiceClient orderServiceClient;
     private final TrackingServiceClient trackingServiceClient;
-    private final OrderAssigmentProducer rabbitMQProducer; // New RabbitMQ producer
+    private final OrderAssignmentProducer rabbitMQProducer; // New RabbitMQ producer
 
     /**
      * Process a new order for assignment
-     * This implements the sequence diagram flow for order assignment
      */
     @Override
     @Transactional
     public OrderAssignmentDTO processOrderAssignment(Long orderId) {
-        log.info("Starting assignment process for order: {}", orderId);
-        // 1. Get order details from Order Service
-        OrderDTO orderDetails = orderServiceClient.getOrderDetails(orderId);
-
-        // 2. Get nearby available drivers from Tracking Service
-        List<DriverLocationDTO> nearbyDrivers = trackingServiceClient.getNearbyDrivers(
-                orderDetails.getPickupLatitude(),
-                orderDetails.getPickupLongitude(),
-                5000, // default radius 5km
-                10    // default limit 10 drivers
-        );
-
-        // 3. Run assignment logic to select best driver
-        Optional<DriverLocationDTO> selectedDriver = selectBestDriver(nearbyDrivers, orderDetails);
-
-        if (!selectedDriver.isPresent()) {
-            log.warn("No available drivers found for order: {}", orderId);
-            throw new RuntimeException("No available drivers found for this order");
+        // 1. Fetch order details
+        OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException("Order " + orderId + " not found");
         }
 
-        DriverLocationDTO bestDriver = selectedDriver.get();
-        log.info("Selected driver {} for order {}", bestDriver.getDriverId(), orderId);
+        // 2. Find nearby drivers with dynamic radius
+        int radius = calculateSearchRadius(orderId);
+        List<DriverLocationDTO> nearbyDrivers = trackingServiceClient.getNearbyDrivers(
+                order.getRestaurantCoordinates().getLatitude(),
+                order.getRestaurantCoordinates().getLongitude(),
+                radius
+        );
 
-        // 4. Create the assignment
-        OrderAssignment assignment = OrderAssignment.builder()
-                .orderId(orderId)
-                .driverId(Long.parseLong(bestDriver.getDriverId()))
-                .status("ASSIGNED")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+        if (nearbyDrivers.isEmpty()) {
+            throw new NoAvailableDriversException("No drivers available within " + radius + "m");
+        }
 
-        OrderAssignment savedAssignment = assignmentRepository.save(assignment);
+        // 3. Create a list of drivers with their details and locations
+        List<DriverWithDetails> driversWithDetails = new ArrayList<>();
+        for (DriverLocationDTO location : nearbyDrivers) {
+            // Get driver details including rating
+            DriverDTO driverDetails = driverServiceClient.getDriverDetails(location.getDriverId());
+            driversWithDetails.add(new DriverWithDetails(location, driverDetails));
+        }
 
-        // 5. Update order status in Order Service
-        orderServiceClient.updateOrderStatus(orderId);
+        // 4. Sort drivers by distance and rating
+        List<DriverWithDetails> candidates = driversWithDetails.stream()
+                .sorted(
+                        Comparator.comparingDouble((DriverWithDetails d) -> d.getLocation().getDistance())
+                                .thenComparingDouble(d -> -d.getDriverDetails().getRating()) // Descending rating
+                )
+                .limit(3)
+                .toList();
 
-        // 6. Notify Driver Service about the assignment
-        OrderAssignmentDTO assignmentDTO = modelMapper.map(savedAssignment, OrderAssignmentDTO.class);
-        driverServiceClient.assignOrderToDriver(Long.parseLong(bestDriver.getDriverId()), assignmentDTO);
+        // 5. Send notifications to selected drivers
+        candidates.forEach(driver -> {
+            DriverAssignmentEvent event = new DriverAssignmentEvent(
+                    orderId,
+                    driver.getLocation().getDriverId(),
+                    new LocationDTO(order.getRestaurantCoordinates().getLatitude(), order.getRestaurantCoordinates().getLongitude()),
+                    driver.getLocation().getDistance(),
+                    driver.getLocation().getHeading(),
+                    LocalDateTime.now().plusSeconds(15)
+            );
+            rabbitMQProducer.sendDriverNotification(event);
+        });
 
-        // 7. Get complete driver details for response
-        DriverDTO driverInfo = driverServiceClient.getDriverDetails(Long.parseLong(bestDriver.getDriverId()));
-        assignmentDTO.setDriver(modelMapper.map(driverInfo, OrderAssignmentDTO.AssignDriverDTO.class));
+        // 6. Create pending assignment
+        OrderAssignment assignment = new OrderAssignment();
+        assignment.setOrderId(orderId);
+        assignment.setCandidateDrivers(
+                candidates.stream()
+                        .map(driver -> driver.getLocation().getDriverId())
+                        .collect(Collectors.toList())
+        );
+        assignment.setStatus("PENDING");
+        assignment.setCreatedAt(LocalDateTime.now());
+        assignment.setUpdatedAt(LocalDateTime.now());
+        assignment.setExpiryTime(LocalDateTime.now().plusSeconds(15));
 
-        // 8. Send assignment completed event via RabbitMQ
-        sendAssignmentCompletedEvent(savedAssignment, driverInfo, orderDetails);
-
-        return assignmentDTO;
+        return modelMapper.map(assignmentRepository.save(assignment), OrderAssignmentDTO.class);
     }
+
 
     /**
      * Build and send an assignment completed event
      */
-    private void sendAssignmentCompletedEvent(OrderAssignment assignment, DriverDTO driver, OrderDTO order) {
+    private void sendAssignmentCompletedEvent(OrderAssignment assignment, DriverDTO driver, OrderDetailsDTO order) {
         // Calculate estimated arrival time (simplified version)
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime estimatedArrival = now.plusMinutes(15); // Simplified calculation
@@ -113,77 +132,16 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
         log.info("Sent assignment completed event for order: {}", assignment.getOrderId());
     }
 
-    // Rest of the implementation remains the same
 
-    private Optional<DriverLocationDTO> selectBestDriver(List<DriverLocationDTO> nearbyDrivers, OrderDTO order) {
-        // Implementation unchanged from previous response
-        if (nearbyDrivers == null || nearbyDrivers.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return nearbyDrivers.stream()
-                .sorted((d1, d2) -> {
-                    double dist1 = calculateDistance(
-                            d1.getLatitude(), d1.getLongitude(),
-                            order.getPickupLatitude(), order.getPickupLongitude()
-                    );
-                    double dist2 = calculateDistance(
-                            d2.getLatitude(), d2.getLongitude(),
-                            order.getPickupLatitude(), order.getPickupLongitude()
-                    );
-                    return Double.compare(dist1, dist2);
-                })
-                .findFirst();
+    private int calculateSearchRadius(Long orderId) {
+        int rejectionCount = assignmentRepository.countRejectionsByOrder(orderId);
+        return rejectionCount >= 3 ? 8000 : 5000; // 8km after 3 rejects
     }
 
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        // Implementation unchanged from previous response
-        final int R = 6371; // Earth's radius in kilometers
-
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
-
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c * 1000; // convert to meters
-    }
-
-
-    @Override
-    @Transactional
-    public OrderAssignmentDTO createAssignment(AssignmentRequest request) {
-        // Get driver details
-        DriverDTO driverInfo = driverServiceClient.getDriverDetails(request.getDriverId());
-
-        OrderAssignment assignment = OrderAssignment.builder()
-                .orderId(request.getOrderId())
-                .driverId(request.getDriverId())
-                .status("PENDING")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        OrderAssignment savedAssignment = assignmentRepository.save(assignment);
-
-        // Notify driver service
-        OrderAssignmentDTO assignmentDTO = modelMapper.map(savedAssignment, OrderAssignmentDTO.class);
-        driverServiceClient.assignOrderToDriver(request.getDriverId(), assignmentDTO);
-
-        // Build response with driver details
-        OrderAssignmentDTO response = modelMapper.map(savedAssignment, OrderAssignmentDTO.class);
-        response.setDriver(modelMapper.map(driverInfo, OrderAssignmentDTO.AssignDriverDTO.class));
-
-        return response;
-    }
 
     @Override
     @Transactional
     public OrderAssignmentDTO updateAssignmentStatus(AssignmentStatusUpdate update) {
-        // Your existing implementation...
         OrderAssignment assignment = assignmentRepository.findById(update.getAssignmentId())
                 .orElseThrow(() -> new AssignmentNotFoundException("Assignment not found"));
 
@@ -200,9 +158,213 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
         return response;
     }
 
+    @Transactional
+    @Override
+    public void confirmAssignment(Long orderId, Long driverId) {  // Changed from String to Long
+        log.info("Confirming assignment for order {} by driver {}", orderId, driverId);
+
+        // Validate and update assignment
+        OrderAssignment assignment = assignmentRepository.findByOrderIdAndDriverId(orderId, driverId)
+                .orElseThrow(() -> new AssignmentNotFoundException(
+                        "No pending assignment found for order " + orderId + " and driver " + driverId));
+
+        if (!"PENDING".equals(assignment.getStatus())) {
+            throw new IllegalStateException("Assignment is not in PENDING state");
+        }
+
+        // Update assignment status
+        assignment.setStatus("CONFIRMED");
+        assignment.setUpdatedAt(LocalDateTime.now());
+        assignmentRepository.save(assignment);
+
+        // Update order and driver statuses
+
+        // Create OrderStatusUpdate object
+        OrderStatusUpdate orderStatusUpdate = new OrderStatusUpdate();
+        orderStatusUpdate.setStatus("DRIVER_CONFIRMED");
+        orderStatusUpdate.setDriverId(driverId);
+
+        // Call the updateOrderStatus method with the proper object
+        orderServiceClient.updateOrderStatus(orderId, orderStatusUpdate);
+
+        // Create a DriverStatusUpdate object
+        DriverStatusUpdate statusUpdate = new DriverStatusUpdate();
+        statusUpdate.setDriverId(driverId);
+        statusUpdate.setStatus("BUSY");
+        statusUpdate.setLastActiveAt(LocalDateTime.now());
+
+        driverServiceClient.updateDriverStatus(driverId, statusUpdate);
+
+        // Cancel other pending assignments for this order
+        Optional<OrderAssignment> pendingAssignmentOpt = assignmentRepository.findByOrderIdAndStatus(orderId, "PENDING");
+        if (pendingAssignmentOpt.isPresent()) {
+            OrderAssignment pendingAssignment = pendingAssignmentOpt.get();
+            pendingAssignment.setStatus("CANCELLED");
+            pendingAssignment.setUpdatedAt(LocalDateTime.now());
+            assignmentRepository.save(pendingAssignment);
+        }
+
+        // Send completion event
+        DriverDTO driver = driverServiceClient.getDriverDetails(driverId);
+        OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
+        sendAssignmentCompletedEvent(assignment, driver, order);
+    }
+
+    @Transactional
+    @Override
+    public void handleRejection(Long orderId, Long driverId) {
+        log.info("Handling rejection for order {} by driver {}", orderId, driverId);
+
+        // Mark assignment as rejected
+        Optional<OrderAssignment> assignmentOpt = assignmentRepository.findByOrderIdAndDriverId(orderId, driverId);
+        assignmentOpt.ifPresent(assignment -> {
+            assignment.setStatus("REJECTED");
+            assignment.setUpdatedAt(LocalDateTime.now());
+            assignmentRepository.save(assignment);
+        });
+
+        // Check rejection count
+        long rejectionCount = assignmentRepository.countByOrderIdAndStatus(orderId, "REJECTED");
+
+        // Get the original order details
+        OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException("Order not found: " + orderId);
+        }
+
+        // Try next candidate or restart process
+        Optional<OrderAssignment> pendingAssignment = assignmentRepository.findByOrderIdAndStatus(orderId, "PENDING");
+        if (pendingAssignment.isPresent()) {
+            // Try next candidate driver
+            List<Long> candidates = pendingAssignment.get().getCandidateDrivers();
+            Optional<Long> nextDriver = candidates.stream()
+                    .filter(candidateId ->
+                            !assignmentRepository.existsByOrderIdAndDriverIdAndStatus(
+                                    orderId, candidateId, "REJECTED"))
+                    .findFirst();
+
+            if (nextDriver.isPresent()) {
+                notifySingleDriver(orderId, nextDriver.get(), order);
+            } else {
+                restartAssignmentProcess(orderId, order, rejectionCount);
+            }
+        } else {
+            restartAssignmentProcess(orderId, order, rejectionCount);
+        }
+    }
+
+    private void notifySingleDriver(Long orderId, Long driverId, OrderDetailsDTO order) {
+        DriverLocationDTO driver = trackingServiceClient.getDriverLocation(driverId);
+        DriverAssignmentEvent event = new DriverAssignmentEvent(
+                orderId,
+                driverId,
+                new LocationDTO(order.getRestaurantCoordinates().getLatitude(), order.getRestaurantCoordinates().getLongitude()),
+                driver.getDistance(),
+                driver.getHeading(),
+                LocalDateTime.now().plusSeconds(15)
+        );
+        rabbitMQProducer.sendDriverNotification(event);
+    }
+
+    private void restartAssignmentProcess(Long orderId, OrderDetailsDTO order, long rejectionCount) {
+        int radius = rejectionCount >= 3 ? 8000 : 5000;
+        log.info("Restarting assignment process for order {} with radius {}m", orderId, radius);
+
+        List<DriverLocationDTO> nearbyDrivers = trackingServiceClient.getNearbyDrivers(
+                order.getRestaurantCoordinates().getLatitude(),
+                order.getRestaurantCoordinates().getLongitude(),
+                radius
+        );
+
+        // Filter out previously rejected drivers
+        List<Long> rejectedDrivers = assignmentRepository.findByOrderId(orderId).stream()
+                .map(OrderAssignment::getDriverId)
+                .toList();
+
+        List<DriverLocationDTO> availableDrivers = nearbyDrivers.stream()
+                .filter(driver -> !rejectedDrivers.contains(driver.getDriverId()))
+                .toList();
+
+        if (!availableDrivers.isEmpty()) {
+            processOrderAssignment(orderId); // Restart the process
+        } else {
+            log.warn("No available drivers left for order {}", orderId);
+
+            // Create OrderStatusUpdate object
+            OrderStatusUpdate statusUpdate = new OrderStatusUpdate();
+            statusUpdate.setStatus("FAILED");
+            statusUpdate.setFailureReason("No drivers available");
+
+            // Call the updateOrderStatus method with the proper object
+            orderServiceClient.updateOrderStatus(orderId, statusUpdate);
+        }
+    }
+
+    @Override
+    public OrderDetailsDTO getDriverActiveOrderDetails(Long driverId) {
+        // Find the driver's active assignment
+        OrderAssignment assignment = assignmentRepository.findByDriverIdAndStatus(driverId, "CONFIRMED")
+                .orElseThrow(() -> new AssignmentNotFoundException(
+                        "No active assignment found for driver " + driverId));
+
+        // Get detailed order information
+        OrderDetailsDTO orderDetails = orderServiceClient.getOrderDetails(assignment.getOrderId());
+
+        // Enrich with assignment information if needed
+        orderDetails.setAssignmentTime(assignment.getCreatedAt());
+
+        return orderDetails;
+    }
+
+    @Override
+    public List<OrderAssignmentNotification> getPendingAssignmentsForDriver(Long driverId) {
+        // Find any pending assignments for this driver
+        List<OrderAssignment> pendingAssignments = assignmentRepository.findAllByDriverIdAndStatus(driverId, "PENDING");
+
+        // Convert assignments to notifications
+        return pendingAssignments.stream().map(assignment -> {
+            // Get order details
+            OrderDetailsDTO order = orderServiceClient.getOrderDetails(assignment.getOrderId());
+
+            // Get coordinates from order (handle null cases)
+            LocationDTO restaurantLocation = order.getRestaurantCoordinates();
+            LocationDTO customerLocation = order.getCustomerCoordinates();
+
+            // If coordinates are null in OrderDetailsDTO, create empty LocationDTO objects
+            if (restaurantLocation == null) {
+                restaurantLocation = new LocationDTO(0.0, 0.0);
+            }
+
+            if (customerLocation == null) {
+                customerLocation = new LocationDTO(0.0, 0.0);
+            }
+
+            // Build notification object
+            return OrderAssignmentNotification.builder()
+                    .orderId(order.getId())
+                    .orderNumber(order.getOrderNumber())
+                    .payment(order.getTotal() != null ? order.getTotal().toString() : "0")
+                    // Restaurant information
+                    .restaurantName(order.getRestaurantName())
+                    .restaurantAddress(order.getPickupAddress())
+                    // Customer information
+                    .customerAddress(order.getDeliveryAddress())
+                    // Coordinates as LocationDTO objects
+                    .restaurantCoordinates(restaurantLocation)
+                    .customerCoordinates(customerLocation)
+                    // Special instructions
+                    .specialInstructions(order.getSpecialInstructions())
+                    // Assignment expiry
+                    .expiryTime(assignment.getExpiryTime())
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+
     @Override
     public List<OrderAssignmentDTO> getAssignmentsByOrder(Long orderId) {
-        // Your existing implementation...
+
         List<OrderAssignment> assignments = assignmentRepository.findByOrderId(orderId);
 
         return assignments.stream().map(assignment -> {
@@ -219,7 +381,7 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
 
     @Override
     public List<OrderAssignmentDTO> getAssignmentsByDriver(Long driverId) {
-        // Your existing implementation...
+
         DriverDTO driverInfo = driverServiceClient.getDriverDetails(driverId);
 
         List<OrderAssignment> assignments = assignmentRepository.findByDriverId(driverId);

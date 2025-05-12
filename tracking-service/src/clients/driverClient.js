@@ -2,14 +2,15 @@ const axios = require('axios');
 const logger = require('../utils/logger');
 const { getRedisClient } = require('../config/redis');
 
-const redis = getRedisClient();
-
 // Driver service client
 const driverClient = {
   baseURL: process.env.DRIVER_SERVICE_URL || 'http://driver-service:8087',
   
   async getDriverDetails(driverId) {
     try {
+      // Get Redis client at function call time, not module load time
+      const redis = getRedisClient();
+      
       // Try cache first
       const cacheKey = `driver:${driverId}:details`;
       const cachedData = await redis.get(cacheKey);
@@ -35,6 +36,9 @@ const driverClient = {
 
   async getAvailableDrivers() {
     try {
+      // Get Redis client at function call time
+      const redis = getRedisClient();
+      
       // Try cache first
       const cacheKey = 'drivers:available';
       const cachedData = await redis.get(cacheKey);
@@ -57,6 +61,7 @@ const driverClient = {
       logger.error(`Error getting available drivers: ${error.message}`);
       // If error occurs, try to return cached data even if expired
       try {
+        const redis = getRedisClient();
         const cacheKey = 'drivers:available';
         const cachedData = await redis.get(cacheKey);
         if (cachedData) {
@@ -69,21 +74,7 @@ const driverClient = {
       throw error;
     }
   }
-  
-  // async updateDriverStatus(driverId, status) {
-  //   try {
-  //     const response = await axios.patch(`${this.baseURL}/api/drivers/status`, {
-  //       driverId,
-  //       status
-  //     });
-  //     return response.data;
-  //   } catch (error) {
-  //     logger.error(`Error updating driver status: ${error.message}`, { driverId, status });
-  //     throw error;
-  //   }
-  // }
 };
-
 
 module.exports = {
   driverClient,

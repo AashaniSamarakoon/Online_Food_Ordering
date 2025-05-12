@@ -41,8 +41,8 @@ const LocationSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['IDLE', 'PICKING_UP', 'DELIVERING', 'COMPLETED'],
-    default: 'IDLE'
+    enum: ['AVAILABLE', 'PICKING_UP', 'DELIVERING', 'COMPLETED'],
+    default: 'AVAILABLE'
   }
 }, {
   timestamps: true
