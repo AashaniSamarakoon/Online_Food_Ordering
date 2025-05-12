@@ -1,6 +1,7 @@
-package com.delivery.driverservice.dto;
+package com.delivery.orderassignmentservice.dto;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data

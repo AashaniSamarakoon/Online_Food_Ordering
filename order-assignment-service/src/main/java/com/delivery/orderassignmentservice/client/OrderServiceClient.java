@@ -1,6 +1,7 @@
 package com.delivery.orderassignmentservice.client;
 
-import com.delivery.orderassignmentservice.dto.OrderDTO;
+import com.delivery.orderassignmentservice.dto.OrderDetailsDTO;
+import com.delivery.orderassignmentservice.dto.OrderStatusUpdate;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface OrderServiceClient {
 
     @GetMapping("/api/orders/{orderId}")
-    OrderDTO getOrderDetails(@PathVariable Long orderId);
+    OrderDetailsDTO getOrderDetails(@PathVariable Long orderId);
 
     @PatchMapping("/api/orders/{orderId}/status")
     void updateOrderStatus(
-            @PathVariable Long orderId
-//            @RequestBody OrderStatusUpdate statusUpdate
+            @PathVariable Long orderId,
+            @RequestBody OrderStatusUpdate statusUpdate
     );
 }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OrderAssigmentConsumer {
+public class OrderAssignmentConsumer {
 
     private final OrderAssignmentService orderAssignmentService;
 

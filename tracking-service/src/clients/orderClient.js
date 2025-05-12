@@ -4,9 +4,9 @@ const { getRedisClient } = require('../config/redis');
 
 // Order service client
 const orderClient = {
-  baseURL: process.env.ORDER_SERVICE_URL || 'http://order-service:8086',
+  baseURL: process.env.ORDER_SERVICE_URL || 'http://order-service:8093',
   
-  async getOrderDetails(orderId) {
+  async getOrderDetails(orderId) { 
     try {
       // Get Redis client at function call time, not module load time
       const redis = getRedisClient();
