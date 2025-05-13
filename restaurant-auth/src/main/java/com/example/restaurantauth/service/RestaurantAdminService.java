@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,5 +27,9 @@ public class RestaurantAdminService implements UserDetailsService {
                 admin.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + admin.getRole().name()))
         );
+    }
+
+    public Optional<RestaurantAdmin> findByEmail(String email) {
+        return repository.findByEmail(email);
     }
 }

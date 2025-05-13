@@ -38,7 +38,7 @@ public class JwtService {
 
     public String generateToken(RestaurantAdmin admin) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", Collections.singletonList("ROLE_" + admin.getRole().name()));
+        claims.put("roles", Collections.singletonList(admin.getRole().name()));
         claims.put("isSuperAdmin", admin.getRole() == RestaurantAdmin.Role.SUPER_ADMIN);
 
         return buildToken(claims, admin.getEmail());

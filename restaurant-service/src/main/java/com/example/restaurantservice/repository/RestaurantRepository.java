@@ -11,12 +11,13 @@ import java.util.Optional;
 
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
-    Optional<Restaurant> findByOwnerUsername(String ownerUsername);
+    Optional<Restaurant> findByOwnerId(String ownerId);
+    boolean existsByOwnerId(String ownerId);
+    boolean existsByIdAndOwnerId(Long id, String ownerId);
+    Optional<Restaurant> findByIdAndOwnerId(Long id, String ownerId);
     List<Restaurant> findByIsActiveTrue();
     List<Restaurant> findByNameContainingIgnoreCase(String name);
 
     @Query("SELECT r FROM Restaurant r LEFT JOIN FETCH r.menuItems WHERE r.id = :id")
     Optional<Restaurant> findByIdWithMenuItems(@Param("id") Long id);
-
-    boolean existsByIdAndOwnerUsername(Long id, String ownerUsername);
 }

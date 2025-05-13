@@ -8,11 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -21,76 +17,99 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Restaurant implements UserDetails {
+public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String username;
+    @Column(name = "owner_id")
+    private String ownerId; // From JWT token (matches auth service user ID)
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "admin_id", nullable = false)
+    private String adminId; // This should match the email or user_id from auth service
 
+    // Add username field that's required by your database
     @Column(nullable = false)
+    private String username; // Will be set to same as owner_id
+
+    // Add owner_username field that might be required
+    @Column(name = "owner_username")
+    private String ownerUsername;
+
+    @NotBlank
     private String name;
 
-    @Column(nullable = false)
+    @NotBlank
     private String address;
 
-    @Column(nullable = false)
+    @NotBlank
     private String phone;
 
-    @Column(nullable = false, unique = true)
-    @Email
-    @NotBlank
-    @Size(max = 100)
+    @NotBlank @Email
     private String email;
 
-    @Column(nullable = false)
     @NotBlank
-    @Size(max = 100)
     private String openingHours;
+
+    @Column(nullable = false)
+    private String password; // Required placeholder value
 
     @Column(nullable = false)
     private boolean isActive;
 
-    @Column(nullable = false)
-    private String ownerUsername;  // Changed from adminId to ownerUsername
+    // New fields based on RegisterRequest
+    private String ownerName;
+
+    private String nic;
+
+    @Column(nullable = true)
+    private Double latitude;
+
+    @Column(nullable = true)
+    private Double longitude;
+
+    @Column(name = "bank_account_owner")
+    private String bankAccountOwner;
+
+    @Column(name = "bank_name")
+    private String bankName;
+
+    @Column(name = "branch_name")
+    private String branchName;
+
+    @Column(name = "account_number")
+    private String accountNumber;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItem> menuItems;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("RESTAURANT_OWNER"));
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return isActive;
-    }
-
-    public void updateDetails(String name, String address, String phone, String email, String openingHours) {
+    public void updateDetails(String name, String address, String phone,
+                              String email, String openingHours) {
         this.name = name;
         this.address = address;
         this.phone = phone;
         this.email = email;
         this.openingHours = openingHours;
+    }
+
+    // Extended update method to include all new fields
+    public void updateFullDetails(String name, String address, String phone,
+                                  String email, String openingHours,
+                                  String ownerName, String nic,
+                                  Double latitude, Double longitude,
+                                  String bankAccountOwner, String bankName,
+                                  String branchName, String accountNumber) {
+        // Update basic details
+        updateDetails(name, address, phone, email, openingHours);
+
+        // Update additional fields
+        this.ownerName = ownerName;
+        this.nic = nic;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.bankAccountOwner = bankAccountOwner;
+        this.bankName = bankName;
+        this.branchName = branchName;
+        this.accountNumber = accountNumber;
     }
 }

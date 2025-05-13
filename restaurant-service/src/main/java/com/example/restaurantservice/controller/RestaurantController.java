@@ -5,68 +5,63 @@ import com.example.restaurantservice.dto.RestaurantResponse;
 import com.example.restaurantservice.service.RestaurantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/restaurants")
 @RequiredArgsConstructor
+@Slf4j
 public class RestaurantController {
     private final RestaurantService restaurantService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('RESTAURANT_ADMIN')")
     public RestaurantResponse createRestaurant(
             @Valid @RequestBody RestaurantRequest request,
             Authentication authentication) {
-        String ownerUsername = authentication.getName();
-        return restaurantService.createRestaurant(request, ownerUsername);
+        String ownerId = authentication.getName();
+        return restaurantService.createRestaurant(request, ownerId);
     }
 
-    @GetMapping("/{id}")
-    public RestaurantResponse getRestaurant(@PathVariable Long id) {
-        return restaurantService.getRestaurantById(id);
+    @GetMapping("/my-restaurant")
+    @PreAuthorize("hasAuthority('RESTAURANT_ADMIN')")
+    public RestaurantResponse getMyRestaurant(Authentication authentication) {
+        String ownerId = authentication.getName();
+        return restaurantService.getRestaurantByOwner(ownerId);
     }
 
-    @GetMapping
-    public Page<RestaurantResponse> getAllRestaurants(Pageable pageable) {
-        return restaurantService.getAllRestaurants(pageable);
+    @GetMapping("/sync")
+    @PreAuthorize("hasAuthority('RESTAURANT_ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
+    public RestaurantResponse syncRestaurantFromAuth(Authentication authentication) {
+        String ownerId = authentication.getName();
+        String token = extractToken(authentication);
+        log.info("Syncing restaurant data for owner: {} with token starting with: {}...",
+                ownerId, token.substring(0, Math.min(10, token.length())));
+        return restaurantService.syncRestaurantFromAuth(ownerId, token);
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('RESTAURANT_OWNER')")
-    public RestaurantResponse updateRestaurant(
-            @PathVariable Long id,
+    private String extractToken(Authentication authentication) {
+        if (authentication instanceof JwtAuthenticationToken) {
+            JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+            return "Bearer " + jwtAuth.getToken().getTokenValue();
+        }
+        throw new IllegalStateException("Expected JWT authentication");
+    }
+
+    @PutMapping("/my-restaurant")
+    @PreAuthorize("hasAuthority('RESTAURANT_ADMIN')")
+    public RestaurantResponse updateMyRestaurant(
             @Valid @RequestBody RestaurantRequest request,
             Authentication authentication) {
-        // Verify ownership
-        restaurantService.verifyOwnership(id, authentication.getName());
-        return restaurantService.updateRestaurant(id, request);
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deleteRestaurant(@PathVariable Long id) {
-        restaurantService.deleteRestaurant(id);
-    }
-
-    @PatchMapping("/{id}/availability")
-    @PreAuthorize("hasRole('RESTAURANT_OWNER') or hasRole('ADMIN')")
-    public RestaurantResponse setRestaurantAvailability(
-            @PathVariable Long id,
-            @RequestParam Boolean isActive,
-            Authentication authentication) {
-        // Verify ownership if not admin
-        if (!authentication.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
-            restaurantService.verifyOwnership(id, authentication.getName());
-        }
-        return restaurantService.setRestaurantAvailability(id, isActive);
+        String ownerId = authentication.getName();
+        RestaurantResponse myRestaurant = restaurantService.getRestaurantByOwner(ownerId);
+        return restaurantService.updateRestaurant(myRestaurant.getId(), request, ownerId);
     }
 }
