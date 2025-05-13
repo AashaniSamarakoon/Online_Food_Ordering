@@ -46,4 +46,26 @@ public class AuthController {
         String token = jwtUtil.generateTokenWithUserId(existing.getId());
         return ResponseEntity.ok(Collections.singletonMap("token", token));
     }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
+        Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        User user = optionalUser.get();
+
+        Map<String, Object> profile = Map.of(
+                "firstName", user.getFirstName(),
+                "lastName", user.getLastName(),
+                "email", user.getEmail(),
+                "phoneNumber", user.getPhoneNumber()
+        );
+
+        return ResponseEntity.ok(profile);
+    }
+
 }

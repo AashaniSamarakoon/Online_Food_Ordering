@@ -17,6 +17,6 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
 
-        return Long.parseLong(claims.getSubject()); // userId is stored as subject
+        return Long.parseLong(claims.getSubject());
     }
 }

@@ -31,4 +31,7 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<FoodItem> items;
+
+    @ElementCollection
+    private List<String> categories;
 }

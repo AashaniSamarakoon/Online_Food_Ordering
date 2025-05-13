@@ -1,6 +1,7 @@
 package com.order_service.order_service.service;
 
 import com.order_service.order_service.client.RestaurantClient;
+import com.order_service.order_service.client.UserClient;
 import com.order_service.order_service.dto.*;
 import com.order_service.order_service.model.Coordinates;
 import com.order_service.order_service.model.CustomerLocation;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,9 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final JwtUtil jwtUtil;
     private final CustomerLocationService customerLocationService;
+    private final UserClient userClient;
+    private final NotificationService notificationService;
+
 
     public OrderResponse placeOrder(OrderRequest request, String token) {
         Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
@@ -69,7 +74,35 @@ public class OrderService {
                 .build();
 
         Order savedOrder = orderRepository.save(order);
+
+        Map<String, Object> userProfile = userClient.getUserProfile(token);
+        String firstName = (String) userProfile.get("firstName");
+        String lastName = (String) userProfile.get("lastName");
+        String email = (String) userProfile.get("email");
+        String phoneNumber = (String) userProfile.get("phoneNumber");
+
+
+        notificationService.sendOrderConfirmation(userProfile, savedOrder);
         return OrderResponse.from(savedOrder);
     }
+
+    public List<OrderHistoryResponse> getOrderHistory(String token) {
+        Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
+        List<Order> orders = orderRepository.findByUserId(userId);
+
+        return orders.stream().map(order -> {
+            RestaurantResponse restaurant = restaurantClient.getRestaurantById(order.getRestaurantId());
+            return OrderHistoryResponse.builder()
+                    .orderId(order.getId())
+                    .restaurantId(order.getRestaurantId())
+                    .restaurantName(restaurant.getName())
+                    .items(order.getItems())
+                    .totalPrice(order.getTotalPrice())
+                    .status(order.getStatus())
+                    .createdAt(order.getCreatedAt() != null ? order.getCreatedAt().toString() : null)
+                    .build();
+        }).toList();
+    }
+
 
 }

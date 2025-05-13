@@ -15,4 +15,6 @@ public class RestaurantResponse {
     private Double distance;
     private String imageUrl;
     private List<FoodItemResponse> items;
+    private List<String> categories;
+
 }

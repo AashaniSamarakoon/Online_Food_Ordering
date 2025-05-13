@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users") // still avoiding 'user' keyword
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +17,7 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String username;  // can also be email or phone, if unique
+    private String username;
 
     @Column(nullable = false)
     private String password;
@@ -40,7 +40,7 @@ public class User {
     private String zipCode;
     private String country;
 
-    // Coordinates for delivery (optional, if preselected by user)
+
     private Double latitude;
     private Double longitude;
 

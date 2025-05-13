@@ -23,9 +23,9 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId; // associated user
+    private Long userId;
 
-    private String status; // e.g., "ACTIVE", "COMPLETED", "ABANDONED"
+    private String status;
 
     private Long restaurantId;
 
@@ -34,16 +34,16 @@ public class Cart {
     private List<CartItem> items = new ArrayList<>();
 
     @Column(name = "total_price")
-    private Double totalPrice; // total price including discounts, delivery, etc.
+    private Double totalPrice;
 
     @Column(name = "discount_code")
-    private String discountCode; // store discount code applied
+    private String discountCode;
 
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt; // cart creation timestamp
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt; // cart last update timestamp
+    private LocalDateTime updatedAt;
 
 
     @PrePersist

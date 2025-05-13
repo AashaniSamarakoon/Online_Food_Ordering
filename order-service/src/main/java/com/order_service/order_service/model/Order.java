@@ -2,6 +2,7 @@ package com.order_service.order_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +26,7 @@ public class Order {
 
     private Long restaurantId;
 
-    private Double totalPrice;
+    private Double totalPrice= 0.0;
 
     private Double deliveryCharges;
 
@@ -33,8 +34,8 @@ public class Order {
 
     private String deliveryInstructions;
 
-    private String paymentMethod;  // e.g. CARD, CASH, UPI
-    private String paymentStatus;  // e.g. PENDING, PAID
+    private String paymentMethod;
+    private String paymentStatus;
     private String transactionId;
 
     private Long assignedDeliveryPersonId;
@@ -56,4 +57,8 @@ public class Order {
             @AttributeOverride(name = "longitude", column = @Column(name = "customer_longitude"))
     })
     private Coordinates customerCoordinates;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 }

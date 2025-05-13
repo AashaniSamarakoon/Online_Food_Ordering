@@ -21,6 +21,7 @@ public class CartItem {
     private Long id;
 
     private Long foodItemId;
+    private String imageUrl;
     private String name;
     private Double price;
     private Integer quantity;

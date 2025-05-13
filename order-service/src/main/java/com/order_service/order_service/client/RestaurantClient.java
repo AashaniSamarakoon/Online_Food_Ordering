@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "restaurant-service", url = "http://localhost:8083") // change port in production
+@FeignClient(name = "restaurant-service", url = "http://localhost:8081")
 public interface RestaurantClient {
 
     @GetMapping("/restaurants")

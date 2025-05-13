@@ -29,7 +29,7 @@ public class DeliveryService {
                 restaurantLat, restaurantLon
         );
 
-        return Math.round(distance * 10.0); // ₹10 per km (example)
+        return Math.round(distance * 100.0);
     }
 }
 

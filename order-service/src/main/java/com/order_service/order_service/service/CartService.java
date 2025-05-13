@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -58,6 +59,7 @@ public class CartService {
             CartItem cartItem = CartItem.builder()
                     .foodItemId(foodItemId)
                     .name(item.getName())
+                    .imageUrl(item.getImageUrl())
                     .price(item.getPrice())
                     .quantity(quantity)
                     .restaurantId(restaurantId)
@@ -72,11 +74,31 @@ public class CartService {
     }
 
 
+//    public void removeItemFromCart(String token, Long cartItemId) {
+//        Cart cart = getCart(token);
+//        cart.getItems().removeIf(item -> item.getId().equals(cartItemId));
+//        cartRepository.save(cart);
+//    }
+
     public void removeItemFromCart(String token, Long cartItemId) {
         Cart cart = getCart(token);
-        cart.getItems().removeIf(item -> item.getId().equals(cartItemId));
+        Iterator<CartItem> iterator = cart.getItems().iterator();
+
+        while (iterator.hasNext()) {
+            CartItem item = iterator.next();
+            if (item.getId().equals(cartItemId)) {
+                if (item.getQuantity() > 1) {
+                    item.setQuantity(item.getQuantity() - 1);
+                } else {
+                    iterator.remove();
+                }
+                break;
+            }
+        }
+
         cartRepository.save(cart);
     }
+
 
     public void clearCart(String token) {
         Cart cart = getCart(token);
