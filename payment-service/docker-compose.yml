@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  payment:
+    build: .
+    container_name: payment_service
+    ports:
+      - "8099:8099"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-rough-snow-a4m8b5yw-pooler.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
+      SPRING_DATASOURCE_USERNAME: neondb_owner
+      SPRING_DATASOURCE_PASSWORD: npg_9lIysfYZ0NAJ
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    restart: always

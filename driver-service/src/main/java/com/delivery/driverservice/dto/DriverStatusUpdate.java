@@ -7,7 +7,5 @@ import java.time.LocalDateTime;
 public class DriverStatusUpdate {
     private Long driverId;
     private String status;
-    private Double latitude;
-    private Double longitude;
     private LocalDateTime lastActiveAt;
 }

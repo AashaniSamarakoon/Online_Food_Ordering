@@ -1,0 +1,70 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+
+    # WebSocket-specific annotations
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+    # Ensure WebSocket connections are allowed to upgrade
+    nginx.ingress.kubernetes.io/websocket-services: "order-assignment-service"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /(api/auth/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-auth-service
+                port:
+                  number: 80
+          - path: /(api/admin/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-auth-service
+                port:
+                  number: 80
+          - path: /(api/tracking/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tracking-service
+                port:
+                  number: 80
+          - path: /(api/drivers/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: driver-service
+                port:
+                  number: 80
+          - path: /(api/assignments/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-assignment-service
+                port:
+                  number: 80
+           # specific path for WebSocket connections
+          - path: /(ws/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-assignment-service
+                port:
+                  number: 80

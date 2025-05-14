@@ -6,10 +6,10 @@ const LocationSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  orderId: {
-    type: String,
-    index: true
-  },
+  // orderId: {
+  //   type: String,
+  //   index: true
+  // },
   location: {
     type: {
       type: String,
@@ -41,8 +41,8 @@ const LocationSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['IDLE', 'PICKING_UP', 'DELIVERING', 'COMPLETED'],
-    default: 'IDLE'
+    enum: ['AVAILABLE', 'PICKING_UP', 'DELIVERING', 'COMPLETED'],
+    default: 'AVAILABLE'
   }
 }, {
   timestamps: true

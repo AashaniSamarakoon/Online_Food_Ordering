@@ -1,5 +1,6 @@
 package com.order_service.order_service.service;
 
+import com.order_service.order_service.client.OrderAssignmentClient;
 import com.order_service.order_service.client.RestaurantClient;
 import com.order_service.order_service.client.UserClient;
 import com.order_service.order_service.dto.*;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class OrderService {
 
     private final RestaurantClient restaurantClient;
+    private final OrderAssignmentClient orderAssignmentClient;
     private final OrderRepository orderRepository;
     private final JwtUtil jwtUtil;
     private final CustomerLocationService customerLocationService;
@@ -81,7 +83,7 @@ public class OrderService {
         String email = (String) userProfile.get("email");
         String phoneNumber = (String) userProfile.get("phoneNumber");
 
-
+        orderAssignmentClient.processOrderAssignment(savedOrder.getId());
         notificationService.sendOrderConfirmation(userProfile, savedOrder);
         return OrderResponse.from(savedOrder);
     }
