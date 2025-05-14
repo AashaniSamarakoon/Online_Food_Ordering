@@ -11,7 +11,7 @@ data:
 
     # Replace with actual service URLs as per K8s naming
     order.service.url=http://order-service
-    stripe.secret.key=sk_test_51RGkQAEpprUnh3rwLGmTsJRQ1tHQvLKEl624fCwmObwtKcp2CG4Yi4rDRvm1CYpEYt0sXOQCfbIuK0HZRVlKg2A900YgCzR72c
+    stripe.secret.key=sk_test_...
 
     # PostgreSQL config
     spring.datasource.url=jdbc:postgresql://ep-rough-snow-a4m8b5yw-pooler.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
