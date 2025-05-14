@@ -43,20 +43,20 @@ public class StripeServiceImpl implements StripeService {
     public StripeResponse checkoutProducts(PaymentRequest paymentRequest) {
         Stripe.apiKey = secretKey;
 
-        long mealPrice = paymentRequest.getMealPrice();
         long deliveryCharge = paymentRequest.getDeliveryCharge();
         int numberOfMeals = paymentRequest.getNumberOfMeals();
         long totalAmount = paymentRequest.getTotalAmount();
-        long companyCommission = (long) (mealPrice * 0.10);
+        long companyCommission = (long) ((totalAmount - deliveryCharge) * 0.10);
+        String mealNamesConcatenated = String.join(", ", paymentRequest.getMealNames());
 
         SessionCreateParams.LineItem.PriceData.ProductData productData =
                 SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                        .setName(paymentRequest.getMealName())
+                        .setName(mealNamesConcatenated)
                         .build();
 
         SessionCreateParams.LineItem.PriceData priceData =
                 SessionCreateParams.LineItem.PriceData.builder()
-                        .setCurrency(paymentRequest.getCurrency().toString().toLowerCase())
+                        .setCurrency("lkr")
                         .setUnitAmount(totalAmount * 100)
                         .setProductData(productData)
                         .build();
@@ -84,21 +84,19 @@ public class StripeServiceImpl implements StripeService {
         }
 
         Payment payment = Payment.builder()
-                .orderId(paymentRequest.getOrderId())
                 .restaurantId(paymentRequest.getRestaurantId())
-                .riderId(paymentRequest.getRiderId())
+                .orderId(0L)
+                .riderId(0L)
                 .paymentType(PaymentType.CARD)
                 .totalAmount(totalAmount)
-                .mealPrice(mealPrice)
                 .deliveryCharge(deliveryCharge)
                 .numberOfMeals(numberOfMeals)
                 .companyCommission(companyCommission)
                 .paymentStatus(PaymentStatus.PENDING)
                 .refundStatus(RefundStatus.NOT_REQUESTED)
                 .createdAt(LocalDateTime.now())
-                .mealName(paymentRequest.getMealName())
-                .currency(paymentRequest.getCurrency())
-                .restaurantBalance(mealPrice - companyCommission)
+                .mealNames(mealNamesConcatenated)
+                .restaurantBalance(totalAmount - companyCommission - deliveryCharge)
                 .sessionId(session.getId())
                 .build();
 
