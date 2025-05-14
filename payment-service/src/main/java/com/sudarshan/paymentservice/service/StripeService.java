@@ -13,4 +13,6 @@ public interface StripeService {
     List<Payment> getPaymentsByRestaurantId(Long restaurantId);
     List<Payment> getPaymentsByRiderId(Long riderId);
     List<Payment> getPaymentsByRestaurantAndRider(Long restaurantId, Long riderId);
+    List<Payment> getAllPayments();
+    Payment updateRiderId(Long paymentId, Long newRiderId);
 }
