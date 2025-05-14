@@ -16,16 +16,17 @@ import com.sudarshan.paymentservice.exceptions.StripeSessionCreationException;
 import com.sudarshan.paymentservice.repository.PaymentRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
 @Service
+@CrossOrigin
 public class StripeServiceImpl implements StripeService {
 
     private final PaymentRepository paymentRepository;
@@ -174,5 +175,18 @@ public class StripeServiceImpl implements StripeService {
     @Override
     public List<Payment> getPaymentsByRestaurantAndRider(Long restaurantId, Long riderId) {
         return paymentRepository.findByRestaurantIdAndRiderId(restaurantId, riderId);
+    }
+
+    @Override
+    public List<Payment> getAllPayments() {
+        return paymentRepository.findAll();
+    }
+
+    @Override
+    public Payment updateRiderId(Long paymentId, Long newRiderId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found with ID: " + paymentId));
+        payment.setRiderId(newRiderId);
+        return paymentRepository.save(payment);
     }
 }
