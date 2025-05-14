@@ -40,6 +40,7 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", Collections.singletonList(admin.getRole().name()));
         claims.put("isSuperAdmin", admin.getRole() == RestaurantAdmin.Role.SUPER_ADMIN);
+        claims.put("isVerified", admin.isVerified());
 
         return buildToken(claims, admin.getEmail());
     }
