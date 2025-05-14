@@ -13,8 +13,6 @@ public class DriverAssignmentEvent {
     private Long orderId;
     private Long driverId;
     private LocationDTO restaurantLocation;
-    private double distance; // meters
-    private double heading; // degrees
     private LocalDateTime expiryTime;
 
 

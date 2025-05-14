@@ -105,45 +105,45 @@ services:
       order-assignment-service:
         condition: service_started
 
-  user-service:
-    build:
-      context: ./user-service
-    container_name: user-service
-    ports:
-      - "8091:8091"
-    environment:
-      - SERVER_PORT=8091
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/userdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
-    networks:
-      - backend
+  # user-service:
+  #   build:
+  #     context: ./user-service
+  #   container_name: user-service
+  #   ports:
+  #     - "8091:8091"
+  #   environment:
+  #     - SERVER_PORT=8091
+  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/userdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
+  #   networks:
+  #     - backend
 
-  order-service:
-    build:
-      context: ./order-service
-    container_name: order-service
-    ports:
-      - "8092:8092"
-    environment:
-      - SERVER_PORT=8092
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/orderdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
-    depends_on:
-      - restaurant-service
-    networks:
-      - backend
+  # order-service:
+  #   build:
+  #     context: ./order-service
+  #   container_name: order-service
+  #   ports:
+  #     - "8092:8092"
+  #   environment:
+  #     - SERVER_PORT=8092
+  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/orderdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
+  #   depends_on:
+  #     - restaurant-service
+  #   networks:
+  #     - backend
 
-  # Restaurant service was referenced in order-service but not defined in original file
-  # Adding a placeholder - you'll need to complete this based on your actual service
-  restaurant-service:
-    build:
-      context: ./restaurant-service
-    container_name: restaurant-service
-    ports:
-      - "8081:8081"
-    environment:
-      - SERVER_PORT=8081
-      # Add appropriate Neon DB connection if needed
-    networks:
-      - backend
+  # # Restaurant service was referenced in order-service but not defined in original file
+  # # Adding a placeholder - you'll need to complete this based on your actual service
+  # restaurant-service:
+  #   build:
+  #     context: ./restaurant-service
+  #   container_name: restaurant-service
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     - SERVER_PORT=8081
+  #     # Add appropriate Neon DB connection if needed
+  #   networks:
+  #     - backend
 
 volumes:
   driver-auth-uploads:

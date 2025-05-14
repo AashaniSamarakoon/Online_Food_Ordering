@@ -86,8 +86,6 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
                     orderId,
                     driver.getLocation().getDriverId(),
                     new LocationDTO(order.getRestaurantCoordinates().getLatitude(), order.getRestaurantCoordinates().getLongitude()),
-                    driver.getLocation().getDistance(),
-                    driver.getLocation().getHeading(),
                     LocalDateTime.now().plusSeconds(15)
             );
             rabbitMQProducer.sendDriverNotification(event);
@@ -254,13 +252,13 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
     }
 
     private void notifySingleDriver(Long orderId, Long driverId, OrderDetailsDTO order) {
-        DriverLocationDTO driver = trackingServiceClient.getDriverLocation(driverId);
+//        DriverLocationDTO driver = trackingServiceClient.getDriverLocation(driverId);
         DriverAssignmentEvent event = new DriverAssignmentEvent(
                 orderId,
                 driverId,
                 new LocationDTO(order.getRestaurantCoordinates().getLatitude(), order.getRestaurantCoordinates().getLongitude()),
-                driver.getDistance(),
-                driver.getHeading(),
+//                driver.getDistance(),
+//                driver.getHeading(),
                 LocalDateTime.now().plusSeconds(15)
         );
         rabbitMQProducer.sendDriverNotification(event);
