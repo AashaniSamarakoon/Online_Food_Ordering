@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: restaurant-auth-service
+  name: restaurant-auth
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: restaurant-auth-service
+      app: restaurant-auth
   template:
     metadata:
       labels:
-        app: restaurant-auth-service
+        app: restaurant-auth
     spec:
       containers:
-        - name: restaurant-auth-service
-          image: aashanisamarakoon/restaurant-auth-service:latest
+        - name: restaurant-auth
+          image: aashani2001/restaurant-auth:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8082

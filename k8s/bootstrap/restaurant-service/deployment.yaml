@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: restaurant-service
-          image: aashanisamarakoon/restaurant-service:latest
+          image: aashani2001/restaurant-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
@@ -26,11 +26,11 @@ spec:
                 secretKeyRef:
                   name: neon-db-secrets
                   key: postgres-password
-#          volumeMounts:
-#            - name: config-volume
-#              mountPath: /app/config
-#      volumes:
-#        - name: config-volume
-#          configMap:
-#            name: restaurant-config
+          volumeMounts:
+           - name: config-volume
+             mountPath: /app/config
+      volumes:
+       - name: config-volume
+         configMap:
+           name: restaurant-config
       restartPolicy: Always
