@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: restaurant-auth-service
+  name: restaurant-auth
 spec:
   selector:
-    app: restaurant-auth-service
+    app: restaurant-auth
   ports:
     - port: 80
       targetPort: 8082

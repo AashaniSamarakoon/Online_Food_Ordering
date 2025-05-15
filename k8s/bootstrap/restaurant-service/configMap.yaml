@@ -4,7 +4,7 @@ metadata:
   name: restaurant-service-config
 data:
   application-k8s.properties: |
-    spring.datasource.url=jdbc:postgresql://ep-long-brook-a4bpeyso-pooler.us-east-1.aws.neon.tech/driver_db?sslmode=require
+    spring.datasource.url=jdbc:postgresql://ep-long-brook-a4bpeyso-pooler.us-east-1.aws.neon.tech/restaurant_service?sslmode=require
     spring.datasource.username=neondb_owner
     spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
     spring.jpa.hibernate.ddl-auto=update
