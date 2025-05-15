@@ -1,45 +1,5 @@
 services:
-  postgres:
-    image: postgres:13
-    environment:
-      POSTGRES_PASSWORD: akalanka28
-      POSTGRES_USER: postgres
-      POSTGRES_MULTIPLE_DATABASES: "driver_auth_db, driver_db, order_assignment_db,restaurant_auth_db,restaurant_service_db,banking_service_db"
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
+  
   rabbitmq:
     image: rabbitmq:4.0-management
     container_name: rabbitmq
@@ -52,84 +12,24 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-
-
-  restaurant-service:
-    build: ./restaurant-service
-    ports:
-      - "8081:8081"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SERVER_PORT: 8081
-
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-
-
-  restaurant-auth:
-    build: ./restaurant-auth
-    ports:
-      - "8082:8082"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
-    volumes:
-      - restaurant-auth-uploads:/app/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      restaurant-service:
-        condition: service_started
-
-
-  banking-auth:
-    build: ./banking-auth
-    ports:
-      - "8083:8083"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
-    volumes:
-      - banking-service-uploads:/app/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      restaurant-service:
-        condition: service_started
-
-
   driver-service:
     build: ./driver-service
     ports:
-      - "8087:8087"
+      - "8087:8087" 
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SERVER_PORT: 8087
-
+      # Neon DB configuration for driver_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-long-brook-a4bpeyso-pooler.us-east-1.aws.neon.tech/driver_db?sslmode=require
+      SPRING_DATASOURCE_USERNAME: neondb_owner
+      SPRING_DATASOURCE_PASSWORD: npg_DfrEgzM9vc1o
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      # RabbitMQ configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
     depends_on:
-      postgres:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
 
@@ -139,6 +39,12 @@ services:
       - "8086:8086"
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      # Neon DB configuration for driver_auth_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-long-brook-a4bpeyso-pooler.us-east-1.aws.neon.tech/driver_auth_db?sslmode=require
+      SPRING_DATASOURCE_USERNAME: neondb_owner
+      SPRING_DATASOURCE_PASSWORD: npg_DfrEgzM9vc1o
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      # RabbitMQ configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
@@ -146,8 +52,6 @@ services:
     volumes:
       - driver-auth-uploads:/app/uploads
     depends_on:
-      postgres:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       driver-service:
@@ -160,14 +64,17 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SERVER_PORT: 8088
-
+      # Neon DB configuration for order_assignment_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-long-brook-a4bpeyso-pooler.us-east-1.aws.neon.tech/order_assignment_db?sslmode=require
+      SPRING_DATASOURCE_USERNAME: neondb_owner
+      SPRING_DATASOURCE_PASSWORD: npg_DfrEgzM9vc1o
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      # RabbitMQ configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
     depends_on:
-      postgres:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       driver-service:
@@ -178,26 +85,69 @@ services:
     ports:
       - "8089:8089"
     environment:
-      - NODE_ENV=development
       - PORT=8089
-      - MONGO_URI=mongodb://mongodb:27017/tracking_db
-      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=development
+      # MongoDB Atlas configuration
+      - MONGO_URI=mongodb+srv://AkalankaDIas:4O7mnW3cH9b4uHkg@cluster1.wkorqmy.mongodb.net/tracking_db?retryWrites=true&w=majority&appName=Cluster1
+      # Redis Cloud configuration
+      - REDIS_USERNAME=default
+      - REDIS_PASSWORD=xyASlWyEDIKuejQ9oF62YBcaAIbtlAbn
+      - REDIS_HOST=redis-11316.c84.us-east-1-2.ec2.redns.redis-cloud.com
+      - REDIS_PORT=11316
+      # Service URLs
       - DRIVER_SERVICE_URL=http://driver-service:8087
       - ORDER_ASSIGNMENT_SERVICE_URL=http://order-assignment-service:8088
     volumes:
       - ./logs:/app/logs
     depends_on:
-      mongodb:
-        condition: service_started
-      redis:
-        condition: service_started
       driver-service:
         condition: service_started
       order-assignment-service:
         condition: service_started
 
+  # user-service:
+  #   build:
+  #     context: ./user-service
+  #   container_name: user-service
+  #   ports:
+  #     - "8091:8091"
+  #   environment:
+  #     - SERVER_PORT=8091
+  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/userdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
+  #   networks:
+  #     - backend
+
+  # order-service:
+  #   build:
+  #     context: ./order-service
+  #   container_name: order-service
+  #   ports:
+  #     - "8092:8092"
+  #   environment:
+  #     - SERVER_PORT=8092
+  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/orderdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
+  #   depends_on:
+  #     - restaurant-service
+  #   networks:
+  #     - backend
+
+  # # Restaurant service was referenced in order-service but not defined in original file
+  # # Adding a placeholder - you'll need to complete this based on your actual service
+  # restaurant-service:
+  #   build:
+  #     context: ./restaurant-service
+  #   container_name: restaurant-service
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     - SERVER_PORT=8081
+  #     # Add appropriate Neon DB connection if needed
+  #   networks:
+  #     - backend
+
 volumes:
-  pgdata:
-  mongodb_data:
-  redis_data:
   driver-auth-uploads:
+
+networks:
+  backend:
+    driver: bridge

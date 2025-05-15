@@ -7,5 +7,5 @@ spec:
     app: driver-auth-service
   ports:
     - port: 80
-      targetPort: 8085
-  type: LoadBalancer  
+      targetPort: 8086
+  type: ClusterIP 

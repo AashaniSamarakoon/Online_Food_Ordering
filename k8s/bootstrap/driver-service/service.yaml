@@ -7,5 +7,5 @@ spec:
     app: driver-service
   ports:
     - port: 80
-      targetPort: 8082
+      targetPort: 8087
   type: ClusterIP 

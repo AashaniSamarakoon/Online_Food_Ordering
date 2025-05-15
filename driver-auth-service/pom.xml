@@ -99,16 +99,13 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Twilio for SMS Verification -->
+        <!-- messagebird for SMS Verification -->
         <dependency>
-            <groupId>com.twilio.sdk</groupId>
-            <artifactId>twilio</artifactId>
-            <version>10.7.1</version>
+            <groupId>com.messagebird</groupId>
+            <artifactId>messagebird-api</artifactId>
+            <version>3.2.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -135,6 +132,10 @@
             <artifactId>azure-identity</artifactId>
             <version>1.15.3</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit</artifactId>
         </dependency>
     </dependencies>
     <dependencyManagement>

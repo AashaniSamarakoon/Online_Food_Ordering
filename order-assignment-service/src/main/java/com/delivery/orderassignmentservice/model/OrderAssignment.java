@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "order_assignments")
@@ -31,4 +32,12 @@ public class OrderAssignment {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column
+    private LocalDateTime expiryTime;
+
+    @ElementCollection
+    @CollectionTable(name = "order_assignment_candidates", joinColumns = @JoinColumn(name = "assignment_id"))
+    @Column(name = "driver_id")
+    private List<Long> candidateDrivers;
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@CrossOrigin
 @Slf4j
 @RestController
 @RequestMapping("/product/v1")
@@ -51,5 +51,19 @@ public class ProductCheckoutController {
             @PathVariable Long riderId) {
         List<Payment> payments = stripeService.getPaymentsByRestaurantAndRider(restaurantId, riderId);
         return ResponseEntity.ok(payments);
+    }
+
+    @GetMapping("/payments")
+    public ResponseEntity<List<Payment>> getAllPayments() {
+        List<Payment> payments = stripeService.getAllPayments();
+        return ResponseEntity.ok(payments);
+    }
+
+    @PatchMapping("/payments/{paymentId}/rider")
+    public ResponseEntity<Payment> updateRiderId(
+            @PathVariable Long paymentId,
+            @RequestParam Long newRiderId) {
+        Payment updatedPayment = stripeService.updateRiderId(paymentId, newRiderId);
+        return ResponseEntity.ok(updatedPayment);
     }
 }

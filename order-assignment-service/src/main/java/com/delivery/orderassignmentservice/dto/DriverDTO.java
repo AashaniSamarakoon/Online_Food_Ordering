@@ -19,4 +19,5 @@ public class DriverDTO {
     private Double latitude;
     private Double longitude;
     private Boolean isActive;
+    private String phone;
 }

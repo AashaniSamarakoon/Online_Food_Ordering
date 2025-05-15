@@ -17,17 +17,20 @@ spec:
           image: akalankadias/driver-service:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8082
+            - containerPort: 8087
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "k8s"
-            # - name: SPRING_DATASOURCE_URL
-            #   value: "jdbc:postgresql://postgres:5432/driver_db"
-            # - name: SPRING_DATASOURCE_USERNAME
-            #   value: "postgres"
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secrets
+                  name: neon-db-secrets
                   key: postgres-password
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: driver-service-config
       restartPolicy: Always

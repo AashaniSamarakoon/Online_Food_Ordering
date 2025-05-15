@@ -9,55 +9,65 @@ spec:
   selector:
     matchLabels:
       app: tracking-service
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   template:
     metadata:
       labels:
         app: tracking-service
+        # Add a unique timestamp or version to force redeployment
+        version: "v1-2025-04-27-fixed"
     spec:
       containers:
       - name: tracking-service
         image: akalankadias/tracking-service:latest
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8084
-        resources:
-          limits:
-            cpu: "500m"     # Reduced from 1 CPU
-            memory: "512Mi"  # Reduced from 1Gi for testing
-          requests:
-            cpu: "200m"     # Reduced from 500m for testing
-            memory: "256Mi"  # Reduced from 512Mi for testing
+        - containerPort: 8089
         env:
-        - name: PORT
-          value: "8084"
-        - name: NODE_ENV
-          value: "production"
         - name: MONGO_URI
           valueFrom:
-            configMapKeyRef:
-              name: tracking-service-config
+            secretKeyRef:
+              name: mongodb-atlas-credentials
               key: mongo-uri
-        - name: REDIS_URL
+        - name: REDIS_USERNAME
           valueFrom:
-            configMapKeyRef:
-              name: tracking-service-config
-              key: redis-url
-        - name: ORDER_SERVICE_URL
+            secretKeyRef:
+              name: redis-credentials
+              key: redis-username
+        - name: REDIS_PASSWORD
           valueFrom:
-            configMapKeyRef:
-              name: tracking-service-config
-              key: order-service-url
+            secretKeyRef:
+              name: redis-credentials
+              key: redis-password
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: redis-host
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: redis-port
         - name: DRIVER_SERVICE_URL
           valueFrom:
             configMapKeyRef:
               name: tracking-service-config
               key: driver-service-url
+        - name: ORDER_SERVICE_URL 
+          valueFrom:
+            configMapKeyRef:
+              name: tracking-service-config
+              key: order-service-url
         - name: NOTIFICATION_SERVICE_URL
           valueFrom:
             configMapKeyRef:
               name: tracking-service-config
               key: notification-service-url
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: tracking-service-config
+      restartPolicy: Always

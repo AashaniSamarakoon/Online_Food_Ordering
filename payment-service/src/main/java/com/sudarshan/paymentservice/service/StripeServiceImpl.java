@@ -16,16 +16,17 @@ import com.sudarshan.paymentservice.exceptions.StripeSessionCreationException;
 import com.sudarshan.paymentservice.repository.PaymentRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
 @Service
+@CrossOrigin
 public class StripeServiceImpl implements StripeService {
 
     private final PaymentRepository paymentRepository;
@@ -42,20 +43,20 @@ public class StripeServiceImpl implements StripeService {
     public StripeResponse checkoutProducts(PaymentRequest paymentRequest) {
         Stripe.apiKey = secretKey;
 
-        long mealPrice = paymentRequest.getMealPrice();
         long deliveryCharge = paymentRequest.getDeliveryCharge();
         int numberOfMeals = paymentRequest.getNumberOfMeals();
         long totalAmount = paymentRequest.getTotalAmount();
-        long companyCommission = (long) (mealPrice * 0.10);
+        long companyCommission = (long) ((totalAmount - deliveryCharge) * 0.10);
+        String mealNamesConcatenated = String.join(", ", paymentRequest.getMealNames());
 
         SessionCreateParams.LineItem.PriceData.ProductData productData =
                 SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                        .setName(paymentRequest.getMealName())
+                        .setName(mealNamesConcatenated)
                         .build();
 
         SessionCreateParams.LineItem.PriceData priceData =
                 SessionCreateParams.LineItem.PriceData.builder()
-                        .setCurrency(paymentRequest.getCurrency().toString().toLowerCase())
+                        .setCurrency("lkr")
                         .setUnitAmount(totalAmount * 100)
                         .setProductData(productData)
                         .build();
@@ -83,21 +84,19 @@ public class StripeServiceImpl implements StripeService {
         }
 
         Payment payment = Payment.builder()
-                .orderId(paymentRequest.getOrderId())
                 .restaurantId(paymentRequest.getRestaurantId())
-                .riderId(paymentRequest.getRiderId())
+                .orderId(0L)
+                .riderId(0L)
                 .paymentType(PaymentType.CARD)
                 .totalAmount(totalAmount)
-                .mealPrice(mealPrice)
                 .deliveryCharge(deliveryCharge)
                 .numberOfMeals(numberOfMeals)
                 .companyCommission(companyCommission)
                 .paymentStatus(PaymentStatus.PENDING)
                 .refundStatus(RefundStatus.NOT_REQUESTED)
                 .createdAt(LocalDateTime.now())
-                .mealName(paymentRequest.getMealName())
-                .currency(paymentRequest.getCurrency())
-                .restaurantBalance(mealPrice - companyCommission)
+                .mealNames(mealNamesConcatenated)
+                .restaurantBalance(totalAmount - companyCommission - deliveryCharge)
                 .sessionId(session.getId())
                 .build();
 
@@ -174,5 +173,18 @@ public class StripeServiceImpl implements StripeService {
     @Override
     public List<Payment> getPaymentsByRestaurantAndRider(Long restaurantId, Long riderId) {
         return paymentRepository.findByRestaurantIdAndRiderId(restaurantId, riderId);
+    }
+
+    @Override
+    public List<Payment> getAllPayments() {
+        return paymentRepository.findAll();
+    }
+
+    @Override
+    public Payment updateRiderId(Long paymentId, Long newRiderId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found with ID: " + paymentId));
+        payment.setRiderId(newRiderId);
+        return paymentRepository.save(payment);
     }
 }

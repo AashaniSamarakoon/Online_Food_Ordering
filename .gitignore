@@ -33,3 +33,17 @@ build/
 .vscode/
 
 payment-service/.env
+
+/logs
+
+
+# Secrets and credentials
+*-secrets.yaml
+*-credentials.yaml
+
+# Local Kubernetes configs
+kubeconfig
+.kube/
+
+# Local development overrides
+*local*.yaml
