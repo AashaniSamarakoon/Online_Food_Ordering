@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1
+1apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: api-gateway
@@ -58,6 +58,13 @@ spec:
             backend:
               service:
                 name: order-assignment-service
+                port:
+                  number: 80
+          - path: /(orders/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
                 port:
                   number: 80
            # specific path for WebSocket connections
