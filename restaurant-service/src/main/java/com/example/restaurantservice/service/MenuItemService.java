@@ -34,19 +34,37 @@ public class MenuItemService {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        MenuItem menuItem = MenuItem.builder()
-                .name(request.getName())
-                .category(request.getCategory())
-                .price(request.getPrice())
-                .status(MenuItem.ItemStatus.valueOf(request.getStatus().toUpperCase()))
-                .description(request.getDescription())
-                .imageUrl(request.getImageUrl())
-                .restaurant(restaurant)
-                .build();
+        // Create the menu item
+        MenuItem menuItem = new MenuItem();
+        menuItem.setName(request.getName());
+        menuItem.setCategory(request.getCategory());
+        menuItem.setPrice(request.getPrice());
+        menuItem.setStatus(MenuItem.ItemStatus.valueOf(request.getStatus()));
+        menuItem.setDescription(request.getDescription());
+        menuItem.setImageUrl(request.getImageUrl());
+        menuItem.setRestaurant(restaurant);  // Set the restaurant!
 
-        menuItem = menuItemRepository.save(menuItem);
-        log.info("Created menu item ID: {} for restaurant ID: {}", menuItem.getId(), restaurantId);
-        return mapToResponse(menuItem);
+        // Log the entity before saving
+        log.info("Saving menu item: {}", menuItem);
+
+        // Save the menu item
+        MenuItem savedMenuItem = menuItemRepository.save(menuItem);
+
+        // Return the response
+        return mapToMenuItemResponse(savedMenuItem);
+    }
+
+    private MenuItemResponse mapToMenuItemResponse(MenuItem menuItem) {
+        // Implement this method to convert MenuItem entity to MenuItemResponse DTO
+        return MenuItemResponse.builder()
+                .id(menuItem.getId())
+                .name(menuItem.getName())
+                .category(menuItem.getCategory())
+                .price(menuItem.getPrice())
+                .status(menuItem.getStatus().name())
+                .description(menuItem.getDescription())
+                .imageUrl(menuItem.getImageUrl())
+                .build();
     }
 
     @Transactional(readOnly = true)
