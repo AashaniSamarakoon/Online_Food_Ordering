@@ -60,11 +60,67 @@ spec:
                 name: order-assignment-service
                 port:
                   number: 80
-           # specific path for WebSocket connections
+          # specific path for WebSocket connections
           - path: /(ws/.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: order-assignment-service
+                port:
+                  number: 80
+          - path: /(api/orders/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+          - path: /(api/admin/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: restaurant-auth
+                port:
+                  number: 80 
+          - path: /(api/restaurant/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: restaurant-auth
+                port:
+                  number: 80
+          - path: /(api/auth/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: restaurant-auth
+                port:
+                  number: 80
+          - path: /(super/admin/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: restaurant-service
+                port:
+                  number: 80  
+          - path: /(api/restaurants/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: restaurant-service
+                port:
+                  number: 80 
+          - path: /(api/menu-items/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: restaurant-service
+                port:
+                  number: 80 
+          - path: /(api/banking/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: banking-service
                 port:
                   number: 80
