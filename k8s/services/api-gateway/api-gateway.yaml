@@ -25,14 +25,14 @@ spec:
   rules:
     - http:
         paths:
-          - path: /(api/auth/.*)
+          - path: /(api/driver/auth/.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: driver-auth-service
                 port:
                   number: 80
-          - path: /(api/admin/.*)
+          - path: /(api/driver/admin/.*)
             pathType: ImplementationSpecific
             backend:
               service:
