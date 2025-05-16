@@ -96,7 +96,7 @@ spec:
                 name: restaurant-auth
                 port:
                   number: 80
-          - path: /(api/admin/.*)
+          - path: /(super/admin/.*)
             pathType: ImplementationSpecific
             backend:
               service:
