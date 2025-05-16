@@ -33,6 +33,8 @@ kubectl apply -f bootstrap/driver-auth/
 
 kubectl apply -f bootstrap/restaurant-auth/
 
+kubectl apply -f bootstrap/user-service/
+
 # Deploy Core Services
 kubectl apply -f bootstrap/driver-service/
 
@@ -45,8 +47,6 @@ kubectl apply -f bootstrap/restaurant-service/
 kubectl apply -f bootstrap/banking-service/
 
 kubectl apply -f bootstrap/order-service/
-
-kubectl apply -f bootstrap/user-service/
 
 kubectl apply -f bootstrap/payment-service/
 
