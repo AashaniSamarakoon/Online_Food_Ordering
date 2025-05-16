@@ -53,9 +53,19 @@ public class MenuItemController {
     public MenuItemResponse createMenuItem(
             @Valid @RequestBody MenuItemRequest request,
             Authentication authentication) {
-        String ownerId = authentication.getName();
-        RestaurantResponse restaurant = getRestaurantForCurrentUser(ownerId);
-        return menuItemService.createMenuItem(restaurant.getId(), request);
+        try {
+            String ownerId = authentication.getName();
+            RestaurantResponse restaurant = getRestaurantForCurrentUser(ownerId);
+
+            // Log the request and restaurant ID for debugging
+            log.info("Creating menu item: {} for restaurant ID: {}", request, restaurant.getId());
+
+            return menuItemService.createMenuItem(restaurant.getId(), request);
+        } catch (Exception e) {
+            // Improved error logging
+            log.error("Error creating menu item: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @GetMapping("/restaurant/{restaurantId}")
