@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+data:
+  application-k8s.properties: |
+    spring.datasource.url=jdbc:postgresql://ep-blue-flower-a5smzhep-pooler.us-east-2.aws.neon.tech/userdb?user=neondb_owner&password=npg_vgqU68xQSGoM&sslmode=require
+    # spring.datasource.username=neondb_owner
+    # spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
+    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+    server.port=8086
+
+
+    

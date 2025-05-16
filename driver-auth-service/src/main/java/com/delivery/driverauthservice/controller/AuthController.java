@@ -18,7 +18,7 @@ import java.util.Base64;
 import java.util.HashMap;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/driver/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

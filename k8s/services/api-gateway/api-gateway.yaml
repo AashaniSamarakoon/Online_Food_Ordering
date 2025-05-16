@@ -68,13 +68,45 @@ spec:
                 name: order-assignment-service
                 port:
                   number: 80
-          - path: /(api/orders/.*)
+
+                  
+          - path: /(orders/.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: order-service
                 port:
                   number: 80
+          - path: /(api/location/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+          - path: /(api/delivery/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+          - path: /(cart/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+          - path: /(auth/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 80
+
+
           - path: /(api/admin/.*)
             pathType: ImplementationSpecific
             backend:
