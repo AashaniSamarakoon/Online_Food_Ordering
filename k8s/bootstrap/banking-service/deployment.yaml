@@ -27,10 +27,10 @@ spec:
                   name: neon-db-secrets
                   key: postgres-password
           volumeMounts:
-           - name: config-volume
-             mountPath: /app/config
+            - name: config-volume
+              mountPath: /app/config
       volumes:
        - name: config-volume
          configMap:
-           name: banking-service
+           name: banking-service-config
       restartPolicy: Always
