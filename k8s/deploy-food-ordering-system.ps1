@@ -4,6 +4,12 @@
 $workDir = "D:\Projects\Online_Food_Ordering\k8s"
 cd $workDir
 
+Write-Host "🔧 Installing Ingress NGINX Controller..." -ForegroundColor Cyan
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+Write-Host "⏳ Waiting for Ingress Controller to initialize..." -ForegroundColor Yellow
+Start-Sleep -Seconds 45
+Write-Host "✅ Ingress NGINX Controller installed successfully" -ForegroundColor Green
+
 Write-Host "🔑 Creating Secrets..." -ForegroundColor Cyan
 kubectl apply -f bootstrap/neon-db-secrets.yaml
 kubectl apply -f bootstrap/mongo-db-secrets.yaml
