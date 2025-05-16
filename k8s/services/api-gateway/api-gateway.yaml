@@ -116,6 +116,13 @@ spec:
               service:
                 name: restaurant-service
                 port:
+                  number: 80
+          - path: /(api/menu-restaurant/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: restaurant-service
+                port:
                   number: 80 
           - path: /(api/banking/.*)
             pathType: ImplementationSpecific
