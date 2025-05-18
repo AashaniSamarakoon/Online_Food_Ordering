@@ -28,18 +28,19 @@ public class OrderService {
     private final CustomerLocationService customerLocationService;
     private final UserClient userClient;
     private final NotificationService notificationService;
+    private final RestaurantService restaurantService;
 
 
     public OrderResponse placeOrder(OrderRequest request, String token) {
         Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
-        RestaurantResponse restaurant = restaurantClient.getRestaurantById(request.getRestaurantId());
+        RestaurantResponse restaurant = restaurantService.getRestaurantById(request.getRestaurantId());
 
         double total = 0;
         List<OrderedItem> orderedItems = new ArrayList<>();
 
         for (FoodItemOrderRequest itemRequest : request.getItems()) {
             FoodItemResponse item = restaurant.getItems().stream()
-                    .filter(i -> i.getId().equals(itemRequest.getFoodItemId()) && i.isAvailable())
+                    .filter(i -> i.getId().equals(itemRequest.getFoodItemId()))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Item not found or unavailable"));
 
@@ -52,7 +53,7 @@ public class OrderService {
                     .price(item.getPrice())
                     .quantity(itemRequest.getQuantity())
                     .subtotal(item.getPrice() * itemRequest.getQuantity())
-                    .available(item.isAvailable())
+                  //  .available(item.isAvailable())
                     .build();
 
            // total += orderedItem.getSubtotal();
@@ -83,7 +84,9 @@ public class OrderService {
         String email = (String) userProfile.get("email");
         String phoneNumber = (String) userProfile.get("phoneNumber");
 
+        
         orderAssignmentClient.processOrderAssignment(savedOrder.getId());
+        restaurantClient.notifyNewOrder(savedOrder);
         notificationService.sendOrderConfirmation(userProfile, savedOrder);
         return OrderResponse.from(savedOrder);
     }
@@ -93,7 +96,7 @@ public class OrderService {
         List<Order> orders = orderRepository.findByUserId(userId);
 
         return orders.stream().map(order -> {
-            RestaurantResponse restaurant = restaurantClient.getRestaurantById(order.getRestaurantId());
+            RestaurantResponse restaurant = restaurantService.getRestaurantById(order.getRestaurantId());
             return OrderHistoryResponse.builder()
                     .orderId(order.getId())
                     .restaurantId(order.getRestaurantId())
