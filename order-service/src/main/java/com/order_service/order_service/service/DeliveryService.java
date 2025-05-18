@@ -15,12 +15,13 @@ public class DeliveryService {
     private final JwtUtil jwtUtil;
     private final CustomerLocationService locationService;
     private final RestaurantClient restaurantClient;
+    private final RestaurantService restaurantService;
 
     public double calculateDeliveryFee(String token, Long restaurantId) {
         Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
         CustomerLocation userLocation = locationService.getLocationByUser(token);
 
-        RestaurantResponse restaurant = restaurantClient.getRestaurantById(restaurantId);
+        RestaurantResponse restaurant = restaurantService.getRestaurantById(restaurantId);
         double restaurantLat = restaurant.getRestaurantCoordinates().getLatitude();
         double restaurantLon = restaurant.getRestaurantCoordinates().getLongitude();
 

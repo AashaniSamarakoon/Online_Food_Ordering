@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .and()
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/orders/public", "/orders/public/**").permitAll()
                         .requestMatchers("/orders/**").authenticated()
                         .anyRequest().permitAll()
                 )
