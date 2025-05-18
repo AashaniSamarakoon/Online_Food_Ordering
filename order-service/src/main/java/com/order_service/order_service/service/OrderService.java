@@ -107,7 +107,7 @@ public class OrderService {
 
 
         //orderAssignmentClient.processOrderAssignment(savedOrder.getId());
-        restaurantClient.notifyNewOrder(savedOrder);
+        //restaurantClient.notifyNewOrder(savedOrder);
         notificationService.sendOrderConfirmation(userProfile, savedOrder);
         return OrderResponse.from(savedOrder);
     }
