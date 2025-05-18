@@ -84,7 +84,9 @@ public class OrderService {
         String email = (String) userProfile.get("email");
         String phoneNumber = (String) userProfile.get("phoneNumber");
 
+        
         orderAssignmentClient.processOrderAssignment(savedOrder.getId());
+        restaurantClient.notifyNewOrder(savedOrder);
         notificationService.sendOrderConfirmation(userProfile, savedOrder);
         return OrderResponse.from(savedOrder);
     }
