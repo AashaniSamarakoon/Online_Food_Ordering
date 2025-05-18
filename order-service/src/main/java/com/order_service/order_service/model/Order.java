@@ -25,6 +25,13 @@ public class Order {
     private List<OrderedItem> items;
 
     private Long restaurantId;
+    private String restaurantName;
+
+    private String address;
+    private String restaurantAddress;
+    private String username;
+    private String email;
+    private String phoneNumber;
 
     private Double totalPrice= 0.0;
 

@@ -21,6 +21,12 @@ public class OrderResponse {
     private Double deliveryCharges;
     private Double totalPrice;
     private String status;
+    private String username;
+    private String email;
+    private String address;
+    private String phoneNumber;
+    private String restaurantName;
+    private String restaurantAddress;
 
     public static OrderResponse from(Order order) {
         return OrderResponse.builder()
@@ -33,6 +39,12 @@ public class OrderResponse {
                 .deliveryCharges(order.getDeliveryCharges())
                 .totalPrice(order.getTotalPrice())
                 .status(order.getStatus())
+                .username(order.getUsername())
+                .email(order.getEmail())
+                .address(order.getAddress())
+                .phoneNumber(order.getPhoneNumber())
+                .restaurantName(order.getRestaurantName())
+                .restaurantAddress(order.getRestaurantAddress())
                 .build();
     }
 }

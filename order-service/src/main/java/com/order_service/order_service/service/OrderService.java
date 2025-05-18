@@ -34,6 +34,8 @@ public class OrderService {
     public OrderResponse placeOrder(OrderRequest request, String token) {
         Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
         RestaurantResponse restaurant = restaurantService.getRestaurantById(request.getRestaurantId());
+        String restaurantName = restaurant.getName();
+        String restaurantAddress = restaurant.getAddress();
 
         double total = 0;
         List<OrderedItem> orderedItems = new ArrayList<>();
@@ -65,27 +67,46 @@ public class OrderService {
         CustomerLocation location = customerLocationService.getLocationByUser(token); // ✅
         Coordinates customerCoordinates = new Coordinates(location.getLatitude(), location.getLongitude()); // ✅
 
+//        Order order = Order.builder()
+//                .userId(userId)
+//                .restaurantId(request.getRestaurantId())
+//                .items(orderedItems)
+//                .totalPrice(request.getTotalPrice())
+//                .status("PLACED")
+//                .restaurantCoordinates(restaurantCoordinates)
+//                .customerCoordinates(customerCoordinates)
+//                .deliveryCharges(request.getDeliveryCharges())
+//                .build();
+//
+//        Order savedOrder = orderRepository.save(order);
+
+        Map<String, Object> userProfile = userClient.getUserProfile(token);
+        String email = (String) userProfile.get("email");
+        String phoneNumber = (String) userProfile.get("phoneNumber");
+        String address = (String) userProfile.get("addressLine1");
+        String username = (String) userProfile.get("username");
+
         Order order = Order.builder()
                 .userId(userId)
                 .restaurantId(request.getRestaurantId())
+                .restaurantName(restaurantName)
                 .items(orderedItems)
                 .totalPrice(request.getTotalPrice())
                 .status("PLACED")
                 .restaurantCoordinates(restaurantCoordinates)
                 .customerCoordinates(customerCoordinates)
                 .deliveryCharges(request.getDeliveryCharges())
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .address(address)
+                .username(username)
+                .restaurantAddress(restaurantAddress)
                 .build();
 
         Order savedOrder = orderRepository.save(order);
 
-        Map<String, Object> userProfile = userClient.getUserProfile(token);
-        String firstName = (String) userProfile.get("firstName");
-        String lastName = (String) userProfile.get("lastName");
-        String email = (String) userProfile.get("email");
-        String phoneNumber = (String) userProfile.get("phoneNumber");
 
-        
-        orderAssignmentClient.processOrderAssignment(savedOrder.getId());
+        //orderAssignmentClient.processOrderAssignment(savedOrder.getId());
         restaurantClient.notifyNewOrder(savedOrder);
         notificationService.sendOrderConfirmation(userProfile, savedOrder);
         return OrderResponse.from(savedOrder);

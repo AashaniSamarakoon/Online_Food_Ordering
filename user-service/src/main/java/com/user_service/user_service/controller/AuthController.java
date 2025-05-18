@@ -62,7 +62,9 @@ public class AuthController {
                 "firstName", user.getFirstName(),
                 "lastName", user.getLastName(),
                 "email", user.getEmail(),
-                "phoneNumber", user.getPhoneNumber()
+                "phoneNumber", user.getPhoneNumber(),
+                "username", user.getUsername(),
+                "addressLine1", user.getAddressLine1()
         );
 
         return ResponseEntity.ok(profile);
