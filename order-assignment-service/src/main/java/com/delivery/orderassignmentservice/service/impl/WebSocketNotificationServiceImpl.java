@@ -11,9 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -51,8 +48,8 @@ public class WebSocketNotificationServiceImpl implements WebSocketNotificationSe
             DriverAssignmentEvent event, OrderDetailsDTO orderDetails) {
 
         // Format the total amount with currency symbol
-        String paymentAmount = orderDetails.getTotal() != null
-                ? orderDetails.getTotal().toString()
+        String paymentAmount = orderDetails.getTotalPrice() != null
+                ? orderDetails.getTotalPrice().toString()
                 : "0.00";
 
         // Check if coordinates exist, if not create empty ones
@@ -72,17 +69,17 @@ public class WebSocketNotificationServiceImpl implements WebSocketNotificationSe
 
         return OrderAssignmentNotification.builder()
                 .orderId(orderDetails.getId())
-                .orderNumber(orderDetails.getOrderNumber())
+//                .orderNumber(orderDetails.getOrderNumber())
                 .payment(paymentAmount)
                 // Customer and restaurant details
-                .restaurantName(orderDetails.getRestaurantName())
-                .restaurantAddress(orderDetails.getPickupAddress())
-                .customerAddress(orderDetails.getDeliveryAddress())
+//                .restaurantName(orderDetails.getRestaurantName())
+//                .restaurantAddress(orderDetails.getPickupAddress())
+//                .customerAddress(orderDetails.getDeliveryAddress())
                 // Coordinates as LocationDTO objects
                 .restaurantCoordinates(restaurantLocation)
                 .customerCoordinates(customerLocation)
                 // Special instructions
-                .specialInstructions(orderDetails.getSpecialInstructions())
+//                .specialInstructions(orderDetails.getSpecialInstructions())
                 // Assignment expiry time
                 .expiryTime(event.getExpiryTime())
                 .timestamp(System.currentTimeMillis())

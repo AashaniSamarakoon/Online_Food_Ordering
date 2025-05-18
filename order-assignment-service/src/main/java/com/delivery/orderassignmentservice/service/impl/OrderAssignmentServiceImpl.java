@@ -39,73 +39,107 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
     private final TrackingServiceClient trackingServiceClient;
     private final OrderAssignmentProducer rabbitMQProducer; // New RabbitMQ producer
 
-    /**
-     * Process a new order for assignment
-     */
-    @Override
-    @Transactional
-    public OrderAssignmentDTO processOrderAssignment(Long orderId) {
-        // 1. Fetch order details
-        OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
-        if (order == null) {
-            throw new OrderNotFoundException("Order " + orderId + " not found");
-        }
+  /**
+   * Process a new order for assignment
+   */
+  @Override
+  @Transactional
+  public OrderAssignmentDTO processOrderAssignment(Long orderId) {
+      // 1. Fetch order details with increased timeout
+      OrderDetailsDTO order;
+      try {
+          log.info("Fetching order details for order ID: {}", orderId);
+          order = orderServiceClient.getOrderDetails(orderId);
+      } catch (Exception e) {
+          log.error("Error fetching order details: {}", e.getMessage(), e);
+          throw new OrderNotFoundException("Order " + orderId + " not found");
+      }
 
-        // 2. Find nearby drivers with dynamic radius
-        int radius = calculateSearchRadius(orderId);
-        List<DriverLocationDTO> nearbyDrivers = trackingServiceClient.getNearbyDrivers(
-                order.getRestaurantCoordinates().getLatitude(),
-                order.getRestaurantCoordinates().getLongitude(),
-                radius
-        );
+      if (order == null) {
+          throw new OrderNotFoundException("Order " + orderId + " not found");
+      }
 
-        if (nearbyDrivers.isEmpty()) {
-            throw new NoAvailableDriversException("No drivers available within " + radius + "m");
-        }
+      // Check for null restaurant coordinates
+      if (order.getRestaurantCoordinates() == null) {
+          log.error("Restaurant coordinates are null for order ID: {}", orderId);
+          throw new IllegalStateException("Restaurant coordinates not available for order " + orderId);
+      }
 
-        // 3. Create a list of drivers with their details and locations
-        List<DriverWithDetails> driversWithDetails = new ArrayList<>();
-        for (DriverLocationDTO location : nearbyDrivers) {
-            // Get driver details including rating
-            DriverDTO driverDetails = driverServiceClient.getDriverDetails(location.getDriverId());
-            driversWithDetails.add(new DriverWithDetails(location, driverDetails));
-        }
+      // 2. Find nearby drivers with dynamic radius
+      int radius = calculateSearchRadius(orderId);
+      List<DriverLocationDTO> nearbyDrivers;
+      try {
+          nearbyDrivers = trackingServiceClient.getNearbyDrivers(
+                  order.getRestaurantCoordinates().getLatitude(),
+                  order.getRestaurantCoordinates().getLongitude(),
+                  radius
+          );
+      } catch (Exception e) {
+          log.error("Error finding nearby drivers: {}", e.getMessage(), e);
+          throw new NoAvailableDriversException("Error finding drivers: " + e.getMessage());
+      }
 
-        // 4. Sort drivers by distance and rating
-        List<DriverWithDetails> candidates = driversWithDetails.stream()
-                .sorted(
-                        Comparator.comparingDouble((DriverWithDetails d) -> d.getLocation().getDistance())
-                                .thenComparingDouble(d -> -d.getDriverDetails().getRating()) // Descending rating
-                )
-                .limit(3)
-                .toList();
+      if (nearbyDrivers == null || nearbyDrivers.isEmpty()) {
+          throw new NoAvailableDriversException("No drivers available within " + radius + "m");
+      }
 
-        // 5. Send notifications to selected drivers
-        candidates.forEach(driver -> {
-            DriverAssignmentEvent event = new DriverAssignmentEvent(
-                    orderId,
-                    driver.getLocation().getDriverId(),
-                    new LocationDTO(order.getRestaurantCoordinates().getLatitude(), order.getRestaurantCoordinates().getLongitude()),
-                    LocalDateTime.now().plusSeconds(15)
-            );
-            rabbitMQProducer.sendDriverNotification(event);
-        });
+      // 3. Create a list of drivers with their details and locations
+      List<DriverWithDetails> driversWithDetails = new ArrayList<>();
+      for (DriverLocationDTO location : nearbyDrivers) {
+          try {
+              // Get driver details including rating
+              DriverDTO driverDetails = driverServiceClient.getDriverDetails(location.getDriverId());
+              if (driverDetails != null) {
+                  driversWithDetails.add(new DriverWithDetails(location, driverDetails));
+              } else {
+                  log.warn("Driver details not found for driver ID: {}", location.getDriverId());
+              }
+          } catch (Exception e) {
+              log.warn("Error fetching driver details for driver {}: {}",
+                      location.getDriverId(), e.getMessage());
+              // Continue with next driver instead of failing entire process
+          }
+      }
 
-        // 6. Create pending assignment
-        OrderAssignment assignment = new OrderAssignment();
-        assignment.setOrderId(orderId);
-        assignment.setCandidateDrivers(
-                candidates.stream()
-                        .map(driver -> driver.getLocation().getDriverId())
-                        .collect(Collectors.toList())
-        );
-        assignment.setStatus("PENDING");
-        assignment.setCreatedAt(LocalDateTime.now());
-        assignment.setUpdatedAt(LocalDateTime.now());
-        assignment.setExpiryTime(LocalDateTime.now().plusSeconds(15));
+      if (driversWithDetails.isEmpty()) {
+          throw new NoAvailableDriversException("Could not retrieve details for any drivers");
+      }
 
-        return modelMapper.map(assignmentRepository.save(assignment), OrderAssignmentDTO.class);
-    }
+      // 4. Sort drivers by distance and rating
+      List<DriverWithDetails> candidates = driversWithDetails.stream()
+              .sorted(
+                      Comparator.comparingDouble((DriverWithDetails d) -> d.getLocation().getDistance())
+                              .thenComparingDouble(d -> -d.getDriverDetails().getRating()) // Descending rating
+              )
+              .limit(3)
+              .toList();
+
+      // 5. Send notifications to selected drivers
+      candidates.forEach(driver -> {
+          DriverAssignmentEvent event = new DriverAssignmentEvent(
+                  orderId,
+                  driver.getLocation().getDriverId(),
+                  new LocationDTO(order.getRestaurantCoordinates().getLatitude(), order.getRestaurantCoordinates().getLongitude()),
+                  LocalDateTime.now().plusSeconds(15)
+          );
+          rabbitMQProducer.sendDriverNotification(event);
+      });
+
+      // 6. Create pending assignment
+      OrderAssignment assignment = new OrderAssignment();
+      assignment.setOrderId(orderId);
+      assignment.setCandidateDrivers(
+              candidates.stream()
+                      .map(driver -> driver.getLocation().getDriverId())
+                      .collect(Collectors.toList())
+      );
+      assignment.setStatus("PENDING");
+      assignment.setCreatedAt(LocalDateTime.now());
+      assignment.setUpdatedAt(LocalDateTime.now());
+      assignment.setExpiryTime(LocalDateTime.now().plusSeconds(15));
+
+      return modelMapper.map(assignmentRepository.save(assignment), OrderAssignmentDTO.class);
+  }
 
 
     /**
@@ -340,18 +374,18 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
             // Build notification object
             return OrderAssignmentNotification.builder()
                     .orderId(order.getId())
-                    .orderNumber(order.getOrderNumber())
-                    .payment(order.getTotal() != null ? order.getTotal().toString() : "0")
+//                    .orderNumber(order.getOrderNumber())
+                    .payment(order.getTotalPrice() != null ? order.getTotalPrice().toString() : "0")
                     // Restaurant information
-                    .restaurantName(order.getRestaurantName())
-                    .restaurantAddress(order.getPickupAddress())
-                    // Customer information
-                    .customerAddress(order.getDeliveryAddress())
+//                    .restaurantName(order.getRestaurantName())
+//                    .restaurantAddress(order.getPickupAddress())
+//                    // Customer information
+//                    .customerAddress(order.getDeliveryAddress())
                     // Coordinates as LocationDTO objects
                     .restaurantCoordinates(restaurantLocation)
                     .customerCoordinates(customerLocation)
                     // Special instructions
-                    .specialInstructions(order.getSpecialInstructions())
+//                    .specialInstructions(order.getSpecialInstructions())
                     // Assignment expiry
                     .expiryTime(assignment.getExpiryTime())
                     .timestamp(System.currentTimeMillis())

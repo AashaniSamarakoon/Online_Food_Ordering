@@ -10,7 +10,4 @@ data:
     spring.rabbitmq.username=guest
     spring.rabbitmq.password=guest
     
-    # Override service URLs for Kubernetes service discovery
-    driver.service.url=http://driver-service
-    order.service.url=http://order-service
-    tracking.service.url=http://tracking-service
+ 
