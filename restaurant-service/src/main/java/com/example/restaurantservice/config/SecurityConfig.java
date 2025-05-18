@@ -50,6 +50,8 @@ public class SecurityConfig {
                         // Menu Restaurant public endpoints configuration
                         .requestMatchers(HttpMethod.GET, "/api/menu-restaurant/restaurants/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/menu-restaurant/all").permitAll()
+                        // Important: Allow /api/neworder to be accessible without authentication
+                        .requestMatchers("/api/neworder").permitAll()
                         // Protected endpoints
                         .requestMatchers(HttpMethod.GET, "/api/menu-restaurant/my-restaurant").hasAuthority("RESTAURANT_ADMIN")
                         .requestMatchers("/api/menu-items/**").hasAuthority("RESTAURANT_ADMIN")

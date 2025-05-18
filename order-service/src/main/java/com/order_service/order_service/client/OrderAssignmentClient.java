@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 
-@FeignClient(name = "order-assignment-service", url = "http://localhost:8088")
+@FeignClient(name = "order-assignment-service", url = "http://order-assignment-service")
 public interface OrderAssignmentClient {
 
     @PostMapping("/api/assignments/process-order/{orderId}")
