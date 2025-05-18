@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "restaurant-service", url = "http://localhost:8085")
+@FeignClient(name = "restaurant-service", url = "http://localhost:8081")
 public interface RestaurantClient {
 
     @GetMapping("/api/menu-restaurant/all")
@@ -21,7 +21,7 @@ public interface RestaurantClient {
     @GetMapping("/items/restaurant/{restaurantId}")
     List<FoodItem> getItemsByRestaurant(@PathVariable("restaurantId") Long restaurantId);
 
-    @PostMapping("/api/neworder")
+    @PostMapping("/api/newOrder")
     void notifyNewOrder(@RequestBody Order order);
 
 }

@@ -222,6 +222,23 @@ public class RestaurantAdminController {
         return ResponseEntity.ok(verifiedRestaurants);
     }
 
+    @GetMapping("/public/all-bank-details")
+    public ResponseEntity<List<Map<String, Object>>> getAllRestaurantsBankDetails() {
+        List<Map<String, Object>> bankDetailsList = adminService.findAllVerifiedRestaurants().stream()
+                .map(admin -> {
+                    Map<String, Object> details = new HashMap<>();
+                    details.put("restaurantId", admin.getId());
+                    details.put("restaurantName", admin.getRestaurantName());
+                    details.put("bankAccountOwner", admin.getBankAccountOwner());
+                    details.put("bankName", admin.getBankName());
+                    details.put("branchName", admin.getBranchName());
+                    details.put("accountNumber", admin.getAccountNumber());
+                    return details;
+                })
+                .toList();
+        return ResponseEntity.ok(bankDetailsList);
+    }
+
     /**
      * Helper method to build a consistent response format for authenticated users
      */
