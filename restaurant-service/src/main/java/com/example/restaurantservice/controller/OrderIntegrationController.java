@@ -19,11 +19,19 @@ public class OrderIntegrationController {
     public ResponseEntity<?> receiveNewOrder(@RequestBody Order order) {
         try {
             log.info("Received new order from order-service for restaurant: {}", order.getRestaurantName());
+
+            // Log details for debugging
+            log.debug("Order details: userId={}, restaurantId={}, items count={}, total price={}",
+                    order.getUserId(),
+                    order.getRestaurantId(),
+                    order.getItems() != null ? order.getItems().size() : 0,
+                    order.getTotalPrice());
+
             Order savedOrder = orderService.saveExternalOrder(order);
             log.info("Successfully saved order with ID: {}", savedOrder.getOrderId());
             return ResponseEntity.ok(savedOrder);
         } catch (Exception e) {
-            log.error("Failed to process order: {}", e.getMessage());
+            log.error("Failed to process order: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body("Error processing order: " + e.getMessage());
         }
     }

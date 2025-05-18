@@ -1,41 +1,68 @@
 package com.example.restaurantservice.service;
 
 import com.example.restaurantservice.model.Order;
+import com.example.restaurantservice.model.OrderedItem;
 import com.example.restaurantservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
 
     @Transactional
-    public Order saveExternalOrder(Order order) {
+    public Order saveExternalOrder(Order externalOrder) {
         // Validate essential fields
-        if (order == null) {
+        if (externalOrder == null) {
             throw new IllegalArgumentException("Order cannot be null");
         }
 
-        if (order.getRestaurantName() == null || order.getRestaurantName().isEmpty()) {
+        if (externalOrder.getRestaurantName() == null || externalOrder.getRestaurantName().isEmpty()) {
             throw new IllegalArgumentException("Restaurant name is required");
         }
 
-        if (order.getRestaurantId() == null) {
+        if (externalOrder.getRestaurantId() == null) {
             throw new IllegalArgumentException("Restaurant ID is required");
         }
 
-        if (order.getItems() == null || order.getItems().isEmpty()) {
+        if (externalOrder.getItems() == null || externalOrder.getItems().isEmpty()) {
             throw new IllegalArgumentException("Order must contain at least one item");
         }
 
-        // Set default status if not provided
-        if (order.getStatus() == null) {
-            order.setStatus("PLACED");
+        // Set default values for fields that might be null
+        if (externalOrder.getStatus() == null) {
+            externalOrder.setStatus("PLACED");
         }
 
-        return orderRepository.save(order);
+        if (externalOrder.getOrderTime() == null) {
+            externalOrder.setOrderTime(LocalDateTime.now());
+        }
+
+        // Calculate total price if not provided
+        if (externalOrder.getTotalPrice() == null || externalOrder.getTotalPrice() == 0.0) {
+            double total = 0.0;
+            for (OrderedItem item : externalOrder.getItems()) {
+                if (item.getSubtotal() != null) {
+                    total += item.getSubtotal();
+                } else if (item.getPrice() != null && item.getQuantity() != null) {
+                    total += item.getPrice() * item.getQuantity();
+                }
+            }
+            externalOrder.setTotalPrice(total);
+        }
+
+        log.info("Saving order from restaurant: {}, with {} items",
+                externalOrder.getRestaurantName(),
+                externalOrder.getItems().size());
+
+        return orderRepository.save(externalOrder);
     }
 }
