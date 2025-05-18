@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 public class OrderRequest {
     private Long restaurantId;
+    private String restaurantName;
     private List<FoodItemOrderRequest> items;
     private Coordinates customerCoordinates;
     private Coordinates restaurantCoordinates;
