@@ -22,6 +22,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final RestaurantClient restaurantClient;
+    private final RestaurantService restaurantService;
     private final JwtUtil jwtUtil;
 
     public Cart getCart(String token) {
@@ -39,9 +40,9 @@ public class CartService {
         Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
         Cart cart = getCart(token);
 
-        RestaurantResponse restaurant = restaurantClient.getRestaurantById(restaurantId);
+        RestaurantResponse restaurant = restaurantService.getRestaurantById(restaurantId);
         FoodItemResponse item = restaurant.getItems().stream()
-                .filter(i -> i.getId().equals(foodItemId) && i.isAvailable())
+                .filter(i -> i.getId().equals(foodItemId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Item not found or unavailable"));
 
