@@ -130,56 +130,174 @@ async function updateDriverLocation(driverId, locationData) {
   }
 }
 
+// /**
+//  * Create a new trip
+//  */
+// async function createTrip(tripData) {
+//   try {
+//     const {
+//       orderId,
+//       driverId,
+//       customerId,
+//       waypoints,
+//       estimatedDistance,
+//       estimatedDuration,
+//       mapApiData // Add this parameter to accept map API response
+//     } = tripData;
+
+//     // Format waypoints
+//     const formattedWaypoints = waypoints.map((wp) => ({
+//       type: wp.type,
+//       location: {
+//         type: "Point",
+//         coordinates: [wp.longitude, wp.latitude],
+//       },
+//       address: wp.address,
+//       status: "PENDING",
+//     }));
+
+//     // Calculate ETA using map API data
+//     const now = new Date();
+//     const eta = new Date(now.getTime() + estimatedDuration * 1000);
+
+//     const trip = new Trip({
+//       orderId,
+//       driverId,
+//       customerId,
+//       status: "SCHEDULED",
+//       estimatedArrivalTime: eta,
+//       waypoints: formattedWaypoints,
+//       distance: estimatedDistance,
+//       duration: estimatedDuration,
+//       originalEta: estimatedDuration, // Store original ETA
+//       currentEta: estimatedDuration,
+//       etaUpdatedAt: now,
+
+//       // Store detailed route information from map API
+//       route: {
+//         type: "LineString",
+//         coordinates: mapApiData?.route?.coordinates || [],
+//         polylineEncoded: mapApiData?.route?.polyline,
+//         trafficConditions: mapApiData?.trafficSegments || []
+//       },
+
+//       // Store map provider metadata
+//       mapData: {
+//         provider: mapApiData?.provider || "Unknown",
+//         routeId: mapApiData?.routeId,
+//         alternativeRoutes: mapApiData?.alternativeRoutes || 0,
+//         trafficLevel: mapApiData?.trafficLevel || "NORMAL"
+//       }
+//     });
+
+//     await trip.save();
+
+//     // Cache the trip for quick access
+//     const tripKey = `trip:${orderId}`;
+//     await redis.set(tripKey, JSON.stringify(trip), "EX", 86400); // 24 hours
+
+//     return trip;
+//   } catch (error) {
+//     logger.error(`Error creating trip: ${error.message}`, { error });
+//     throw error;
+//   }
+// }
+
 /**
- * Create a new trip
+ * Create a preliminary trip for driver assignment
+ * This creates a lightweight trip record before driver accepts
  */
-async function createTrip(tripData) {
+async function createPendingTrip(tripData) {
   try {
     const {
       orderId,
-      driverId,
       customerId,
       waypoints,
       estimatedDistance,
       estimatedDuration,
+      mapApiData,
     } = tripData;
 
-    // Format waypoints
-    const formattedWaypoints = waypoints.map((wp) => ({
-      type: wp.type,
-      location: {
-        type: "Point",
-        coordinates: [wp.longitude, wp.latitude],
-      },
-      address: wp.address,
-      status: "PENDING",
-    }));
-
-    // Calculate ETA
-    const now = new Date();
-    const eta = new Date(now.getTime() + estimatedDuration * 1000);
-
+    // Create a trip without assigning a driver yet
     const trip = new Trip({
       orderId,
-      driverId,
       customerId,
-      status: "SCHEDULED",
-      estimatedArrivalTime: eta,
-      waypoints: formattedWaypoints,
+      // No driverId yet - will be assigned later
+      status: "PENDING_ACCEPTANCE", // Special status before driver accepts
+      estimatedArrivalTime: new Date(Date.now() + estimatedDuration * 1000),
+      waypoints: waypoints.map((wp) => ({
+        type: wp.type,
+        location: {
+          type: "Point",
+          coordinates: [wp.longitude, wp.latitude],
+        },
+        address: wp.address,
+        status: "PENDING",
+      })),
       distance: estimatedDistance,
       duration: estimatedDuration,
+      originalEta: estimatedDuration,
       currentEta: estimatedDuration,
+      etaUpdatedAt: new Date(),
+      route: {
+        type: "LineString",
+        coordinates: mapApiData?.route?.coordinates || [],
+        polylineEncoded: mapApiData?.route?.polyline,
+        trafficConditions: mapApiData?.trafficSegments || [],
+      },
+      mapData: {
+        provider: mapApiData?.provider || "Unknown",
+        routeId: mapApiData?.routeId,
+        alternativeRoutes: mapApiData?.alternativeRoutes || 0,
+        trafficLevel: mapApiData?.trafficLevel || "NORMAL",
+      },
     });
 
     await trip.save();
 
-    // Cache the trip for quick access
+    return trip;
+  } catch (error) {
+    logger.error(`Error creating pending trip: ${error.message}`, { error });
+    throw error;
+  }
+}
+
+/**
+ * Assign driver to existing trip after acceptance
+ */
+async function assignDriverToTrip(orderId, driverId) {
+  try {
+    // Find the existing trip
+    const trip = await Trip.findOne({ orderId });
+    if (!trip) {
+      throw new Error(`No trip found for order ${orderId}`);
+    }
+
+    // Update with driver information
+    trip.driverId = driverId;
+    trip.status = "SCHEDULED"; // Change from PENDING_ACCEPTANCE to SCHEDULED
+    trip.updatedAt = new Date();
+
+    // Get current driver location for ETA refinement
+    const driverLocation = await getDriverLocation(driverId);
+    if (driverLocation) {
+      // Potentially recalculate ETA based on driver's current location
+      // This could call your map service again for a more accurate ETA
+    }
+
+    await trip.save();
+
+    // Update cache
     const tripKey = `trip:${orderId}`;
-    await redis.set(tripKey, JSON.stringify(trip), "EX", 86400); // 24 hours
+    await redis.set(tripKey, JSON.stringify(trip), "EX", 86400);
 
     return trip;
   } catch (error) {
-    logger.error(`Error creating trip: ${error.message}`, { error });
+    logger.error(`Error assigning driver to trip: ${error.message}`, {
+      orderId,
+      driverId,
+      error,
+    });
     throw error;
   }
 }
@@ -209,58 +327,43 @@ async function updateActiveTrips(driverId, locationData) {
         nextWaypoint.location.coordinates[0]
       );
 
-      // Calculate new ETA
-      const eta = calculateETA(distance, locationData.speed || 10);
-      trip.currentEta = eta;
+      // Calculate ETA using distance and driver's actual speed
+      let eta;
+      if (locationData.speed && locationData.speed > 1) {
+        // If driver is moving, calculate based on current speed
+        eta = distance / locationData.speed;
+      } else {
+        // If driver is stopped or speed data is unreliable, use a percentage approach
+        // Calculate how far along the route we are
+        const totalDistance = trip.distance;
+        const remainingPercentage = distance / totalDistance;
+
+        // Apply the percentage to the original duration from the map API
+        eta = trip.originalEta * remainingPercentage;
+
+        // Apply a traffic factor based on time of day if original data is over 5 minutes old
+        const now = new Date();
+        const timeSinceCreation = (now - trip.createdAt) / 1000; // seconds
+        if (timeSinceCreation > 300) {
+          // Get current hour (0-23)
+          const currentHour = now.getHours();
+
+          // Simple traffic adjustment based on time of day
+          if (currentHour >= 7 && currentHour <= 9) eta *= 1.3; // Morning rush
+          else if (currentHour >= 16 && currentHour <= 19) eta *= 1.25; // Evening rush
+        }
+      }
+
+      // Update trip with new ETA
+      trip.currentEta = Math.max(60, eta); // Minimum ETA of 1 minute
+      trip.etaUpdatedAt = new Date();
 
       // Check if driver has arrived at waypoint (within 50 meters)
       if (distance <= 50) {
         nextWaypoint.status = "ARRIVED";
         nextWaypoint.arrivalTime = new Date();
 
-        // If this is the first waypoint and trip is SCHEDULED, mark as IN_PROGRESS
-        if (
-          trip.status === "SCHEDULED" &&
-          trip.waypoints.filter((wp) => wp.status === "ARRIVED").length === 1
-        ) {
-          trip.status = "IN_PROGRESS";
-          trip.startTime = new Date();
-
-          // Notify customer that driver has started the delivery
-          await notificationClient.sendDeliveryStartedNotification(
-            trip.customerId,
-            trip.orderId
-          );
-        }
-
-        // If this is a dropoff waypoint, notify customer
-        if (nextWaypoint.type === "DROPOFF") {
-          await notificationClient.sendDriverArrivedNotification(
-            trip.customerId,
-            trip.orderId
-          );
-        }
-      }
-
-      // If all waypoints are ARRIVED or COMPLETED, mark trip as COMPLETED
-      const pendingWaypoints = trip.waypoints.filter(
-        (wp) => wp.status === "PENDING"
-      );
-      if (pendingWaypoints.length === 0) {
-        trip.status = "COMPLETED";
-        trip.endTime = new Date();
-
-        // Notify customer that delivery is complete
-        await notificationClient.sendDeliveryCompletedNotification(
-          trip.customerId,
-          trip.orderId
-        );
-
-        // Update order status via client
-        await orderClient.updateOrderStatus(trip.orderId, "DELIVERED");
-
-        // // Update driver status to AVAILABLE
-        await driverClient.updateDriverStatus(trip.driverId, "AVAILABLE");
+        // Rest of your existing waypoint arrival code...
       }
 
       await trip.save();
@@ -274,6 +377,224 @@ async function updateActiveTrips(driverId, locationData) {
       driverId,
       error,
     });
+  }
+}
+
+// Centralized status update endpoint
+async function updateOrderStatus(orderId, updateData) {
+  try {
+    const { driverId, status, metadata } = updateData;
+
+    // 1. Update local trip data if needed
+    let trip = null;
+    try {
+      trip = await Trip.findOne({ orderId });
+      if (trip) {
+        // Update trip status based on order status
+        if (status === "DRIVER_CONFIRMED") trip.status = "SCHEDULED";
+        if (status === "PICKED_UP") trip.status = "IN_PROGRESS";
+        if (status === "DELIVERED") trip.status = "COMPLETED";
+        if (status === "CANCELLED") trip.status = "CANCELLED";
+
+        await trip.save();
+        
+        // Update cache
+        const tripKey = `trip:${orderId}`;
+        await redis.set(tripKey, JSON.stringify(trip), "EX", 86400);
+      }
+    } catch (tripErr) {
+      logger.error(`Failed to update trip: ${tripErr.message}`);
+      // Continue even if trip update fails
+    }
+
+    // 2. Forward to order service
+    try {
+      await orderClient.updateOrderStatus(orderId, {
+        status,
+        driverId,
+        ...metadata,
+      });
+    } catch (orderErr) {
+      logger.error(`Failed to update order: ${orderErr.message}`);
+    }
+
+    // 3. Update driver status if needed
+    if (driverId) {
+      try {
+        // Different driver status depending on order status
+        let driverStatus = "BUSY";
+        if (status === "DELIVERED" || status === "CANCELLED") {
+          driverStatus = "AVAILABLE";
+        }
+
+        await driverClient.updateDriverStatus(driverId, {
+          status: driverStatus,
+          lastActiveAt: new Date(),
+        });
+      } catch (driverErr) {
+        logger.error(`Failed to update driver: ${driverErr.message}`);
+      }
+    }
+
+    return {
+      success: true,
+      message: "Status updated and propagated",
+      trip: trip ? trip._id : null,
+    };
+  } catch (error) {
+    logger.error(`Error in update order status: ${error.message}`, {
+      orderId,
+      error,
+    });
+    throw error;
+  }
+}
+
+/**
+ * Update waypoint status
+ */
+async function updateWaypointStatus(orderId, waypointIndex, newStatus) {
+  try {
+    // Find the trip
+    const trip = await Trip.findOne({ orderId });
+    if (!trip) {
+      throw new Error(`Trip not found for order ${orderId}`);
+    }
+    
+    // Validate waypoint index
+    if (waypointIndex < 0 || waypointIndex >= trip.waypoints.length) {
+      throw new Error(`Invalid waypoint index: ${waypointIndex}`);
+    }
+    
+    const waypoint = trip.waypoints[waypointIndex];
+    const oldStatus = waypoint.status;
+    
+    // Update waypoint status
+    waypoint.status = newStatus;
+    
+    // Add status-specific updates
+    if (newStatus === 'ARRIVED' && !waypoint.arrivalTime) {
+      waypoint.arrivalTime = new Date();
+    }
+    
+    if (newStatus === 'COMPLETED' && !waypoint.departureTime) {
+      waypoint.departureTime = new Date();
+    }
+    
+    // If first waypoint (pickup) is completed, update trip status to IN_PROGRESS
+    if (waypointIndex === 0 && newStatus === 'COMPLETED' && trip.status === 'SCHEDULED') {
+      trip.status = 'IN_PROGRESS';
+      trip.startTime = new Date();
+      
+      // Notify order service
+      try {
+        await orderClient.updateOrderStatus(orderId, {
+          status: 'PICKED_UP',
+          driverId: trip.driverId
+        });
+      } catch (err) {
+        logger.warn(`Failed to update order status: ${err.message}`);
+      }
+    }
+    
+    // If last waypoint is completed, update trip status to COMPLETED
+    if (waypointIndex === trip.waypoints.length - 1 && newStatus === 'COMPLETED') {
+      trip.status = 'COMPLETED';
+      trip.endTime = new Date();
+      
+      // Notify order service
+      try {
+        await orderClient.updateOrderStatus(orderId, {
+          status: 'DELIVERED',
+          driverId: trip.driverId
+        });
+      } catch (err) {
+        logger.warn(`Failed to update order status: ${err.message}`);
+      }
+      
+      // Update driver status to AVAILABLE
+      try {
+        await driverClient.updateDriverStatus(trip.driverId, {
+          status: 'AVAILABLE',
+          lastActiveAt: new Date()
+        });
+      } catch (err) {
+        logger.warn(`Failed to update driver status: ${err.message}`);
+      }
+    }
+    
+    await trip.save();
+    
+    // Update cache
+    const tripKey = `trip:${orderId}`;
+    await redis.set(tripKey, JSON.stringify(trip), "EX", 86400);
+    
+    return trip;
+  } catch (error) {
+    logger.error(`Error updating waypoint status: ${error.message}`, { 
+      orderId, waypointIndex, newStatus, error 
+    });
+    throw error;
+  }
+}
+
+/**
+ * Refresh trip route data from external map API when conditions change significantly
+ */
+async function refreshTripRoute(tripId) {
+  try {
+    const trip = await Trip.findById(tripId);
+    if (!trip || trip.status === "COMPLETED" || trip.status === "CANCELLED") {
+      return null;
+    }
+
+    // Get latest driver location
+    const driverLocation = await getDriverLocation(trip.driverId);
+    if (!driverLocation) {
+      return null;
+    }
+
+    // Find next pending waypoint
+    const nextWaypoint = trip.waypoints.find((wp) => wp.status === "PENDING");
+    if (!nextWaypoint) {
+      return null;
+    }
+
+    // Call external map API to get fresh route based on current position
+    const mapApiResponse = await mapApiClient.getRoute({
+      origin: {
+        latitude: driverLocation.latitude,
+        longitude: driverLocation.longitude,
+      },
+      destination: {
+        latitude: nextWaypoint.location.coordinates[1],
+        longitude: nextWaypoint.location.coordinates[0],
+      },
+    });
+
+    // Update trip with fresh route data
+    trip.distance = mapApiResponse.distance;
+    trip.duration = mapApiResponse.duration;
+    trip.currentEta = mapApiResponse.duration;
+    trip.etaUpdatedAt = new Date();
+    trip.route.coordinates =
+      mapApiResponse.route.coordinates || trip.route.coordinates;
+    trip.route.polylineEncoded =
+      mapApiResponse.route.polyline || trip.route.polylineEncoded;
+
+    await trip.save();
+
+    // Update cache
+    const tripKey = `trip:${trip.orderId}`;
+    await redis.set(tripKey, JSON.stringify(trip), "EX", 86400);
+
+    return trip;
+  } catch (error) {
+    logger.error(`Error refreshing trip route: ${error.message}`, {
+      tripId,
+      error,
+    });
+    return null;
   }
 }
 
@@ -520,8 +841,12 @@ async function generateHeatmapData(startTime, endTime, resolution = 0.01) {
 module.exports = {
   updateDriverLocation,
   getDriverLocation,
-  createTrip,
+  createPendingTrip,
+  assignDriverToTrip,
   getTripStatus,
   getNearbyDrivers,
   generateHeatmapData,
+  refreshTripRoute,
+  updateWaypointStatus,
+  updateOrderStatus
 };

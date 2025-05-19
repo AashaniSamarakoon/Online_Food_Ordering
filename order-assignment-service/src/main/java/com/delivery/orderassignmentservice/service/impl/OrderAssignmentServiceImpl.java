@@ -64,6 +64,45 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
           throw new IllegalStateException("Restaurant coordinates not available for order " + orderId);
       }
 
+      // Create a pending trip in the tracking service
+      try {
+          log.info("Creating pending trip in tracking service for order ID: {}", orderId);
+
+          // Create waypoints
+          List<TripWaypointDTO> waypoints = new ArrayList<>();
+          waypoints.add(TripWaypointDTO.builder()
+                  .type("PICKUP")
+                  .longitude(order.getRestaurantCoordinates().getLongitude())
+                  .latitude(order.getRestaurantCoordinates().getLatitude())
+                  .address(order.getRestaurantAddress())
+                  .build());
+
+          waypoints.add(TripWaypointDTO.builder()
+                  .type("DROPOFF")
+                  .longitude(order.getCustomerCoordinates().getLongitude())
+                  .latitude(order.getCustomerCoordinates().getLatitude())
+                  .address(order.getAddress())
+                  .build());
+
+          // Create pending trip request
+          TripCreateDTO tripData = TripCreateDTO.builder()
+                  .orderId(orderId.toString())
+                  .customerId(order.getUserId().toString())
+                  .waypoints(waypoints)
+                  .estimatedDistance(0)
+                  .estimatedDuration(0)
+                  // Map API data would come from a map service if available
+                  .build();
+
+          // Call the tracking service
+          trackingServiceClient.createPendingTrip(tripData);
+
+      } catch (Exception e) {
+          // Log but continue with the assignment process
+          log.error("Error creating pending trip in tracking service: {}", e.getMessage(), e);
+      }
+
+
       // 2. Find nearby drivers with dynamic radius
       int radius = calculateSearchRadius(orderId);
       List<DriverLocationDTO> nearbyDrivers;
@@ -256,28 +295,66 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
      */
     private void updateOrderAndDriverStatus(Long orderId, Long driverId, OrderAssignment assignment) {
         try {
-            // Update order status
-            OrderStatusUpdate orderStatusUpdate = new OrderStatusUpdate();
-            orderStatusUpdate.setStatus("DRIVER_CONFIRMED");
-            orderStatusUpdate.setDriverId(driverId);
-            orderServiceClient.updateOrderStatus(orderId, orderStatusUpdate);
+            // Create a unified status update object using the DTO
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("assignmentTime", assignment.getCreatedAt().toString());
+            metadata.put("assignmentId", assignment.getId().toString());
+
+            StatusUpdateRequest statusUpdate = StatusUpdateRequest.builder()
+                    .orderId(orderId.toString())
+                    .driverId(driverId.toString())
+                    .status("DRIVER_CONFIRMED")
+                    .metadata(metadata)
+                    .build();
+
+            // Make a single call to the tracking service using Feign client and StatusUpdateRequest
+            Map<String, Object> response = trackingServiceClient.updateOrderStatus(orderId.toString(), statusUpdate);
+            log.info("Successfully updated order status through tracking service for order {}", orderId);
+
         } catch (Exception e) {
-            log.error("Failed to update order status: {}", e.getMessage(), e);
+            log.error("Failed to update order status through tracking service: {}", e.getMessage(), e);
+
+            // Fallback to direct updates if tracking service fails
+            try {
+                // Direct update to order service as fallback
+                OrderStatusUpdate orderStatusUpdate = new OrderStatusUpdate();
+                orderStatusUpdate.setStatus("DRIVER_CONFIRMED");
+                orderStatusUpdate.setDriverId(driverId);
+                orderServiceClient.updateOrderStatus(orderId, orderStatusUpdate);
+
+                // Direct update to driver service as fallback
+                DriverStatusUpdate statusUpdate = new DriverStatusUpdate();
+                statusUpdate.setDriverId(driverId);
+                statusUpdate.setStatus("BUSY");
+                statusUpdate.setLastActiveAt(LocalDateTime.now());
+                driverServiceClient.updateDriverStatus(driverId, statusUpdate);
+
+                log.info("Completed fallback status updates for order {}", orderId);
+            } catch (Exception fallbackException) {
+                log.error("Fallback status updates failed: {}", fallbackException.getMessage(), fallbackException);
+            }
         }
 
         try {
-            // Update driver status
-            DriverStatusUpdate statusUpdate = new DriverStatusUpdate();
-            statusUpdate.setDriverId(driverId);
-            statusUpdate.setStatus("BUSY");
-            statusUpdate.setLastActiveAt(LocalDateTime.now());
-            driverServiceClient.updateDriverStatus(driverId, statusUpdate);
+            // Always assign the driver in the tracking service
+            DriverAssignmentDTO driverData = new DriverAssignmentDTO();
+            driverData.setDriverId(driverId.toString());
+            trackingServiceClient.assignDriverToTrip(orderId.toString(), driverData);
         } catch (Exception e) {
-            log.error("Failed to update driver status: {}", e.getMessage(), e);
+            log.error("Failed to assign driver to trip in tracking service: {}", e.getMessage(), e);
         }
 
         try {
-            // Cancel other pending assignments for this order
+            // Send completion event
+            DriverDTO driver = driverServiceClient.getDriverDetails(driverId);
+            OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
+            sendAssignmentCompletedEvent(assignment, driver, order);
+        } catch (Exception e) {
+            log.error("Failed to send assignment completion event: {}", e.getMessage(), e);
+        }
+
+        try {
+            // Cancel other pending assignments
             List<OrderAssignment> otherPendingAssignments =
                     assignmentRepository.findByOrderIdAndStatusAndIdNot(orderId, "PENDING", assignment.getId());
 
@@ -288,15 +365,6 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
             }
         } catch (Exception e) {
             log.error("Failed to cancel other pending assignments: {}", e.getMessage(), e);
-        }
-
-        try {
-            // Send completion event
-            DriverDTO driver = driverServiceClient.getDriverDetails(driverId);
-            OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
-            sendAssignmentCompletedEvent(assignment, driver, order);
-        } catch (Exception e) {
-            log.error("Failed to send assignment completion event: {}", e.getMessage(), e);
         }
     }
 
@@ -502,4 +570,9 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
             return response;
         }).collect(Collectors.toList());
     }
+
+
+
+
+
 }

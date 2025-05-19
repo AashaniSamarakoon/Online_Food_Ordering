@@ -1,42 +1,46 @@
 package com.delivery.orderassignmentservice.client;
 
-import com.delivery.orderassignmentservice.dto.DriverLocationDTO;
+import com.delivery.orderassignmentservice.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(name = "tracking-service", url = "${tracking.service.url}")
 public interface TrackingServiceClient {
 
     /**
      * Get nearby available drivers based on location
-     *
-     * @param latitude The pickup location latitude
-     * @param longitude The pickup location longitude
-     * @param radius Optional radius in meters (default 5000)
-//     * @param limit Optional max number of drivers to return (default 10)
-     * @return List of nearby drivers with their location details
      */
     @GetMapping("/api/tracking/drivers/nearby")
     List<DriverLocationDTO> getNearbyDrivers(
             @RequestParam double latitude,
             @RequestParam double longitude,
             @RequestParam(required = false, defaultValue = "5000") int radius
-//            @RequestParam(required = false, defaultValue = "10") int limit
     );
 
     /**
      * Get current location of a specific driver
      */
     @GetMapping("/api/tracking/drivers/{driverId}/location")
-    DriverLocationDTO getDriverLocation(@PathVariable Long driverId);
+    DriverLocationDTO getDriverLocation(@PathVariable String driverId);
 
     /**
-     * Create a new delivery trip
+     * Create a pending trip (before driver assignment)
      */
-//    @PostMapping("/api/tracking/trips")
-//    TripDTO createTrip(@RequestBody TripCreateDTO tripData);
+    @PostMapping("/api/tracking/trips/pending")
+    Object createPendingTrip(@RequestBody TripCreateDTO tripData);
+
+    /**
+     * Assign driver to existing trip
+     */
+    @PostMapping("/api/tracking/trips/{orderId}/assign")
+    Object assignDriverToTrip(@PathVariable String orderId, @RequestBody DriverAssignmentDTO driverData);
+
+    /**
+     * Centralized status update endpoint
+     */
+    @PostMapping("/api/tracking/status/{orderId}")
+    Map<String, Object> updateOrderStatus(@PathVariable String orderId, @RequestBody StatusUpdateRequest statusUpdate);
 }

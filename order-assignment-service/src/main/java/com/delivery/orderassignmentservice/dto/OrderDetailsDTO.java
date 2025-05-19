@@ -18,6 +18,7 @@ public class OrderDetailsDTO {
     private Long id;
 
     // User information
+    private Long userId;
     private String username;
     private String address;
     private String phoneNumber;

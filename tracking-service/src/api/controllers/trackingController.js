@@ -83,31 +83,67 @@ exports.getTripStatus = async (req, res) => {
   }
 };
 
-/**
- * Create a new trip
- */
-exports.createTrip = async (req, res) => {
+// /**
+//  * Create a new trip
+//  */
+// exports.createTrip = async (req, res) => {
+//   try {
+//     const tripData = req.body;
+
+//     // Validate required fields
+//     if (
+//       !tripData.orderId ||
+//       !tripData.driverId ||
+//       !tripData.customerId ||
+//       !tripData.waypoints
+//     ) {
+//       return res.status(400).json({ message: "Missing required fields" });
+//     }
+
+//     const trip = await trackingService.createTrip(tripData);
+
+//     return res.status(201).json(trip);
+//   } catch (error) {
+//     logger.error(`Error creating trip: ${error.message}`, { error });
+//     return res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+
+// In your tracking controller
+exports.createPendingTrip = async (req, res) => {
   try {
     const tripData = req.body;
-
-    // Validate required fields
-    if (
-      !tripData.orderId ||
-      !tripData.driverId ||
-      !tripData.customerId ||
-      !tripData.waypoints
-    ) {
+    
+    if (!tripData.orderId || !tripData.customerId || !tripData.waypoints) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-
-    const trip = await trackingService.createTrip(tripData);
-
+    
+    const trip = await trackingService.createPendingTrip(tripData);
     return res.status(201).json(trip);
   } catch (error) {
-    logger.error(`Error creating trip: ${error.message}`, { error });
+    logger.error(`Error creating pending trip: ${error.message}`, { error });
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.assignDriverToTrip = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { driverId } = req.body;
+    
+    if (!driverId) {
+      return res.status(400).json({ message: "Driver ID is required" });
+    }
+    
+    const trip = await trackingService.assignDriverToTrip(orderId, driverId);
+    return res.status(200).json(trip);
+  } catch (error) {
+    logger.error(`Error assigning driver to trip: ${error.message}`, { error });
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 /**
  * Get nearby drivers
@@ -137,6 +173,81 @@ exports.getNearbyDrivers = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+/**
+ * Update waypoint status
+ */
+exports.updateWaypointStatus = async (req, res) => {
+  try {
+    const { orderId, waypointIndex } = req.params;
+    const { status } = req.body;
+    
+    if (!status || !['PENDING', 'ARRIVED', 'COMPLETED'].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+    
+    const trip = await trackingService.updateWaypointStatus(
+      orderId, 
+      parseInt(waypointIndex), 
+      status
+    );
+    
+    return res.status(200).json(trip);
+  } catch (error) {
+    logger.error(`Error updating waypoint status: ${error.message}`, { error });
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+/**
+ * Update order status endpoint
+ */
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { driverId, status, metadata } = req.body;
+
+    // Log the status change
+    logger.info(`Order status update: Order ${orderId}, Status: ${status}`, {
+      orderId,
+      status,
+      driverId,
+      metadata,
+    });
+
+    const result = await trackingService.updateOrderStatus(orderId, {
+      driverId, 
+      status, 
+      metadata
+    });
+
+    // Send notifications via WebSockets if available
+    try {
+      if (req.app.io) {
+        req.app.io.to(`order_${orderId}`).emit("status_update", {
+          orderId,
+          status,
+          timestamp: new Date(),
+        });
+      }
+    } catch (notifyErr) {
+      logger.error(`Failed to send WebSocket notifications: ${notifyErr.message}`);
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    logger.error(`Error in status update endpoint: ${error.message}`, {
+      error,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 
 /**
  * Get heatmap data
