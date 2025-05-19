@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig {
@@ -18,19 +17,14 @@ public class CorsConfig {
         // Allow credentials
         config.setAllowCredentials(true);
 
-        // Allow specific origins or use patterns
-        // Option 1: Specific origins
-        // config.addAllowedOrigin("http://localhost:19006");
-        // config.addAllowedOrigin("http://192.168.1.159:19006");
-
-        // Option 2: Use patterns (Spring Boot 2.4.0+)
+        // Use allowed origin patterns instead of specific origins
         config.addAllowedOriginPattern("*");
 
         // Standard CORS headers
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
-        // SockJS and WebSocket specific headers
+        // Required for WebSocket
         config.addExposedHeader("SockJS-Version");
         config.addExposedHeader("heart-beat");
         config.addExposedHeader("accept-version");

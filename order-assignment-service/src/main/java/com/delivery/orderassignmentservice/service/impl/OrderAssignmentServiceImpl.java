@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -192,97 +189,160 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
 
     @Transactional
     @Override
-    public void confirmAssignment(Long orderId, Long driverId) {  // Changed from String to Long
+    public void confirmAssignment(Long orderId, Long driverId) {
         log.info("Confirming assignment for order {} by driver {}", orderId, driverId);
 
-        // Validate and update assignment
-        OrderAssignment assignment = assignmentRepository.findByOrderIdAndDriverId(orderId, driverId)
-                .orElseThrow(() -> new AssignmentNotFoundException(
-                        "No pending assignment found for order " + orderId + " and driver " + driverId));
+        try {
+            // Try to find a direct assignment first
+            Optional<OrderAssignment> directAssignmentOpt = assignmentRepository.findByOrderIdAndDriverId(orderId, driverId);
+            OrderAssignment assignment = null;
 
-        if (!"PENDING".equals(assignment.getStatus())) {
-            throw new IllegalStateException("Assignment is not in PENDING state");
+            if (directAssignmentOpt.isPresent()) {
+                // Direct assignment exists
+                assignment = directAssignmentOpt.get();
+
+                if (!"PENDING".equals(assignment.getStatus())) {
+                    throw new IllegalStateException("Assignment is not in PENDING state");
+                }
+            } else {
+                // Check if there's an assignment for this order with this driver as a candidate
+                Optional<OrderAssignment> orderAssignmentOpt = assignmentRepository.findByOrderIdAndStatus(orderId, "PENDING");
+
+                if (orderAssignmentOpt.isPresent()) {
+                    OrderAssignment pendingAssignment = orderAssignmentOpt.get();
+
+                    // Check if this driver is in candidates
+                    if (pendingAssignment.getCandidateDrivers() != null &&
+                            pendingAssignment.getCandidateDrivers().contains(driverId)) {
+                        assignment = pendingAssignment;
+
+                        // Set the driver ID for this assignment
+                        assignment.setDriverId(driverId);
+                        assignmentRepository.save(assignment);
+
+                        // Remove from candidates since this driver is now the assigned driver
+                        assignment.getCandidateDrivers().remove(driverId);
+                    } else {
+                        throw new AssignmentNotFoundException(
+                                "No pending assignment found for order " + orderId + " and driver " + driverId);
+                    }
+                } else {
+                    throw new AssignmentNotFoundException(
+                            "No pending assignment found for order " + orderId + " and driver " + driverId);
+                }
+            }
+
+            // Update assignment status
+            assignment.setStatus("CONFIRMED");
+            assignment.setUpdatedAt(LocalDateTime.now());
+            assignmentRepository.save(assignment);
+
+            // Update order status
+            OrderStatusUpdate orderStatusUpdate = new OrderStatusUpdate();
+            orderStatusUpdate.setStatus("DRIVER_CONFIRMED");
+            orderStatusUpdate.setDriverId(driverId);
+
+            try {
+                orderServiceClient.updateOrderStatus(orderId, orderStatusUpdate);
+            } catch (Exception e) {
+                log.error("Failed to update order status: {}", e.getMessage(), e);
+            }
+
+            // Update driver status
+            DriverStatusUpdate statusUpdate = new DriverStatusUpdate();
+            statusUpdate.setDriverId(driverId);
+            statusUpdate.setStatus("BUSY");
+            statusUpdate.setLastActiveAt(LocalDateTime.now());
+
+            try {
+                driverServiceClient.updateDriverStatus(driverId, statusUpdate);
+            } catch (Exception e) {
+                log.error("Failed to update driver status: {}", e.getMessage(), e);
+            }
+
+            // Cancel other pending assignments for this order
+            List<OrderAssignment> pendingAssignments = assignmentRepository.findByOrderIdAndStatusAndIdNot(
+                    orderId, "PENDING", assignment.getId());
+
+            for (OrderAssignment pendingAssignment : pendingAssignments) {
+                pendingAssignment.setStatus("CANCELLED");
+                pendingAssignment.setUpdatedAt(LocalDateTime.now());
+                assignmentRepository.save(pendingAssignment);
+            }
+
+            // Send completion event
+            try {
+                DriverDTO driver = driverServiceClient.getDriverDetails(driverId);
+                OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
+                sendAssignmentCompletedEvent(assignment, driver, order);
+            } catch (Exception e) {
+                log.error("Failed to send assignment completed event: {}", e.getMessage(), e);
+            }
+
+        } catch (AssignmentNotFoundException e) {
+            log.warn(e.getMessage());
+            throw e; // Rethrow to maintain the 404 status
+        } catch (IllegalStateException e) {
+            log.warn("Invalid assignment state: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error confirming assignment: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to confirm assignment", e);
         }
-
-        // Update assignment status
-        assignment.setStatus("CONFIRMED");
-        assignment.setUpdatedAt(LocalDateTime.now());
-        assignmentRepository.save(assignment);
-
-        // Update order and driver statuses
-
-        // Create OrderStatusUpdate object
-        OrderStatusUpdate orderStatusUpdate = new OrderStatusUpdate();
-        orderStatusUpdate.setStatus("DRIVER_CONFIRMED");
-        orderStatusUpdate.setDriverId(driverId);
-
-        // Call the updateOrderStatus method with the proper object
-        orderServiceClient.updateOrderStatus(orderId, orderStatusUpdate);
-
-        // Create a DriverStatusUpdate object
-        DriverStatusUpdate statusUpdate = new DriverStatusUpdate();
-        statusUpdate.setDriverId(driverId);
-        statusUpdate.setStatus("BUSY");
-        statusUpdate.setLastActiveAt(LocalDateTime.now());
-
-        driverServiceClient.updateDriverStatus(driverId, statusUpdate);
-
-        // Cancel other pending assignments for this order
-        Optional<OrderAssignment> pendingAssignmentOpt = assignmentRepository.findByOrderIdAndStatus(orderId, "PENDING");
-        if (pendingAssignmentOpt.isPresent()) {
-            OrderAssignment pendingAssignment = pendingAssignmentOpt.get();
-            pendingAssignment.setStatus("CANCELLED");
-            pendingAssignment.setUpdatedAt(LocalDateTime.now());
-            assignmentRepository.save(pendingAssignment);
-        }
-
-        // Send completion event
-        DriverDTO driver = driverServiceClient.getDriverDetails(driverId);
-        OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
-        sendAssignmentCompletedEvent(assignment, driver, order);
     }
+
 
     @Transactional
     @Override
     public void handleRejection(Long orderId, Long driverId) {
         log.info("Handling rejection for order {} by driver {}", orderId, driverId);
 
-        // Mark assignment as rejected
-        Optional<OrderAssignment> assignmentOpt = assignmentRepository.findByOrderIdAndDriverId(orderId, driverId);
-        assignmentOpt.ifPresent(assignment -> {
-            assignment.setStatus("REJECTED");
-            assignment.setUpdatedAt(LocalDateTime.now());
-            assignmentRepository.save(assignment);
-        });
-
-        // Check rejection count
-        long rejectionCount = assignmentRepository.countByOrderIdAndStatus(orderId, "REJECTED");
-
-        // Get the original order details
-        OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
-        if (order == null) {
-            throw new OrderNotFoundException("Order not found: " + orderId);
-        }
-
-        // Try next candidate or restart process
-        Optional<OrderAssignment> pendingAssignment = assignmentRepository.findByOrderIdAndStatus(orderId, "PENDING");
-        if (pendingAssignment.isPresent()) {
-            // Try next candidate driver
-            List<Long> candidates = pendingAssignment.get().getCandidateDrivers();
-            Optional<Long> nextDriver = candidates.stream()
-                    .filter(candidateId ->
-                            !assignmentRepository.existsByOrderIdAndDriverIdAndStatus(
-                                    orderId, candidateId, "REJECTED"))
-                    .findFirst();
-
-            if (nextDriver.isPresent()) {
-                notifySingleDriver(orderId, nextDriver.get(), order);
-            } else {
-                restartAssignmentProcess(orderId, order, rejectionCount);
+        try {
+            // Mark assignment as rejected
+            Optional<OrderAssignment> assignmentOpt = assignmentRepository.findByOrderIdAndDriverId(orderId, driverId);
+            if (assignmentOpt.isEmpty()) {
+                log.warn("Assignment not found for rejection - order {} driver {}", orderId, driverId);
+                return; // Return silently instead of throwing an exception
             }
-        } else {
-            restartAssignmentProcess(orderId, order, rejectionCount);
+            assignmentOpt.ifPresent(assignment -> {
+                assignment.setStatus("REJECTED");
+                assignment.setUpdatedAt(LocalDateTime.now());
+                assignmentRepository.save(assignment);
+            });
+
+            // Check rejection count
+            long rejectionCount = assignmentRepository.countByOrderIdAndStatus(orderId, "REJECTED");
+
+            // Get the original order details
+            OrderDetailsDTO order = orderServiceClient.getOrderDetails(orderId);
+            if (order == null) {
+                throw new OrderNotFoundException("Order not found: " + orderId);
+            }
+
+            // Try next candidate or restart process
+            Optional<OrderAssignment> pendingAssignment = assignmentRepository.findByOrderIdAndStatus(orderId, "PENDING");
+            if (pendingAssignment.isPresent()) {
+                // Try next candidate driver
+                List<Long> candidates = pendingAssignment.get().getCandidateDrivers();
+                Optional<Long> nextDriver = candidates.stream()
+                        .filter(candidateId ->
+                                !assignmentRepository.existsByOrderIdAndDriverIdAndStatus(
+                                        orderId, candidateId, "REJECTED"))
+                        .findFirst();
+
+                if (nextDriver.isPresent()) {
+                    notifySingleDriver(orderId, nextDriver.get(), order);
+                } else {
+                    restartAssignmentProcess(orderId, order, rejectionCount);
+                }
+            }
+        } catch (Exception e) {
+            // Log exception but don't throw it further
+            log.error("Error handling rejection for order {} driver {}: {}",
+                    orderId, driverId, e.getMessage(), e);
         }
+
+
     }
 
     private void notifySingleDriver(Long orderId, Long driverId, OrderDetailsDTO order) {
@@ -371,28 +431,36 @@ public class OrderAssignmentServiceImpl implements OrderAssignmentService {
                 customerLocation = new LocationDTO(0.0, 0.0);
             }
 
-            // Build notification object
+            // Format payment amount
+            String paymentAmount = order.getTotalPrice() != null
+                    ? order.getTotalPrice().toString()
+                    : "0.00";
+
+            // Build notification object with updated field names
             return OrderAssignmentNotification.builder()
                     .orderId(order.getId())
-//                    .orderNumber(order.getOrderNumber())
-                    .payment(order.getTotalPrice() != null ? order.getTotalPrice().toString() : "0")
-                    // Restaurant information
-//                    .restaurantName(order.getRestaurantName())
-//                    .restaurantAddress(order.getPickupAddress())
-//                    // Customer information
-//                    .customerAddress(order.getDeliveryAddress())
+                    .orderNumber("ORD-" + order.getId())  // Generate an order number
+                    .payment(paymentAmount)
+                    .currency("LKR")
+                    // Restaurant details
+                    .restaurantName(order.getRestaurantName())
+                    .pickupAddress(order.getRestaurantAddress())
+                    // Customer details
+                    .deliveryAddress(order.getAddress())
+                    .customerName(order.getUsername())
+                    .phoneNumber(order.getPhoneNumber())
                     // Coordinates as LocationDTO objects
                     .restaurantCoordinates(restaurantLocation)
                     .customerCoordinates(customerLocation)
-                    // Special instructions
-//                    .specialInstructions(order.getSpecialInstructions())
+                    // Additional order details
+                    .deliveryFee(order.getDeliveryCharges())
+                    .specialInstructions("")  // No special instructions in the current model
                     // Assignment expiry
                     .expiryTime(assignment.getExpiryTime())
                     .timestamp(System.currentTimeMillis())
                     .build();
         }).collect(Collectors.toList());
     }
-
 
     @Override
     public List<OrderAssignmentDTO> getAssignmentsByOrder(Long orderId) {

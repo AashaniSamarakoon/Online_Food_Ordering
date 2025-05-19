@@ -34,4 +34,6 @@ public interface OrderAssignmentRepository extends JpaRepository<OrderAssignment
     Optional<OrderAssignment> findByDriverIdAndStatus(Long driverId, String status);
     List<OrderAssignment> findAllByDriverIdAndStatus(Long driverId, String status);
 
+    List<OrderAssignment> findByOrderIdAndStatusAndIdNot(Long orderId, String status, Long excludedId);
+
 }

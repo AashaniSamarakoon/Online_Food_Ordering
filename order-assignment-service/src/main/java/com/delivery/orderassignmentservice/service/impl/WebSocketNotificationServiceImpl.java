@@ -28,6 +28,9 @@ public class WebSocketNotificationServiceImpl implements WebSocketNotificationSe
             // Create the notification with necessary fields for driver's UI
             OrderAssignmentNotification notification = buildNotificationFromOrderDetails(event, orderDetails);
 
+            // Debug log to verify the notification object
+            log.debug("Sending notification to driver {}: {}", event.getDriverId(), notification);
+
             // Send to the specific driver's topic
             String destination = "/queue/driver." + event.getDriverId() + ".assignments";
             messagingTemplate.convertAndSend(destination, notification);
@@ -40,10 +43,6 @@ public class WebSocketNotificationServiceImpl implements WebSocketNotificationSe
         }
     }
 
-
-    /**
-     * Build a notification with required fields from order details
-     */
     private OrderAssignmentNotification buildNotificationFromOrderDetails(
             DriverAssignmentEvent event, OrderDetailsDTO orderDetails) {
 
@@ -69,21 +68,25 @@ public class WebSocketNotificationServiceImpl implements WebSocketNotificationSe
 
         return OrderAssignmentNotification.builder()
                 .orderId(orderDetails.getId())
-//                .orderNumber(orderDetails.getOrderNumber())
+                .orderNumber("ORD-" + orderDetails.getId())  // Generate an order number
                 .payment(paymentAmount)
-                // Customer and restaurant details
-//                .restaurantName(orderDetails.getRestaurantName())
-//                .restaurantAddress(orderDetails.getPickupAddress())
-//                .customerAddress(orderDetails.getDeliveryAddress())
+                .currency("LKR")
+                // Restaurant details
+                .restaurantName(orderDetails.getRestaurantName())
+                .pickupAddress(orderDetails.getRestaurantAddress())
+                // Customer details
+                .deliveryAddress(orderDetails.getAddress())
+                .customerName(orderDetails.getUsername())
+                .phoneNumber(orderDetails.getPhoneNumber())
                 // Coordinates as LocationDTO objects
                 .restaurantCoordinates(restaurantLocation)
                 .customerCoordinates(customerLocation)
-                // Special instructions
-//                .specialInstructions(orderDetails.getSpecialInstructions())
+                // Additional order details
+                .deliveryFee(orderDetails.getDeliveryCharges())
+                .specialInstructions("")
                 // Assignment expiry time
                 .expiryTime(event.getExpiryTime())
                 .timestamp(System.currentTimeMillis())
                 .build();
     }
-
 }
