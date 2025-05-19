@@ -1,4 +1,5 @@
-package com.order_service.order_service.service;
+// SmsService.java
+package com.user_service.user_service.service;
 
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
@@ -28,8 +29,8 @@ public class SmsService {
 
     public void sendSms(String to, String messageBody) {
         Message.creator(
-                new PhoneNumber(to),
-                new PhoneNumber(twilioPhoneNumber),
+                new PhoneNumber(to),         // To number (e.g., "+94771234567")
+                new PhoneNumber(twilioPhoneNumber), // From Twilio number
                 messageBody
         ).create();
     }

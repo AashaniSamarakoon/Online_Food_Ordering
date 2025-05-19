@@ -20,6 +20,7 @@ public class NotificationService {
         String phoneNumber = (String) userProfile.get("phoneNumber");
         String firstName = (String) userProfile.get("firstName");
 
+        sendSms(phoneNumber, firstName, order);
         sendEmail(email, firstName, order);
         smsService.sendSms(phoneNumber, buildSmsMessage(firstName, order));
     }
@@ -39,6 +40,19 @@ public class NotificationService {
 
     private String buildSmsMessage(String name, Order order) {
         return "Hi " + name + ", your order #" + order.getId() + " was placed successfully! Total: $" + order.getTotalPrice();
+    }
+
+    private void sendSms(String toPhoneNumber, String name, Order order) {
+        String smsBody = buildOrderMessage(name, order);
+        smsService.sendSms(toPhoneNumber, smsBody);
+    }
+
+    private String buildOrderMessage(String name, Order order) {
+        return "Hi " + name + ",\n\n" +
+                "Your order #" + order.getId() + " has been placed successfully!\n" +
+                "Total: $" + order.getTotalPrice() + "\n" +
+                "We will deliver it soon. 🚀\n\n" +
+                "Thank you for choosing us!";
     }
 }
 

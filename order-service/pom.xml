@@ -64,6 +64,12 @@
 			<artifactId>postgresql</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>10.9.0</version> <!-- Use latest stable -->
+		</dependency>
+
 
 		<!-- JWT -->
 		<dependency>

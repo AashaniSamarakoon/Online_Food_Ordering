@@ -69,7 +69,15 @@ spec:
                 port:
                   number: 80
 
+                  
           - path: /(orders/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+          - path: /(orders)
             pathType: ImplementationSpecific
             backend:
               service:
@@ -97,7 +105,21 @@ spec:
                 name: order-service
                 port:
                   number: 80
+          - path: /(cart)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
           - path: /(auth/.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 80
+          - path: /(oauth2/authorization/google)
             pathType: ImplementationSpecific
             backend:
               service:

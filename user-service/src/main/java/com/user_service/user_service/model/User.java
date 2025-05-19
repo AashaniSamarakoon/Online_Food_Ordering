@@ -46,4 +46,7 @@ public class User {
 
     private boolean isVerified = false;
     private boolean isActive = true;
+
+    private String phoneVerificationCode;
+    private Boolean isPhoneVerified = false;
 }
