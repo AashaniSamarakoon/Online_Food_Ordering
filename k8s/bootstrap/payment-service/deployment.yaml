@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: payment-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: payment-service
@@ -12,25 +12,11 @@ spec:
       labels:
         app: payment-service
     spec:
+      restartPolicy: Always
       containers:
-        - name: payment
+        - name: payment-service
           image: sudarshan27922/payment-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8099
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "k8s"
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: neon-db-secrets
-                  key: postgres-password
-          volumeMounts:
-            - name: config-volume
-              mountPath: /app/config
-      volumes:
-        - name: config-volume
-          configMap:
-            name: payment-config
-      restartPolicy: Always
+

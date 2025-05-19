@@ -8,19 +8,23 @@ import com.stripe.param.checkout.SessionCreateParams;
 import com.sudarshan.paymentservice.dto.PaymentRequest;
 import com.sudarshan.paymentservice.dto.StripeResponse;
 import com.sudarshan.paymentservice.entity.Payment;
+import com.sudarshan.paymentservice.entity.RestaurantTransaction;
 import com.sudarshan.paymentservice.enums.PaymentStatus;
 import com.sudarshan.paymentservice.enums.PaymentType;
 import com.sudarshan.paymentservice.enums.RefundStatus;
 import com.sudarshan.paymentservice.exceptions.StripePollingException;
 import com.sudarshan.paymentservice.exceptions.StripeSessionCreationException;
 import com.sudarshan.paymentservice.repository.PaymentRepository;
+import com.sudarshan.paymentservice.repository.RestaurantTransactionRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,13 +34,14 @@ import java.util.List;
 public class StripeServiceImpl implements StripeService {
 
     private final PaymentRepository paymentRepository;
+    private final RestaurantTransactionRepository restaurantTransactionRepository;
     private String secretKey;
 
-    public StripeServiceImpl(PaymentRepository paymentRepository) {
+    public StripeServiceImpl(PaymentRepository paymentRepository, @Value("${stripe.secret.key}") String secretKey, RestaurantTransactionRepository restaurantTransactionRepository) {
         this.paymentRepository = paymentRepository;
+        this.restaurantTransactionRepository = restaurantTransactionRepository;
 
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-        this.secretKey = dotenv.get("STRIPE_SECRET_KEY");
+        this.secretKey = secretKey;
     }
 
     @Override
@@ -48,6 +53,7 @@ public class StripeServiceImpl implements StripeService {
         long totalAmount = paymentRequest.getTotalAmount();
         long companyCommission = (long) ((totalAmount - deliveryCharge) * 0.10);
         String mealNamesConcatenated = String.join(", ", paymentRequest.getMealNames());
+        long restaurantBalance = totalAmount - deliveryCharge - companyCommission;
 
         SessionCreateParams.LineItem.PriceData.ProductData productData =
                 SessionCreateParams.LineItem.PriceData.ProductData.builder()
@@ -96,11 +102,21 @@ public class StripeServiceImpl implements StripeService {
                 .refundStatus(RefundStatus.NOT_REQUESTED)
                 .createdAt(LocalDateTime.now())
                 .mealNames(mealNamesConcatenated)
-                .restaurantBalance(totalAmount - companyCommission - deliveryCharge)
+                .restaurantBalance(restaurantBalance)
                 .sessionId(session.getId())
                 .build();
 
         paymentRepository.save(payment);
+
+        RestaurantTransaction transaction = RestaurantTransaction.builder()
+                .restaurantId(paymentRequest.getRestaurantId())
+                .date(LocalDate.now())
+                .description("Payment for meals: " + mealNamesConcatenated)
+                .bankName("BOC") // Hardcoded bank name
+                .amount(restaurantBalance)
+                .build();
+
+        restaurantTransactionRepository.save(transaction);
 
         return StripeResponse
                 .builder()
