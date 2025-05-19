@@ -13,8 +13,8 @@ metadata:
     # WebSocket-specific annotations
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
     # Ensure WebSocket connections are allowed to upgrade
     nginx.ingress.kubernetes.io/websocket-services: "order-assignment-service"
     nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -69,7 +69,6 @@ spec:
                 port:
                   number: 80
 
-                  
           - path: /(orders/.*)
             pathType: ImplementationSpecific
             backend:
@@ -106,14 +105,13 @@ spec:
                 port:
                   number: 80
 
-
           - path: /(api/admin/.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: restaurant-auth
                 port:
-                  number: 80 
+                  number: 80
           - path: /(api/restaurant/.*)
             pathType: ImplementationSpecific
             backend:
@@ -134,14 +132,14 @@ spec:
               service:
                 name: restaurant-service
                 port:
-                  number: 80  
+                  number: 80
           - path: /(api/restaurants/.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: restaurant-service
                 port:
-                  number: 80 
+                  number: 80
           - path: /(api/menu-items/.*)
             pathType: ImplementationSpecific
             backend:

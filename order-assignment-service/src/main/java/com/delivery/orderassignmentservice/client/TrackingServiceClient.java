@@ -20,7 +20,7 @@ public interface TrackingServiceClient {
 //     * @param limit Optional max number of drivers to return (default 10)
      * @return List of nearby drivers with their location details
      */
-    @GetMapping("/api/drivers/nearby")
+    @GetMapping("/api/tracking/drivers/nearby")
     List<DriverLocationDTO> getNearbyDrivers(
             @RequestParam double latitude,
             @RequestParam double longitude,
@@ -31,12 +31,12 @@ public interface TrackingServiceClient {
     /**
      * Get current location of a specific driver
      */
-    @GetMapping("/api/drivers/{driverId}/location")
+    @GetMapping("/api/tracking/drivers/{driverId}/location")
     DriverLocationDTO getDriverLocation(@PathVariable Long driverId);
 
     /**
      * Create a new delivery trip
      */
-//    @PostMapping("/api/trips")
+//    @PostMapping("/api/tracking/trips")
 //    TripDTO createTrip(@RequestBody TripCreateDTO tripData);
 }

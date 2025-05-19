@@ -4,7 +4,7 @@ const trackingController = require('../controllers/trackingController');
 
 // Driver location routes
 router.get('/drivers/:driverId/location', trackingController.getDriverLocation);
-router.post('/drivers/:driverId/location', trackingController.updateDriverLocation);
+router.put('/drivers/:driverId/location', trackingController.updateDriverLocation);
 
 // Trip routes
 router.post('/trips', trackingController.createTrip);
