@@ -144,6 +144,12 @@
             <version>1.14.12</version> <!-- Use latest version -->
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.0.1-android</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
