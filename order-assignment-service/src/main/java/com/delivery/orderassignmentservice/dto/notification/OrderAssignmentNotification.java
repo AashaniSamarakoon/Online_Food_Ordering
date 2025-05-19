@@ -27,22 +27,18 @@ public class OrderAssignmentNotification {
 
     // Restaurant details
     private String restaurantName;
-    private String restaurantAddress;
+    private String pickupAddress;  // Using restaurantAddress as pickupAddress
 
     // Customer details
-    private String customerAddress;
-    private String customerCity;
+    private String deliveryAddress;  // Using customer address as deliveryAddress
+    private String customerName;     // Added customer name
+    private String phoneNumber;      // Added phone number
 
-    // Option 1: Use LocationDTO objects
+    // Coordinates for navigation
     private LocationDTO restaurantCoordinates;
     private LocationDTO customerCoordinates;
 
-    // Option 2: Use individual coordinates (uncomment if you prefer this approach)
-    // private double pickupLatitude;
-    // private double pickupLongitude;
-    // private double deliveryLatitude;
-    // private double deliveryLongitude;
-
-    // Optional fields for customer experience
-    private String specialInstructions;
+    // Order details
+    private Double deliveryFee;
+    private String specialInstructions;  // For any special delivery instructions
 }

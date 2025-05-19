@@ -21,7 +21,7 @@ public class OrderAssignment {
     @Column(nullable = false)
     private Long orderId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long driverId;
 
     @Column(nullable = false)

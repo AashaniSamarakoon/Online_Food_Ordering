@@ -1,11 +1,11 @@
 package com.delivery.orderassignmentservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,54 +13,50 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderDetailsDTO {
     private Long id;
-    private String orderNumber;
-    private String status;
-    private LocalDateTime createdAt;
-    private LocalDateTime assignmentTime;
 
-    // Customer details (limited for privacy)
-    private String customerName;
-    private String customerPhone;
+    // User information
+    private String username;
+    private String address;
+    private String phoneNumber;
 
-    // Location details
-    private String pickupAddress;
-    private String deliveryAddress;
+    // Restaurant information
+    private String restaurantName;
+    private String restaurantAddress;
 
-    // Coordinates using embedded object pattern
+    // Coordinates
     private LocationDTO restaurantCoordinates;
     private LocationDTO customerCoordinates;
 
     // Order details
     private List<OrderItemDTO> items;
-    private BigDecimal subtotal;
-    private BigDecimal deliveryFee;
-    private BigDecimal total;
-    private String specialInstructions;
-    private boolean contactlessDelivery;
+    private Double totalPrice;
+    private Double deliveryCharges;
 
-    // Restaurant details
-    private String restaurantName;
-    private String restaurantPhone;
-
-    // Payment information
-    private String paymentMethod;
-    private String paymentStatus;
-    private String transactionId;
-
-    // Timing information
-    private LocalDateTime orderTime;
-    private LocalDateTime deliveryTimeEstimate;
+    // These can be set after retrieval if needed by your business logic
+    private LocalDateTime createdAt;
+    private LocalDateTime assignmentTime;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OrderItemDTO {
+        private Long foodItemId;
         private String name;
+        private String description;
+        private String category;
+        private String imageUrl;
+        private Double price;
         private Integer quantity;
-        private String specialInstructions;
+        private Double subtotal;
+        private Boolean available;
+        private Object customizations;
+        private String notes;
+        private Double tax;
+        private Double discount;
     }
-
-
 }

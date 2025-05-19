@@ -53,7 +53,7 @@ kubectl apply -f bootstrap/payment-service/
 Write-Host "✅ Backend services deployed successfully" -ForegroundColor Green
 
 Write-Host "⏳ Waiting for backend services to be ready..." -ForegroundColor Yellow
-Start-Sleep -Seconds 20
+Start-Sleep -Seconds 40
 
 Write-Host "🌐 Deploying API Gateway..." -ForegroundColor Cyan
 # Apply API Gateway last

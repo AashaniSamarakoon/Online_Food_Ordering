@@ -20,7 +20,7 @@ const orderClient = {
       }
       
       // Call order service
-      const response = await axios.get(`${this.baseURL}/api/orders/${orderId}`);
+      const response = await axios.get(`${this.baseURL}/orders/public/${orderId}`);
       
       // Cache the result
       if (response.data) {

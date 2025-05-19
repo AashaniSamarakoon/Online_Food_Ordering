@@ -11,9 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,6 +28,9 @@ public class WebSocketNotificationServiceImpl implements WebSocketNotificationSe
             // Create the notification with necessary fields for driver's UI
             OrderAssignmentNotification notification = buildNotificationFromOrderDetails(event, orderDetails);
 
+            // Debug log to verify the notification object
+            log.debug("Sending notification to driver {}: {}", event.getDriverId(), notification);
+
             // Send to the specific driver's topic
             String destination = "/queue/driver." + event.getDriverId() + ".assignments";
             messagingTemplate.convertAndSend(destination, notification);
@@ -43,16 +43,12 @@ public class WebSocketNotificationServiceImpl implements WebSocketNotificationSe
         }
     }
 
-
-    /**
-     * Build a notification with required fields from order details
-     */
     private OrderAssignmentNotification buildNotificationFromOrderDetails(
             DriverAssignmentEvent event, OrderDetailsDTO orderDetails) {
 
         // Format the total amount with currency symbol
-        String paymentAmount = orderDetails.getTotal() != null
-                ? orderDetails.getTotal().toString()
+        String paymentAmount = orderDetails.getTotalPrice() != null
+                ? orderDetails.getTotalPrice().toString()
                 : "0.00";
 
         // Check if coordinates exist, if not create empty ones
@@ -72,21 +68,25 @@ public class WebSocketNotificationServiceImpl implements WebSocketNotificationSe
 
         return OrderAssignmentNotification.builder()
                 .orderId(orderDetails.getId())
-                .orderNumber(orderDetails.getOrderNumber())
+                .orderNumber("ORD-" + orderDetails.getId())  // Generate an order number
                 .payment(paymentAmount)
-                // Customer and restaurant details
+                .currency("LKR")
+                // Restaurant details
                 .restaurantName(orderDetails.getRestaurantName())
-                .restaurantAddress(orderDetails.getPickupAddress())
-                .customerAddress(orderDetails.getDeliveryAddress())
+                .pickupAddress(orderDetails.getRestaurantAddress())
+                // Customer details
+                .deliveryAddress(orderDetails.getAddress())
+                .customerName(orderDetails.getUsername())
+                .phoneNumber(orderDetails.getPhoneNumber())
                 // Coordinates as LocationDTO objects
                 .restaurantCoordinates(restaurantLocation)
                 .customerCoordinates(customerLocation)
-                // Special instructions
-                .specialInstructions(orderDetails.getSpecialInstructions())
+                // Additional order details
+                .deliveryFee(orderDetails.getDeliveryCharges())
+                .specialInstructions("")
                 // Assignment expiry time
                 .expiryTime(event.getExpiryTime())
                 .timestamp(System.currentTimeMillis())
                 .build();
     }
-
 }

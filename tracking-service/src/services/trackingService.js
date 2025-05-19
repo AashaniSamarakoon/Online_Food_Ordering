@@ -339,8 +339,67 @@ async function getNearbyDrivers(
   try {
     // 1. Get available driver IDs from driver service
     const availableDrivers = await driverClient.getAvailableDrivers();
-    const availableDriverIds = availableDrivers.map(
-      (driver) => driver.driverId
+    console.log("Available drivers:", availableDrivers);
+
+    // Check if we got valid data
+    if (
+      !availableDrivers ||
+      !Array.isArray(availableDrivers) ||
+      availableDrivers.length === 0
+    ) {
+      logger.warn("No available drivers returned from driver service");
+      return []; // Return empty array instead of proceeding with invalid data
+    }
+
+    // Convert driver IDs to strings to match MongoDB storage format
+    const availableDriverIds = availableDrivers
+      .map((driver) =>
+        driver && driver.driverId ? driver.driverId.toString() : null
+      )
+      .filter((id) => id !== null); // Filter out any null IDs
+
+    console.log("Available driver IDs:", availableDriverIds);
+
+    // Check if we have location records for these drivers
+    const locationCount = await Location.countDocuments({
+      driverId: { $in: availableDriverIds },
+    });
+    console.log(`Found ${locationCount} location records for drivers`);
+
+    if (locationCount === 0) {
+      // No location records found, return driver data from driver service
+      // Calculate distance for each driver
+      return (
+        availableDrivers
+          .map((driver) => {
+            // Calculate distance if coordinates are available
+            let distance = 0;
+            if (driver.latitude && driver.longitude) {
+              distance = calculateDistance(
+                parseFloat(latitude),
+                parseFloat(longitude),
+                driver.latitude,
+                driver.longitude
+              );
+            }
+
+            return {
+              driverId: driver.driverId.toString(),
+              latitude: driver.latitude,
+              longitude: driver.longitude,
+              distance: distance,
+              timestamp: new Date(),
+            };
+          })
+          // Sort by distance
+          .sort((a, b) => a.distance - b.distance)
+          // Limit results
+          .slice(0, limit)
+      );
+    }
+
+    console.log(
+      `Executing geospatial query for point [${longitude}, ${latitude}] with radius ${radius}m`
     );
 
     // 2. Use MongoDB geospatial indexing to find nearby drivers from the available pool
@@ -353,7 +412,6 @@ async function getNearbyDrivers(
           },
           distanceField: "distance",
           maxDistance: radius,
-          // Filter to only include drivers from the available list
           query: {
             driverId: { $in: availableDriverIds },
           },
@@ -376,13 +434,42 @@ async function getNearbyDrivers(
       },
     ]);
 
-    // 3. Map to the expected format
+    console.log(`Geospatial query returned ${drivers.length} results`);
+
+    if (drivers.length === 0) {
+      // IMPORTANT: Fall back to returning the driver data we already have
+      // This ensures clients get data even if the geospatial query returns nothing
+      console.log(
+        "No drivers found in radius, falling back to available drivers"
+      );
+      return availableDrivers.map((driver) => {
+        // Calculate distance
+        const distance = calculateDistance(
+          parseFloat(latitude),
+          parseFloat(longitude),
+          driver.latitude,
+          driver.longitude
+        );
+
+        return {
+          driverId: driver.driverId.toString(),
+          latitude: driver.latitude,
+          longitude: driver.longitude,
+          distance: distance,
+          timestamp: new Date(),
+        };
+      });
+    }
+
+    // 3. Map to the expected format and include the actual distance
     return drivers.map((driver) => ({
-      driverId: driver._id,
-      latitude: driver.location.coordinates[1],
-      longitude: driver.location.coordinates[0],
-      distance: driver.distance,
-      timestamp: driver.timestamp,
+      driverId: driver._id ? driver._id.toString() : driver._id, // Convert ObjectId to string
+      latitude: driver.location ? driver.location.coordinates[1] : null,
+      longitude: driver.location ? driver.location.coordinates[0] : null,
+      distance: driver.distance || 0,
+      timestamp: driver.timestamp
+        ? new Date(driver.timestamp).toISOString()
+        : new Date().toISOString(),
     }));
   } catch (error) {
     logger.error(`Error finding nearby drivers: ${error.message}`, { error });
