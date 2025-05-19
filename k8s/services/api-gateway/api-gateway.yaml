@@ -147,8 +147,6 @@ spec:
                 name: restaurant-service
                 port:
                   number: 80
-<<<<<<< HEAD
-=======
           - path: /(api/menu-restaurant/.*)
             pathType: ImplementationSpecific
             backend:
@@ -156,7 +154,6 @@ spec:
                 name: restaurant-service
                 port:
                   number: 80 
->>>>>>> main
           - path: /(api/banking/.*)
             pathType: ImplementationSpecific
             backend:
@@ -164,11 +161,6 @@ spec:
                 name: banking-service
                 port:
                   number: 80
-<<<<<<< HEAD
-
-
-                  
-=======
           - path: /(api/payments/.*)
             pathType: ImplementationSpecific
             backend:
@@ -183,4 +175,3 @@ spec:
                 name: payment-service
                 port:
                   number: 80
->>>>>>> main
