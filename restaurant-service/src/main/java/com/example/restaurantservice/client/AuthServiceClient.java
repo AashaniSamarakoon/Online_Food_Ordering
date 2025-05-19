@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.List;
 
 @FeignClient(name = "restaurant-auth", url = "${restaurant-auth.url}", configuration = FeignClientConfig.class)
+
 public interface AuthServiceClient {
 
     @GetMapping("/api/restaurant/by-owner/{ownerId}")
