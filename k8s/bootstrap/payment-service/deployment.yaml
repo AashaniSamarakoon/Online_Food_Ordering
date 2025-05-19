@@ -19,4 +19,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8099
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: payment-service-config
 
