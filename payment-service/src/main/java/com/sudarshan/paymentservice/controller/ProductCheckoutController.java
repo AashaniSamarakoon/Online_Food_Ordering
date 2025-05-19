@@ -15,7 +15,7 @@ import java.util.List;
 @CrossOrigin
 @Slf4j
 @RestController
-@RequestMapping("/product/v1")
+@RequestMapping("/payments/v1")
 public class ProductCheckoutController {
 
 
