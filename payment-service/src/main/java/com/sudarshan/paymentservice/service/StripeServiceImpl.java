@@ -16,6 +16,7 @@ import com.sudarshan.paymentservice.exceptions.StripeSessionCreationException;
 import com.sudarshan.paymentservice.repository.PaymentRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +33,10 @@ public class StripeServiceImpl implements StripeService {
     private final PaymentRepository paymentRepository;
     private String secretKey;
 
-    public StripeServiceImpl(PaymentRepository paymentRepository) {
+    public StripeServiceImpl(PaymentRepository paymentRepository, @Value("${stripe.secret.key}") String secretKey) {
         this.paymentRepository = paymentRepository;
 
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-        this.secretKey = dotenv.get("STRIPE_SECRET_KEY");
+        this.secretKey = secretKey;
     }
 
     @Override
