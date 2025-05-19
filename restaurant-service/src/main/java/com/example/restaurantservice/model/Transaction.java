@@ -17,12 +17,8 @@ public class Transaction {
     private Long id;
 
     private Long restaurantId;
-
     private LocalDate date;
-
     private String description;
-
     private String bankName;
-
-    private Double amount;
+    private Long amount;
 }

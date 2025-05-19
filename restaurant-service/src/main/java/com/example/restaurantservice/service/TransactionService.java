@@ -19,10 +19,10 @@ public class TransactionService {
     private final PaymentServiceClient paymentServiceClient;
     private final TransactionRepository transactionRepository;
 
-    // Fetch from payment-service and save in restaurant-service DB
+    // Sync and save all transactions for a restaurant from payment-service
     @Transactional
-    public List<Transaction> syncTransactionsFromPaymentService() {
-        List<TransactionResponse> remoteList = paymentServiceClient.getAllTransactionsForRestaurant();
+    public List<Transaction> syncTransactionsFromPaymentService(Long restaurantId) {
+        List<TransactionResponse> remoteList = paymentServiceClient.getTransactionsByRestaurantId(restaurantId);
         List<Transaction> transactions = remoteList.stream().map(dto -> Transaction.builder()
                 .id(dto.getId())
                 .restaurantId(dto.getRestaurantId())
@@ -33,11 +33,11 @@ public class TransactionService {
                 .build()
         ).collect(Collectors.toList());
 
-        // Save all to DB
+        // Save all to DB (will update if ID already exists)
         return transactionRepository.saveAll(transactions);
     }
 
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+    public List<Transaction> getTransactionsByRestaurant(Long restaurantId) {
+        return transactionRepository.findByRestaurantId(restaurantId);
     }
 }

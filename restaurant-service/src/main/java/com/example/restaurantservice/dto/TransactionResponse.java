@@ -6,8 +6,8 @@ import lombok.Data;
 public class TransactionResponse {
     private Long id;
     private Long restaurantId;
-    private String date;
+    private String date;        // Will parse to LocalDate in service
     private String description;
     private String bankName;
-    private Double amount;
+    private Long amount;
 }

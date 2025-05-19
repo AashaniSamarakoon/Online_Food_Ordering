@@ -4,6 +4,7 @@ import com.example.restaurantservice.model.Transaction;
 import com.example.restaurantservice.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,16 +16,18 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-    // API to sync (fetch and store) all transactions from payment-service
-    @PostMapping("/sync")
-    public ResponseEntity<List<Transaction>> syncTransactions() {
-        List<Transaction> synced = transactionService.syncTransactionsFromPaymentService();
+    // Only restaurant owner can sync their transactions
+    @PreAuthorize("@restaurantAuthorizationService.isRestaurantOwner(authentication, #restaurantId)")
+    @PostMapping("/sync/{restaurantId}")
+    public ResponseEntity<List<Transaction>> syncTransactions(@PathVariable Long restaurantId) {
+        List<Transaction> synced = transactionService.syncTransactionsFromPaymentService(restaurantId);
         return ResponseEntity.ok(synced);
     }
 
-    // Get all locally stored transactions
-    @GetMapping
-    public ResponseEntity<List<Transaction>> getTransactions() {
-        return ResponseEntity.ok(transactionService.getAllTransactions());
+    // Only restaurant owner can view their transactions
+    @PreAuthorize("@restaurantAuthorizationService.isRestaurantOwner(authentication, #restaurantId)")
+    @GetMapping("/restaurant/{restaurantId}")
+    public ResponseEntity<List<Transaction>> getTransactions(@PathVariable Long restaurantId) {
+        return ResponseEntity.ok(transactionService.getTransactionsByRestaurant(restaurantId));
     }
 }
