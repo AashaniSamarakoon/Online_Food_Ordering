@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SecurityConstants.PUBLIC_URLS).permitAll()
-//                        .requestMatchers("/api/transactions/**").permitAll()
+//                        .requestMatchers("/api/restaurant-transactions/**").permitAll()
                         .requestMatchers("/api/health").permitAll()
                         // Menu Restaurant public endpoints configuration
                         .requestMatchers(HttpMethod.GET, "/api/menu-restaurant/restaurants/**").permitAll()

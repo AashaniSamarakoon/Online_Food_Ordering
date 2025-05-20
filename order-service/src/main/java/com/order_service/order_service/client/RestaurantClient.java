@@ -49,6 +49,6 @@ public interface RestaurantClient {
     @GetMapping("/items/restaurant/{restaurantId}")
     List<FoodItem> getItemsByRestaurant(@PathVariable("restaurantId") Long restaurantId);
 
-    @PostMapping("/api/neworder")
+    @PostMapping("/api/new/neworder")
     void notifyNewOrder(@RequestBody OrderDTO orderDTO);
 }
